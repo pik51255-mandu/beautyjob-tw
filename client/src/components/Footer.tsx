@@ -52,6 +52,18 @@ export default function Footer() {
           <p>© 2025 台灣美髮求職平台. All rights reserved.</p>
           <p>所有金額以新台幣（NT$）計算</p>
         </div>
+
+        {/* 제작사 크레딧 - 한결 頂級美髮沙龍 */}
+        <div className="border-t border-background/10 mt-4 pt-4 flex items-center justify-center gap-2 opacity-40 hover:opacity-70 transition-opacity">
+          <span className="text-xs text-background/60">Designed &amp; Built by</span>
+          <img
+            src="/manus-storage/hangyeol-logo_2111d3d8.jpg"
+            alt="한결 頂級美髮沙龍"
+            className="h-7 w-auto object-contain brightness-0 invert"
+            style={{ maxWidth: '80px' }}
+          />
+          <span className="text-xs text-background/60">頂級美髮沙龍</span>
+        </div>
       </div>
     </footer>
   );
