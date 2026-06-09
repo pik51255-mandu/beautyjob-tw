@@ -4,32 +4,101 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import Home from "./pages/Home";
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
 
-function Router() {
-  // make sure to consider if you need authentication for certain routes
+// Lazy-load pages for code splitting
+const JobList = lazy(() => import("./pages/JobList"));
+const JobDetail = lazy(() => import("./pages/JobDetail"));
+const JobForm = lazy(() => import("./pages/JobForm"));
+const ResumeList = lazy(() => import("./pages/ResumeList"));
+const ResumeDetail = lazy(() => import("./pages/ResumeDetail"));
+const ResumeEdit = lazy(() => import("./pages/ResumeEdit"));
+const Community = lazy(() => import("./pages/Community"));
+const CommunityDetail = lazy(() => import("./pages/CommunityDetail"));
+const CommunityForm = lazy(() => import("./pages/CommunityForm"));
+const Transfers = lazy(() => import("./pages/Transfers"));
+const TransferDetail = lazy(() => import("./pages/TransferDetail"));
+const TransferForm = lazy(() => import("./pages/TransferForm"));
+const UsedItems = lazy(() => import("./pages/UsedItems"));
+const UsedItemDetail = lazy(() => import("./pages/UsedItemDetail"));
+const UsedItemForm = lazy(() => import("./pages/UsedItemForm"));
+const MyPage = lazy(() => import("./pages/MyPage"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+
+function PageLoader() {
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+    </div>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
+function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-1">
+        {children}
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
+function Router() {
+  return (
+    <Suspense fallback={<Layout><PageLoader /></Layout>}>
+      <Switch>
+        <Route path="/" component={() => <Layout><Home /></Layout>} />
+        <Route path="/onboarding" component={() => <Layout><Onboarding /></Layout>} />
+
+        {/* Jobs */}
+        <Route path="/jobs" component={() => <Layout><JobList /></Layout>} />
+        <Route path="/jobs/new" component={() => <Layout><JobForm /></Layout>} />
+        <Route path="/jobs/:id/edit" component={() => <Layout><JobForm /></Layout>} />
+        <Route path="/jobs/:id" component={() => <Layout><JobDetail /></Layout>} />
+
+        {/* Resumes */}
+        <Route path="/resumes" component={() => <Layout><ResumeList /></Layout>} />
+        <Route path="/resume/edit" component={() => <Layout><ResumeEdit /></Layout>} />
+        <Route path="/resumes/:id" component={() => <Layout><ResumeDetail /></Layout>} />
+
+        {/* Community */}
+        <Route path="/community" component={() => <Layout><Community /></Layout>} />
+        <Route path="/community/new" component={() => <Layout><CommunityForm /></Layout>} />
+        <Route path="/community/:id/edit" component={() => <Layout><CommunityForm /></Layout>} />
+        <Route path="/community/:id" component={() => <Layout><CommunityDetail /></Layout>} />
+
+        {/* Transfers */}
+        <Route path="/transfers" component={() => <Layout><Transfers /></Layout>} />
+        <Route path="/transfers/new" component={() => <Layout><TransferForm /></Layout>} />
+        <Route path="/transfers/:id/edit" component={() => <Layout><TransferForm /></Layout>} />
+        <Route path="/transfers/:id" component={() => <Layout><TransferDetail /></Layout>} />
+
+        {/* Used Items */}
+        <Route path="/used-items" component={() => <Layout><UsedItems /></Layout>} />
+        <Route path="/used-items/new" component={() => <Layout><UsedItemForm /></Layout>} />
+        <Route path="/used-items/:id/edit" component={() => <Layout><UsedItemForm /></Layout>} />
+        <Route path="/used-items/:id" component={() => <Layout><UsedItemDetail /></Layout>} />
+
+        {/* MyPage */}
+        <Route path="/mypage/:tab?" component={() => <Layout><MyPage /></Layout>} />
+
+        <Route path="/404" component={() => <Layout><NotFound /></Layout>} />
+        <Route component={() => <Layout><NotFound /></Layout>} />
+      </Switch>
+    </Suspense>
+  );
+}
 
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
           <Router />
