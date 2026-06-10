@@ -1,10 +1,13 @@
-import { and, desc, eq, gte, lte, or, sql } from "drizzle-orm";
+import {
+  and, desc, eq, gte, lte, or, sql
+} from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertUser,
   comments,
   communityPosts,
   favorites,
+  jobApplications,
   jobPosts,
   resumes,
   salonTransfers,
@@ -445,4 +448,67 @@ export async function isFavorited(userId: number, targetType: string, targetId: 
     .where(and(eq(favorites.userId, userId), eq(favorites.targetType, targetType as any), eq(favorites.targetId, targetId)))
     .limit(1);
   return result.length > 0;
+}
+
+// ─── Job Applications ───────────────────────────────────────────────────────────────────────────────────────
+export async function applyToJob(jobPostId: number, applicantId: number, coverLetter?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  // 중복 지원 방지
+  const existing = await db
+    .select()
+    .from(jobApplications)
+    .where(and(eq(jobApplications.jobPostId, jobPostId), eq(jobApplications.applicantId, applicantId)))
+    .limit(1);
+  if (existing.length > 0) throw new Error("ALREADY_APPLIED");
+  await db.insert(jobApplications).values({ jobPostId, applicantId, coverLetter: coverLetter ?? null });
+}
+
+export async function cancelApplication(jobPostId: number, applicantId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(jobApplications).where(
+    and(eq(jobApplications.jobPostId, jobPostId), eq(jobApplications.applicantId, applicantId))
+  );
+}
+
+export async function getMyApplications(applicantId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(jobApplications)
+    .where(eq(jobApplications.applicantId, applicantId))
+    .orderBy(desc(jobApplications.createdAt));
+}
+
+export async function getJobApplications(jobPostId: number, ownerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  // 직접 JOIN 대신 어플리케이션 목록만 반환 (applicantId 포함)
+  return db
+    .select()
+    .from(jobApplications)
+    .where(eq(jobApplications.jobPostId, jobPostId))
+    .orderBy(desc(jobApplications.createdAt));
+}
+
+export async function getApplicationStatus(jobPostId: number, applicantId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db
+    .select()
+    .from(jobApplications)
+    .where(and(eq(jobApplications.jobPostId, jobPostId), eq(jobApplications.applicantId, applicantId)))
+    .limit(1);
+  return result[0] ?? null;
+}
+
+export async function updateApplicationStatus(
+  id: number,
+  status: "pending" | "reviewed" | "accepted" | "rejected"
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(jobApplications).set({ status }).where(eq(jobApplications.id, id));
 }

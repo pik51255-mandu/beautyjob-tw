@@ -54,3 +54,10 @@
 ## Phase 9: Tests & Checkpoint
 - [x] vitest 단위 테스트 작성 (15/15 통과)
 - [x] 최종 체크포인트 저장
+
+## Phase 10: 지원하기 기능
+- [ ] job_applications 테이블 DB 스키마 추가
+- [ ] jobApplications tRPC 라우터 구현 (apply, cancel, myApplications, jobApplications)
+- [ ] JobDetail 페이지에 지원하기 버튼 및 지원 모달 추가
+- [ ] 마이페이지에 내 지원 현황 탭 추가
+- [ ] 살롱 원장 지원자 목록 확인 기능 (JobDetail 내)

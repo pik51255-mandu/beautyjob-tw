@@ -472,6 +472,57 @@ const favoritesRouter = router({
     }),
 });
 
+// ─── Job Applications Router ─────────────────────────────────────────────────
+const jobApplicationsRouter = router({
+  submit: protectedProcedure
+    .input(z.object({ jobPostId: z.number(), coverLetter: z.string().max(2000).optional() }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        await db.applyToJob(input.jobPostId, ctx.user.id, input.coverLetter);
+        return { success: true };
+      } catch (e: any) {
+        if (e.message === "ALREADY_APPLIED") {
+          throw new TRPCError({ code: "CONFLICT", message: "您已經投遞過此職缺" });
+        }
+        throw e;
+      }
+    }),
+
+  withdraw: protectedProcedure
+    .input(z.object({ jobPostId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await db.cancelApplication(input.jobPostId, ctx.user.id);
+      return { success: true };
+    }),
+
+  myApplications: protectedProcedure.query(async ({ ctx }) => {
+    return db.getMyApplications(ctx.user.id);
+  }),
+
+  jobApplications: protectedProcedure
+    .input(z.object({ jobPostId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const post = await db.getJobPostById(input.jobPostId);
+      if (!post || post.authorId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "無權限查看" });
+      }
+      return db.getJobApplications(input.jobPostId, ctx.user.id);
+    }),
+
+  status: protectedProcedure
+    .input(z.object({ jobPostId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      return db.getApplicationStatus(input.jobPostId, ctx.user.id);
+    }),
+
+  updateStatus: protectedProcedure
+    .input(z.object({ applicationId: z.number(), status: z.enum(["pending", "reviewed", "accepted", "rejected"]) }))
+    .mutation(async ({ ctx, input }) => {
+      await db.updateApplicationStatus(input.applicationId, input.status);
+      return { success: true };
+    }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
   system: systemRouter,
@@ -491,6 +542,7 @@ export const appRouter = router({
   salonTransfers: salonTransfersRouter,
   usedItems: usedItemsRouter,
   favorites: favoritesRouter,
+  jobApplications: jobApplicationsRouter,
 });
 
 export type AppRouter = typeof appRouter;

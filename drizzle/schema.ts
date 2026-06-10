@@ -220,3 +220,25 @@ export const favorites = mysqlTable("favorites", {
 
 export type Favorite = typeof favorites.$inferSelect;
 export type InsertFavorite = typeof favorites.$inferInsert;
+
+// ─── Job Applications (지원 내역) ───────────────────────────────────────────────────────────────────────────────────────
+export const jobApplications = mysqlTable("job_applications", {
+  id: int("id").autoincrement().primaryKey(),
+  jobPostId: int("jobPostId").notNull(),           // job_posts.id
+  applicantId: int("applicantId").notNull(),       // users.id (job_seeker)
+  coverLetter: text("coverLetter"),                // 自我介紹 / 求職信
+  status: mysqlEnum("status", [
+    "pending",    // 待審中
+    "reviewed",   // 已查看
+    "accepted",   // 錄取
+    "rejected",   // 不合適
+  ]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  index("idx_app_job").on(table.jobPostId),
+  index("idx_app_applicant").on(table.applicantId),
+]);
+
+export type JobApplication = typeof jobApplications.$inferSelect;
+export type InsertJobApplication = typeof jobApplications.$inferInsert;
