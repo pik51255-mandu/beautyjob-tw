@@ -177,6 +177,12 @@ export default function ResumeEdit() {
             <div className="sm:col-span-2 space-y-2">
               <Label>作品集網址</Label>
               <Input value={portfolioUrl} onChange={(e) => setPortfolioUrl(e.target.value)} placeholder="https://..." type="url" />
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                請輸入完整網址，需以 <code className="bg-muted px-1 py-0.5 rounded text-[11px] font-mono">https://</code> 開頭。<br />
+                例：<span className="text-foreground/70">https://instagram.com/yourname</span>、
+                <span className="text-foreground/70">https://www.facebook.com/yourpage</span>、
+                <span className="text-foreground/70">https://yourportfolio.com</span>
+              </p>
             </div>
 
             <div className="sm:col-span-2 flex items-center justify-between p-4 bg-muted/30 rounded-lg">
