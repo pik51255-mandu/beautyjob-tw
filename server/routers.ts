@@ -177,7 +177,10 @@ const resumesRouter = router({
         desiredWorkType: z.enum(["full_time", "part_time", "contract", "any"]).default("any"),
         skills: z.string().optional(),
         introduction: z.string().min(10),
-        portfolioUrl: z.string().url().optional().or(z.literal("")),
+        portfolioUrl: z.string().optional().refine(
+          (val) => !val || val === "" || /^https?:\/\/.+/.test(val),
+          { message: "請輸入有效的網址 (https://...)" }
+        ),
         isPublic: z.boolean().default(true),
       })
     )
