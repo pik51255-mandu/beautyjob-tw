@@ -1,8 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { COOKIE_NAME } from "@shared/const";
+import bcrypt from "bcryptjs";
+import { nanoid } from "nanoid";
+import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
+import { sdk } from "./_core/sdk";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 
@@ -576,6 +579,64 @@ export const appRouter = router({
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
+
+    // 이메일 로그인
+    emailLogin: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string().min(6),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const user = await db.getUserByEmail(input.email);
+        if (!user || !user.passwordHash) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "帳號或密碼錯誤" });
+        }
+        const valid = await bcrypt.compare(input.password, user.passwordHash);
+        if (!valid) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "帳號或密碼錯誤" });
+        }
+        await db.upsertUser({ openId: user.openId, lastSignedIn: new Date() });
+        const sessionToken = await sdk.createSessionToken(user.openId, {
+          name: user.name || "",
+          expiresInMs: ONE_YEAR_MS,
+        });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        return { success: true, user };
+      }),
+
+    // 이메일 회원가입
+    emailRegister: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+        password: z.string().min(6),
+        name: z.string().min(1).max(100),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const existing = await db.getUserByEmail(input.email);
+        if (existing) {
+          throw new TRPCError({ code: "CONFLICT", message: "此電子郵件已經註冊" });
+        }
+        const passwordHash = await bcrypt.hash(input.password, 10);
+        const openId = `email_${nanoid(16)}`;
+        await db.upsertUser({
+          openId,
+          email: input.email,
+          name: input.name,
+          loginMethod: "email",
+          lastSignedIn: new Date(),
+          passwordHash,
+        });
+        const user = await db.getUserByOpenId(openId);
+        if (!user) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "註冊失敗" });
+        const sessionToken = await sdk.createSessionToken(user.openId, {
+          name: user.name || "",
+          expiresInMs: ONE_YEAR_MS,
+        });
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        return { success: true, user };
+      }),
   }),
   users: usersRouter,
   jobPosts: jobPostsRouter,

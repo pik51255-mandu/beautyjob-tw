@@ -334,6 +334,7 @@ function buildCronUser(
     lastSignedIn: now,
     taskUid: userInfo.taskUid ?? undefined,
     isCron: true,
+    passwordHash: null,
   } as AuthenticatedUser;
 }
 

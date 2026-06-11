@@ -29,6 +29,8 @@ const UsedItemForm = lazy(() => import("./pages/UsedItemForm"));
 const MyPage = lazy(() => import("./pages/MyPage"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
 
 function PageLoader() {
   return (
@@ -88,6 +90,10 @@ function Router() {
 
         {/* MyPage */}
         <Route path="/mypage/:tab?" component={() => <Layout><MyPage /></Layout>} />
+
+        {/* Auth */}
+        <Route path="/login" component={() => <Login />} />
+        <Route path="/register" component={() => <Register />} />
 
         {/* Admin */}
         <Route path="/admin" component={() => <AdminDashboard />} />

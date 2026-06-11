@@ -25,6 +25,7 @@ export const users = mysqlTable("users", {
   city: varchar("city", { length: 50 }),         // 거주/사업 지역
   avatarUrl: text("avatarUrl"),
   bio: text("bio"),
+  passwordHash: text("passwordHash"),  // 이메일 로그인용 비밀번호 해시
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
