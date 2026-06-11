@@ -74,6 +74,20 @@ export default function JobDetail() {
     },
   });
 
+  const updateStatusMutation = trpc.jobApplications.updateStatus.useMutation({
+    onSuccess: (_, variables) => {
+      const labels: Record<string, string> = {
+        reviewed: "已標記為已查看",
+        accepted: "已發送錄取通知",
+        rejected: "已標記為不合適",
+        pending: "已重設為待審中",
+      };
+      toast.success(labels[variables.status] ?? "狀態已更新");
+      utils.jobApplications.jobApplications.invalidate({ jobPostId: post?.id });
+    },
+    onError: () => toast.error("狀態更新失敗，請稍後再試"),
+  });
+
   const deletePost = trpc.jobPosts.delete.useMutation({
     onSuccess: () => {
       toast.success("職缺已刪除");
@@ -376,8 +390,13 @@ export default function JobDetail() {
             ) : (
               applicants.map((app) => {
                 const si = APPLICATION_STATUS_LABELS[app.status];
+                const isPending = updateStatusMutation.isPending;
                 return (
-                  <div key={app.id} className="border rounded-lg p-4 space-y-2">
+                  <div key={app.id} className={`border rounded-lg p-4 space-y-3 transition-colors ${
+                    app.status === "accepted" ? "border-green-200 bg-green-50/50" :
+                    app.status === "rejected" ? "border-red-100 bg-red-50/30" :
+                    app.status === "reviewed" ? "border-blue-100 bg-blue-50/30" : ""
+                  }`}>
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">應徵者 #{app.applicantId}</span>
                       <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${si?.color}`}>
@@ -392,6 +411,54 @@ export default function JobDetail() {
                     <p className="text-xs text-muted-foreground">
                       投遞時間：{format(new Date(app.createdAt), "yyyy/MM/dd HH:mm")}
                     </p>
+                    {/* 狀態 變更 按鈕 */}
+                    <div className="flex flex-wrap gap-2 pt-1 border-t border-border/50">
+                      <span className="text-xs text-muted-foreground self-center mr-1">更改狀態：</span>
+                      {app.status !== "reviewed" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs px-2 text-blue-600 border-blue-200 hover:bg-blue-50"
+                          disabled={isPending}
+                          onClick={() => updateStatusMutation.mutate({ applicationId: app.id, status: "reviewed" })}
+                        >
+                          已查看
+                        </Button>
+                      )}
+                      {app.status !== "accepted" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs px-2 text-green-600 border-green-200 hover:bg-green-50"
+                          disabled={isPending}
+                          onClick={() => updateStatusMutation.mutate({ applicationId: app.id, status: "accepted" })}
+                        >
+                          🎉 錄取
+                        </Button>
+                      )}
+                      {app.status !== "rejected" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-xs px-2 text-red-500 border-red-200 hover:bg-red-50"
+                          disabled={isPending}
+                          onClick={() => updateStatusMutation.mutate({ applicationId: app.id, status: "rejected" })}
+                        >
+                          不合適
+                        </Button>
+                      )}
+                      {app.status !== "pending" && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 text-xs px-2 text-muted-foreground"
+                          disabled={isPending}
+                          onClick={() => updateStatusMutation.mutate({ applicationId: app.id, status: "pending" })}
+                        >
+                          重設
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 );
               })

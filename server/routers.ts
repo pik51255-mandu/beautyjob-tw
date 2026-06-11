@@ -518,6 +518,13 @@ const jobApplicationsRouter = router({
   updateStatus: protectedProcedure
     .input(z.object({ applicationId: z.number(), status: z.enum(["pending", "reviewed", "accepted", "rejected"]) }))
     .mutation(async ({ ctx, input }) => {
+      // Verify the caller owns the job post this application belongs to
+      const application = await db.getApplicationById(input.applicationId);
+      if (!application) throw new TRPCError({ code: "NOT_FOUND", message: "Application not found" });
+      const post = await db.getJobPostById(application.jobPostId);
+      if (!post || post.authorId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only the salon owner can update application status" });
+      }
       await db.updateApplicationStatus(input.applicationId, input.status);
       return { success: true };
     }),

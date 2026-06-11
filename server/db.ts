@@ -504,6 +504,17 @@ export async function getApplicationStatus(jobPostId: number, applicantId: numbe
   return result[0] ?? null;
 }
 
+export async function getApplicationById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db
+    .select()
+    .from(jobApplications)
+    .where(eq(jobApplications.id, id))
+    .limit(1);
+  return result[0] ?? null;
+}
+
 export async function updateApplicationStatus(
   id: number,
   status: "pending" | "reviewed" | "accepted" | "rejected"
