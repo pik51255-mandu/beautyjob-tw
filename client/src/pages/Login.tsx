@@ -19,6 +19,18 @@ export default function Login() {
   const params = new URLSearchParams(window.location.search);
   const returnPath = params.get("returnPath") || "/";
 
+  const handleLineLogin = () => {
+    const clientId = import.meta.env.VITE_LINE_CLIENT_ID;
+    if (!clientId) {
+      toast.error("LINE 登入尚未設定，請使用電子郵件登入");
+      return;
+    }
+    const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/line/callback`);
+    const state = encodeURIComponent(returnPath);
+    const lineAuthUrl = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid`;
+    window.location.href = lineAuthUrl;
+  };
+
   const loginMutation = trpc.auth.emailLogin.useMutation({
     onSuccess: () => {
       toast.success("登入成功！");
@@ -62,7 +74,7 @@ export default function Login() {
             <Button
               variant="outline"
               className="w-full h-11 border-[#06C755] text-[#06C755] hover:bg-[#06C755] hover:text-white transition-colors"
-              onClick={() => toast.info("LINE 登入功能即將開放！")}
+              onClick={handleLineLogin}
               type="button"
             >
               <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
