@@ -523,6 +523,13 @@ const jobApplicationsRouter = router({
     }),
 });
 
+// ─── Stats Router ───────────────────────────────────────────────────────────
+const statsRouter = router({
+  platform: publicProcedure.query(async () => {
+    return db.getPlatformStats();
+  }),
+});
+
 // ─── App Router ───────────────────────────────────────────────────────────────
 export const appRouter = router({
   system: systemRouter,
@@ -543,6 +550,7 @@ export const appRouter = router({
   usedItems: usedItemsRouter,
   favorites: favoritesRouter,
   jobApplications: jobApplicationsRouter,
+  stats: statsRouter,
 });
 
 export type AppRouter = typeof appRouter;

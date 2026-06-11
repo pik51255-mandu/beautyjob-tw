@@ -512,3 +512,23 @@ export async function updateApplicationStatus(
   if (!db) return;
   await db.update(jobApplications).set({ status }).where(eq(jobApplications.id, id));
 }
+
+// ─── Platform Stats ─────────────────────────────────────────────────────────
+export async function getPlatformStats() {
+  const db = await getDb();
+  if (!db) return { jobCount: 0, resumeCount: 0, salonCount: 0, communityCount: 0 };
+
+  const [jobResult, resumeResult, salonResult, communityResult] = await Promise.all([
+    db.select({ count: sql<number>`count(*)` }).from(jobPosts),
+    db.select({ count: sql<number>`count(*)` }).from(resumes),
+    db.select({ count: sql<number>`count(*)` }).from(salonTransfers),
+    db.select({ count: sql<number>`count(*)` }).from(communityPosts),
+  ]);
+
+  return {
+    jobCount: Number(jobResult[0]?.count ?? 0),
+    resumeCount: Number(resumeResult[0]?.count ?? 0),
+    salonCount: Number(salonResult[0]?.count ?? 0),
+    communityCount: Number(communityResult[0]?.count ?? 0),
+  };
+}

@@ -45,15 +45,9 @@ const FEATURES = [
   },
 ];
 
-const STATS = [
-  { label: "刊登職缺", value: "500+" },
-  { label: "求職者", value: "2,000+" },
-  { label: "合作沙龍", value: "300+" },
-  { label: "社群討論", value: "1,500+" },
-];
-
 export default function Home() {
   const { data: jobData } = trpc.jobPosts.list.useQuery({ limit: 6, page: 1 });
+  const { data: platformStats } = trpc.stats.platform.useQuery();
 
   return (
     <div className="min-h-screen">
@@ -98,9 +92,20 @@ export default function Home() {
       <section className="border-y border-border bg-white">
         <div className="container py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {STATS.map((stat) => (
+            {[
+              { label: "刊登職缺", value: platformStats?.jobCount ?? 0, suffix: "+" },
+              { label: "求職者", value: platformStats?.resumeCount ?? 0, suffix: "+" },
+              { label: "店面頂讓", value: platformStats?.salonCount ?? 0, suffix: "+" },
+              { label: "社群討論", value: platformStats?.communityCount ?? 0, suffix: "+" },
+            ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-3xl font-bold text-primary">{stat.value}</div>
+                <div className="text-3xl font-bold text-primary">
+                  {platformStats ? (
+                    <>{stat.value.toLocaleString()}{stat.value > 0 ? stat.suffix : ""}</>
+                  ) : (
+                    <span className="inline-block w-16 h-8 bg-muted animate-pulse rounded" />
+                  )}
+                </div>
                 <div className="text-sm text-muted-foreground mt-1">{stat.label}</div>
               </div>
             ))}
