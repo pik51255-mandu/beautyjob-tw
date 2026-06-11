@@ -28,6 +28,7 @@ const UsedItemDetail = lazy(() => import("./pages/UsedItemDetail"));
 const UsedItemForm = lazy(() => import("./pages/UsedItemForm"));
 const MyPage = lazy(() => import("./pages/MyPage"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 
 function PageLoader() {
   return (
@@ -87,6 +88,9 @@ function Router() {
 
         {/* MyPage */}
         <Route path="/mypage/:tab?" component={() => <Layout><MyPage /></Layout>} />
+
+        {/* Admin */}
+        <Route path="/admin" component={() => <AdminDashboard />} />
 
         <Route path="/404" component={() => <Layout><NotFound /></Layout>} />
         <Route component={() => <Layout><NotFound /></Layout>} />

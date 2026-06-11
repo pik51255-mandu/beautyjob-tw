@@ -543,3 +543,122 @@ export async function getPlatformStats() {
     communityCount: Number(communityResult[0]?.count ?? 0),
   };
 }
+
+// ─── Admin Stats ─────────────────────────────────────────────────────────────
+export async function getAdminStats() {
+  const db = await getDb();
+  if (!db) return null;
+
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const [
+    totalUsers, newUsersMonth, salonOwners, jobSeekers,
+    totalJobs, activeJobs, newJobsMonth,
+    totalApplications, pendingApps, acceptedApps, rejectedApps,
+    totalResumes, totalCommunity, totalTransfers, totalUsedItems,
+    recentUsers, recentJobs, recentApplications,
+  ] = await Promise.all([
+    db.select({ count: sql<number>`count(*)` }).from(users),
+    db.select({ count: sql<number>`count(*)` }).from(users).where(gte(users.createdAt, thirtyDaysAgo)),
+    db.select({ count: sql<number>`count(*)` }).from(users).where(eq(users.userType, "salon_owner")),
+    db.select({ count: sql<number>`count(*)` }).from(users).where(eq(users.userType, "job_seeker")),
+    db.select({ count: sql<number>`count(*)` }).from(jobPosts),
+    db.select({ count: sql<number>`count(*)` }).from(jobPosts).where(eq(jobPosts.isActive, true)),
+    db.select({ count: sql<number>`count(*)` }).from(jobPosts).where(gte(jobPosts.createdAt, thirtyDaysAgo)),
+    db.select({ count: sql<number>`count(*)` }).from(jobApplications),
+    db.select({ count: sql<number>`count(*)` }).from(jobApplications).where(eq(jobApplications.status, "pending")),
+    db.select({ count: sql<number>`count(*)` }).from(jobApplications).where(eq(jobApplications.status, "accepted")),
+    db.select({ count: sql<number>`count(*)` }).from(jobApplications).where(eq(jobApplications.status, "rejected")),
+    db.select({ count: sql<number>`count(*)` }).from(resumes),
+    db.select({ count: sql<number>`count(*)` }).from(communityPosts),
+    db.select({ count: sql<number>`count(*)` }).from(salonTransfers),
+    db.select({ count: sql<number>`count(*)` }).from(usedItems),
+    // 최근 가입 회원 5명
+    db.select({ id: users.id, name: users.name, email: users.email, userType: users.userType, createdAt: users.createdAt })
+      .from(users).orderBy(desc(users.createdAt)).limit(5),
+    // 최근 등록 공고 5개
+    db.select({ id: jobPosts.id, title: jobPosts.title, salonName: jobPosts.salonName, city: jobPosts.city, createdAt: jobPosts.createdAt })
+      .from(jobPosts).orderBy(desc(jobPosts.createdAt)).limit(5),
+    // 최근 지원 5건
+    db.select({ id: jobApplications.id, jobPostId: jobApplications.jobPostId, applicantId: jobApplications.applicantId, status: jobApplications.status, createdAt: jobApplications.createdAt })
+      .from(jobApplications).orderBy(desc(jobApplications.createdAt)).limit(5),
+  ]);
+
+  return {
+    users: {
+      total: Number(totalUsers[0]?.count ?? 0),
+      newThisMonth: Number(newUsersMonth[0]?.count ?? 0),
+      salonOwners: Number(salonOwners[0]?.count ?? 0),
+      jobSeekers: Number(jobSeekers[0]?.count ?? 0),
+    },
+    jobs: {
+      total: Number(totalJobs[0]?.count ?? 0),
+      active: Number(activeJobs[0]?.count ?? 0),
+      newThisMonth: Number(newJobsMonth[0]?.count ?? 0),
+    },
+    applications: {
+      total: Number(totalApplications[0]?.count ?? 0),
+      pending: Number(pendingApps[0]?.count ?? 0),
+      accepted: Number(acceptedApps[0]?.count ?? 0),
+      rejected: Number(rejectedApps[0]?.count ?? 0),
+    },
+    content: {
+      resumes: Number(totalResumes[0]?.count ?? 0),
+      community: Number(totalCommunity[0]?.count ?? 0),
+      transfers: Number(totalTransfers[0]?.count ?? 0),
+      usedItems: Number(totalUsedItems[0]?.count ?? 0),
+    },
+    recent: {
+      users: recentUsers,
+      jobs: recentJobs,
+      applications: recentApplications,
+    },
+  };
+}
+
+// ─── Admin List Queries ───────────────────────────────────────────────────────
+export async function getAdminUsers(page: number, limit: number) {
+  const db = await getDb();
+  if (!db) return { items: [], total: 0 };
+  const offset = (page - 1) * limit;
+  const [items, countResult] = await Promise.all([
+    db.select({
+      id: users.id, name: users.name, email: users.email,
+      userType: users.userType, role: users.role, createdAt: users.createdAt,
+    }).from(users).orderBy(desc(users.createdAt)).limit(limit).offset(offset),
+    db.select({ count: sql<number>`count(*)` }).from(users),
+  ]);
+  return { items, total: Number(countResult[0]?.count ?? 0) };
+}
+
+export async function getAdminJobs(page: number, limit: number) {
+  const db = await getDb();
+  if (!db) return { items: [], total: 0 };
+  const offset = (page - 1) * limit;
+  const [items, countResult] = await Promise.all([
+    db.select({
+      id: jobPosts.id, title: jobPosts.title, salonName: jobPosts.salonName,
+      city: jobPosts.city, jobType: jobPosts.jobType, isActive: jobPosts.isActive,
+      createdAt: jobPosts.createdAt,
+    }).from(jobPosts).orderBy(desc(jobPosts.createdAt)).limit(limit).offset(offset),
+    db.select({ count: sql<number>`count(*)` }).from(jobPosts),
+  ]);
+  return { items, total: Number(countResult[0]?.count ?? 0) };
+}
+
+export async function getAdminApplications(page: number, limit: number) {
+  const db = await getDb();
+  if (!db) return { items: [], total: 0 };
+  const offset = (page - 1) * limit;
+  const [items, countResult] = await Promise.all([
+    db.select({
+      id: jobApplications.id, jobPostId: jobApplications.jobPostId,
+      applicantId: jobApplications.applicantId, status: jobApplications.status,
+      createdAt: jobApplications.createdAt,
+    }).from(jobApplications).orderBy(desc(jobApplications.createdAt)).limit(limit).offset(offset),
+    db.select({ count: sql<number>`count(*)` }).from(jobApplications),
+  ]);
+  return { items, total: Number(countResult[0]?.count ?? 0) };
+}

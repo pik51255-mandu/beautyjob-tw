@@ -530,6 +530,35 @@ const jobApplicationsRouter = router({
     }),
 });
 
+// ─── Admin Router ──────────────────────────────────────────────────────────
+const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.user.role !== "admin") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "관리자 전용 기능입니다" });
+  }
+  return next({ ctx });
+});
+
+const adminRouter = router({
+  stats: adminProcedure.query(async () => {
+    return db.getAdminStats();
+  }),
+  listUsers: adminProcedure
+    .input(z.object({ page: z.number().default(1), limit: z.number().default(20) }))
+    .query(async ({ input }) => {
+      return db.getAdminUsers(input.page, input.limit);
+    }),
+  listJobs: adminProcedure
+    .input(z.object({ page: z.number().default(1), limit: z.number().default(20) }))
+    .query(async ({ input }) => {
+      return db.getAdminJobs(input.page, input.limit);
+    }),
+  listApplications: adminProcedure
+    .input(z.object({ page: z.number().default(1), limit: z.number().default(20) }))
+    .query(async ({ input }) => {
+      return db.getAdminApplications(input.page, input.limit);
+    }),
+});
+
 // ─── Stats Router ───────────────────────────────────────────────────────────
 const statsRouter = router({
   platform: publicProcedure.query(async () => {
@@ -558,6 +587,7 @@ export const appRouter = router({
   favorites: favoritesRouter,
   jobApplications: jobApplicationsRouter,
   stats: statsRouter,
+  admin: adminRouter,
 });
 
 export type AppRouter = typeof appRouter;
