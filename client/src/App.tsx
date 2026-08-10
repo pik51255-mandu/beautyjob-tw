@@ -26,6 +26,7 @@ const SalaryInfo = lazy(() => import("./pages/info/SalaryInfo"));
 const Courses = lazy(() => import("./pages/info/Courses"));
 const KoreanTechniques = lazy(() => import("./pages/info/KoreanTechniques"));
 const SupplyMap = lazy(() => import("./pages/info/SupplyMap"));
+const SalaryCalculator = lazy(() => import("./pages/tools/SalaryCalculator"));
 const Community = lazy(() => import("./pages/Community"));
 const CommunityDetail = lazy(() => import("./pages/CommunityDetail"));
 const CommunityForm = lazy(() => import("./pages/CommunityForm"));
@@ -88,6 +89,9 @@ function Router() {
             <Route path="/resume/edit" component={() => <Layout><JobsComingSoon /></Layout>} />
           </>
         )}
+
+        {/* Tools */}
+        <Route path="/tools/salary" component={() => <Layout><SalaryCalculator /></Layout>} />
 
         {/* Phase 1 정보 메뉴 */}
         <Route path="/salary-info" component={() => <Layout><SalaryInfo /></Layout>} />
