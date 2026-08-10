@@ -32,12 +32,13 @@ describe("calcEmployerBurden", () => {
 
 // ─── 시술 믹스 가중평균 ───────────────────────────────────────────────────────
 describe("calcServiceMix", () => {
-  it("기본 5행: 가중 客單價 1,480 / 재료비율 19% / 소요시간 73분", () => {
+  it("기본 5행: 가중 客單價 1,480 / 재료비율 26.6%(매출 가중) / 소요시간 73분(객수 가중)", () => {
     const mix = calcServiceMix(DEFAULT_SERVICES);
     expect(mix.shareSum).toBe(100);
     expect(mix.avgTicket).toBe(1_480);   // 600×.4+2500×.2+2200×.25+1500×.1+800×.05
-    expect(mix.materialRate).toBeCloseTo(0.19, 10); // 0+.06+.075+.05+.005
-    expect(mix.avgMinutes).toBe(73);     // 16+24+25+6+2
+    // 매출 가중 재료비율 = Σ(단가×비중×재료율) ÷ Σ(단가×비중) = 394 ÷ 1,480
+    expect(mix.materialRate).toBeCloseTo(394 / 1_480, 10); // ≈ 0.2662 → 26.6%
+    expect(mix.avgMinutes).toBe(73);     // 객수 가중 유지: 16+24+25+6+2
   });
 
   it("비중 합 ≠ 100이어도 비중 합 기준으로 정규화 계산", () => {
@@ -118,27 +119,28 @@ describe("필수 케이스: 기본 5행 + 월세 4만 + 직원 1명 32,000 + 기
   const dailyNeed = calcDailyCustomers(bep, mix.avgTicket, 26);
   const maxDaily = calcMaxDailyCustomers(1, 3, 10, mix.avgMinutes, 0.8);
 
-  it("변동비율 56% (재료 19% + 抽成 35% + 수수료 2%)", () => {
-    expect(variableRatio).toBeCloseTo(0.56, 10);
+  it("변동비율 ≈ 63.6% (재료 26.6% + 抽成 35% + 수수료 2%)", () => {
+    expect(variableRatio).toBeCloseTo(394 / 1_480 + 0.37, 10); // ≈ 0.6362
   });
 
-  it("BEP = 88,445 ÷ 0.44 ≈ 201,011", () => {
-    expect(Math.round(bep)).toBe(201_011);
+  it("BEP = 88,445 ÷ (1 − 0.6362) ≈ 243,125", () => {
+    expect(Math.round(bep)).toBe(243_125);
   });
 
-  it("일 필요 객수 5.2명 (客單價 1,480 × 26일)", () => {
-    expect(dailyNeed).toBe(5.2);
+  it("일 필요 객수 6.3명 (客單價 1,480 × 26일)", () => {
+    expect(dailyNeed).toBe(6.3);
   });
 
-  it("캐파 한계 6.6명/일 → BEP 달성 가능 (경고 미발동)", () => {
+  it("캐파 한계 6.6명/일 → BEP 달성 가능하나 여유 ~5% (경고 미발동)", () => {
     expect(maxDaily).toBe(6.6);
     expect(dailyNeed <= maxDaily).toBe(true);
   });
 
-  it("130% 시나리오는 일 6.8객 필요 → 캐파 초과", () => {
+  it("130% 시나리오는 일 8.2객 필요 → 캐파 124% 초과", () => {
     const daily130 = calcDailyCustomers(bep * 1.3, mix.avgTicket, 26);
-    expect(daily130).toBe(6.8);
+    expect(daily130).toBe(8.2);
     expect(daily130 > maxDaily).toBe(true);
+    expect(Math.round((daily130 / maxDaily) * 100)).toBe(124);
   });
 });
 
