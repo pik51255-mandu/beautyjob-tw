@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Calculator, Download, AlertTriangle, Plus, X } from "lucide-react";
+import { Link } from "wouter";
+import { Calculator, Download, AlertTriangle, Plus, X, Store, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -385,6 +386,13 @@ export default function SalaryCalculator() {
           </Button>
         </div>
       </div>
+
+      <Button asChild size="lg" variant="outline" className="w-full gap-2 mb-6">
+        <Link href="/tools/opening-cost">
+          <Store className="w-5 h-5" />{t("ocEntryTitle")}
+          <ArrowRight className="w-4 h-4" />
+        </Link>
+      </Button>
 
       <div className="text-xs text-muted-foreground leading-relaxed space-y-1.5 px-1">
         <p>⚠️ {t("disclaimer")}</p>

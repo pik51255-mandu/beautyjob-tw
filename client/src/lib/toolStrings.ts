@@ -81,6 +81,89 @@ export const toolStrings = {
     ko: "요율 기준: 2026년(민국 115년) 공고. 최저임금 29,500／노보 12.5%／건보 5.17%",
   },
 
+  // ─── 開店成本試算器 ───
+  ocPageTitle: {
+    zh: "美髮開店成本試算器｜押金・裝潢・損益兩平",
+    ko: "미용실 창업비용 계산기｜보증금·인테리어·손익분기",
+  },
+  ocMetaDescription: {
+    zh: "台灣美髮開店成本試算：初期投資、每月固定成本（含雇主勞健保・勞退負擔）、損益兩平營業額與回本期間，一次算清楚（2026 年費率）。",
+    ko: "대만 미용실 창업비용 계산: 초기 투자, 월 고정비(고용주 노건보·노퇴 부담 포함), 손익분기 매출과 회수 기간까지 한 번에 (2026년 요율).",
+  },
+  ocHeading: { zh: "開店成本試算器", ko: "창업비용 계산기" },
+  ocSubheading: {
+    zh: "初期投資・每月固定成本・損益兩平，一次算清楚",
+    ko: "초기 투자·월 고정비·손익분기를 한 번에 계산합니다",
+  },
+
+  // 섹션 A: 초기 투자
+  ocSectionInitial: { zh: "A. 初期投資", ko: "A. 초기 투자" },
+  ocDepositMonths: { zh: "押金（月租 × 幾個月）", ko: "보증금 (월세 × 개월수)" },
+  ocMonthsUnit: { zh: "個月", ko: "개월" },
+  ocDepositResult: { zh: "押金金額", ko: "보증금 금액" },
+  ocTransferFee: { zh: "頂讓費（新開店請填 0）", ko: "권리금 (신규 창업이면 0)" },
+  ocInterior: { zh: "裝潢費", ko: "인테리어 비용" },
+  ocEquipment: { zh: "設備・儀器", ko: "설비·기기" },
+  ocSupplies: { zh: "初期材料・備品", ko: "초기 재료·비품" },
+  ocReserve: { zh: "預備金（小計的 %）", ko: "예비비 (소계의 %)" },
+  ocInitialTotal: { zh: "初期投資總額（含預備金）", ko: "초기 투자 총액 (예비비 포함)" },
+
+  // 섹션 B: 월 고정비
+  ocSectionFixed: { zh: "B. 每月固定成本", ko: "B. 월 고정비" },
+  ocRent: { zh: "月租（NT$）", ko: "월세 (NT$)" },
+  ocStaffCount: { zh: "月薪制員工人數", ko: "월급제 직원 수" },
+  ocStaffSalary: { zh: "每人月薪（NT$）", ko: "1인당 월급 (NT$)" },
+  ocStaffBurdenTitle: { zh: "每人雇主負擔（自動加算）", ko: "1인당 고용주 부담 (자동 가산)" },
+  ocBurdenLabor: { zh: "勞保雇主分（70%）", ko: "노보 고용주분 (70%)" },
+  ocBurdenHealth: { zh: "健保雇主分（60% × 平均眷屬係數 1.56）", ko: "건보 고용주분 (60% × 평균 피부양 계수 1.56)" },
+  ocBurdenPension: { zh: "勞退提繳（6%）", ko: "노퇴 적립 (6%)" },
+  ocStaffTotalCost: { zh: "實際人事總負擔", ko: "실제 인건비 총부담" },
+  ocUtilities: { zh: "水電・通訊（NT$）", ko: "수도광열·통신 (NT$)" },
+  ocMarketing: { zh: "行銷費用（NT$）", ko: "마케팅 (NT$)" },
+  ocOtherFixed: { zh: "其他固定成本（NT$）", ko: "기타 고정비 (NT$)" },
+  ocFixedTotal: { zh: "每月固定成本合計", ko: "월 고정비 합계" },
+
+  // 섹션 C: 변동비 구조
+  ocSectionVariable: { zh: "C. 變動成本結構", ko: "C. 변동비 구조" },
+  ocMaterialRatio: { zh: "材料費率（營業額的 %）", ko: "재료비율 (매출의 %)" },
+  ocCommissionRatio: { zh: "抽成制設計師平均抽成率（%）", ko: "커미션제 디자이너 평균 커미션율 (%)" },
+  ocAvgTicket: { zh: "客單價（平均每客消費 NT$）", ko: "객단가 (평균 1인 소비 NT$)" },
+  ocWorkDays: { zh: "每月營業日數", ko: "월 영업일수" },
+
+  // 결과
+  ocResultTitle: { zh: "試算結果", ko: "계산 결과" },
+  ocBepLabel: { zh: "損益兩平月營業額", ko: "손익분기 월매출" },
+  ocBepImpossible: {
+    zh: "變動成本率已達 100%，無法達到損益兩平 — 請調整抽成率或材料費率",
+    ko: "변동비율이 100% 이상이라 손익분기가 불가능합니다 — 커미션율·재료비율을 조정하세요",
+  },
+  ocDailyCustomers: { zh: "每日所需來客數", ko: "일 필요 객수" },
+  ocCustomersUnit: { zh: "位／日", ko: "명／일" },
+  ocVariableRatio: { zh: "變動成本率", ko: "변동비율" },
+  ocScenarioTitle: { zh: "情境分析（以損益兩平為基準）", ko: "시나리오 (손익분기 기준)" },
+  ocScenarioRevenue: { zh: "月營業額", ko: "월매출" },
+  ocScenarioProfit: { zh: "月損益", ko: "월 손익" },
+  ocScenarioPayback: { zh: "初期投資回本", ko: "초기투자 회수" },
+  ocPaybackMonths: { zh: "個月", ko: "개월" },
+  ocPaybackNever: { zh: "無法回本", ko: "회수 불가" },
+
+  // CTA
+  ocCtaTransfers: { zh: "看店面頂讓物件", ko: "매장 양도 매물 보기" },
+  ocCtaSalary: { zh: "薪水試算器", ko: "급여 계산기" },
+
+  // 면책
+  ocDisclaimer: {
+    zh: "本試算僅供參考，未含職災保險・稅務・裝潢貸款利息，實際成本依個案而異",
+    ko: "본 계산은 참고용이며 산재보험(職災保險)·세무·인테리어 대출이자는 포함하지 않습니다. 실제 비용은 개별 사례에 따라 다릅니다",
+  },
+
+  // 진입 카드 (開店成本)
+  ocEntryTitle: { zh: "開店成本試算器", ko: "창업비용 계산기" },
+  ocEntryDesc: {
+    zh: "押金、裝潢、人事到損益兩平，開店前先算清楚",
+    ko: "보증금·인테리어·인건비부터 손익분기까지, 창업 전 미리 계산",
+  },
+
   // 진입 카드 (홈·薪資情報)
   entryCardTitle: { zh: "薪水試算器", ko: "급여 계산기" },
   entryCardDesc: {
