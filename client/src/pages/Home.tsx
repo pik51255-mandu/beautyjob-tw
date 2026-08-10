@@ -3,7 +3,6 @@ import {
   Scissors,
   Users,
   MessageSquare,
-  Store,
   Package,
   ArrowRight,
   Eye,
@@ -66,13 +65,6 @@ const FEATURES_GRID = [
     color: "bg-sky-50 text-sky-600",
   },
   {
-    icon: Store,
-    title: "店面頂讓",
-    desc: "美髮店頂讓資訊，含坪數、頂讓金、月租等完整資料",
-    href: "/transfers",
-    color: "bg-blue-50 text-blue-600",
-  },
-  {
     icon: Package,
     title: "二手器材",
     desc: "美髮椅、烘罩、剪刀等二手器材資訊，省錢又環保",
@@ -127,11 +119,10 @@ export default function Home() {
       {/* Stats */}
       <section className="border-y border-border bg-white">
         <div className="container py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-3 gap-6">
             {[
               { label: "社群討論", value: platformStats?.communityCount ?? 0, suffix: "+" },
               { label: "會員", value: platformStats?.memberCount ?? 0, suffix: "+" },
-              { label: "店面頂讓", value: platformStats?.salonCount ?? 0, suffix: "+" },
               { label: "二手器材", value: platformStats?.usedItemCount ?? 0, suffix: "+" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">

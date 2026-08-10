@@ -8,7 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { USED_ITEM_CATEGORY_LABELS, ITEM_CONDITION_LABELS, TW_CITIES } from "@shared/constants";
+import { ITEM_CONDITION_LABELS, TW_CITIES } from "@shared/constants";
+import { USED_ITEM_CATEGORIES, BANNED_KEYWORD_MESSAGE, findBannedKeyword } from "@shared/usedItemCatalog";
+import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 
@@ -20,7 +22,8 @@ export default function UsedItemForm() {
   const utils = trpc.useUtils();
 
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("other");
+  const [category, setCategory] = useState("");
+  const [agreedNonMedical, setAgreedNonMedical] = useState(false);
   const [condition, setCondition] = useState("good");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
@@ -36,6 +39,7 @@ export default function UsedItemForm() {
       setPrice(String(existing.price));
       setDescription(existing.description);
       setCity(existing.city ?? "");
+      setAgreedNonMedical(true);
     }
   }, [existing]);
 
@@ -52,6 +56,10 @@ export default function UsedItemForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !price || !description) { toast.error("請填寫必填欄位"); return; }
+    if (!category) { toast.error("請選擇商品類別"); return; }
+    if (!agreedNonMedical) { toast.error("請確認商品非屬醫療器材"); return; }
+    // 금지 키워드 사전 검사 (서버에서도 동일하게 차단됨)
+    if (findBannedKeyword(`${title}\n${description}`)) { toast.error(BANNED_KEYWORD_MESSAGE); return; }
     const payload = {
       title,
       category: category as any,
@@ -91,9 +99,9 @@ export default function UsedItemForm() {
             <div className="space-y-2">
               <Label>商品類別 <span className="text-destructive">*</span></Label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="請選擇類別" /></SelectTrigger>
                 <SelectContent>
-                  {Object.entries(USED_ITEM_CATEGORY_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+                  {USED_ITEM_CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -122,6 +130,24 @@ export default function UsedItemForm() {
               <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} placeholder="說明商品狀況、使用年限、附件等..." />
             </div>
           </div>
+          {/* 의료기기 금지 고지 + 동의 (D-1 유지 항목) */}
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800 leading-relaxed flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            <p>{BANNED_KEYWORD_MESSAGE}。雷射・脈衝光・電音波等醫美儀器屬醫療器材，刊登將被移除並可能觸法。</p>
+          </div>
+          <label className="flex items-start gap-2.5 rounded-lg border border-border p-3 text-xs leading-relaxed cursor-pointer hover:bg-muted/40 transition-colors">
+            <input
+              type="checkbox"
+              checked={agreedNonMedical}
+              onChange={(e) => setAgreedNonMedical(e.target.checked)}
+              className="mt-0.5 accent-primary"
+            />
+            <span className="text-muted-foreground">
+              我確認此商品<strong className="text-foreground">非屬醫療器材</strong>，並同意違規內容經檢舉或偵測後將被移除
+              <span className="text-destructive ml-0.5">*</span>
+            </span>
+          </label>
+
           <div className="flex gap-3 pt-2">
             <Button type="button" variant="outline" onClick={() => navigate("/used-items")} className="flex-1">取消</Button>
             <Button type="submit" disabled={isPending} className="flex-1">{isPending ? "處理中..." : isEdit ? "更新" : "刊登"}</Button>

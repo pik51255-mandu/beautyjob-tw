@@ -50,6 +50,13 @@
       "when": 1786358863578,
       "tag": "0006_wild_baron_zemo",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1786359397715,
+      "tag": "0007_fancy_firelord",
+      "breakpoints": true
     }
   ]
 }

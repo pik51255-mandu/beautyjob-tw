@@ -50,16 +50,12 @@ export const COMMUNITY_CATEGORY_LABELS: Record<string, string> = {
   qa: "問答",
 };
 
-// 二手商品分類
-export const USED_ITEM_CATEGORY_LABELS: Record<string, string> = {
-  chair: "美髮椅",
-  dryer: "吹風機/烘罩",
-  washer: "洗頭台",
-  scissors: "剪刀/工具",
-  chemical: "藥水/材料",
-  furniture: "家具/裝潢",
-  other: "其他",
-};
+// 二手商品分類 — D-1: shared/usedItemCatalog.ts의 명시 목록에서 파생
+import { USED_ITEM_CATEGORIES } from "./usedItemCatalog";
+
+export const USED_ITEM_CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
+  USED_ITEM_CATEGORIES.map((c) => [c.value, c.label])
+);
 
 // 商品狀態
 export const ITEM_CONDITION_LABELS: Record<string, string> = {

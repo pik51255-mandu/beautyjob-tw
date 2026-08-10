@@ -8,6 +8,8 @@ import { systemRouter } from "./_core/systemRouter";
 import { sdk } from "./_core/sdk";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
+import { anonymizeComments, anonymizeCommunityPost } from "./anonymize";
+import { BANNED_KEYWORD_MESSAGE, USED_ITEM_CATEGORY_VALUES, findBannedKeyword } from "@shared/usedItemCatalog";
 
 // ─── Shared Enums ─────────────────────────────────────────────────────────────
 const jobTypeEnum = z.enum(["designer", "intern", "staff", "colorist", "barber", "manager", "other"]);
@@ -17,7 +19,7 @@ const experienceEnum = z.enum(["none", "1year", "2year", "3year", "5year", "10ye
 const communityCategory = z.enum(["general", "technique", "education", "news", "qa"]);
 const postTypeEnum = z.enum(["community", "salon_transfer", "used_item"]);
 const favoriteTypeEnum = z.enum(["job_post", "resume", "salon_transfer", "used_item"]);
-const usedItemCategory = z.enum(["chair", "dryer", "washer", "scissors", "chemical", "furniture", "other"]);
+const usedItemCategory = z.enum(USED_ITEM_CATEGORY_VALUES);
 const usedItemCondition = z.enum(["new", "like_new", "good", "fair"]);
 const reportTargetEnum = z.enum(["community", "salon_transfer", "used_item"]);
 const reportReasonEnum = z.enum(["spam", "fraud", "offensive", "illegal", "other"]);
@@ -26,6 +28,21 @@ const reportReasonEnum = z.enum(["spam", "fraud", "offensive", "illegal", "other
 function assertJobsEnabled() {
   if (!FEATURES.JOBS_ENABLED) {
     throw new TRPCError({ code: "PRECONDITION_FAILED", message: "徵才功能即將開放" });
+  }
+}
+
+// 店面頂讓 잠금 가드 (D-1) — 재오픈 조건: 변호사 확인 + 운영 인력 확보 후 별도 지시
+function assertTransfersEnabled() {
+  if (!FEATURES.TRANSFER_ENABLED) {
+    throw new TRPCError({ code: "PRECONDITION_FAILED", message: "店面頂讓功能整備中" });
+  }
+}
+
+// 二手 금지 키워드 가드 (D-1): 제목+내용 등록 시점 차단
+function assertNoBannedKeywords(title: string, description: string) {
+  const keyword = findBannedKeyword(`${title}\n${description}`);
+  if (keyword) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: BANNED_KEYWORD_MESSAGE });
   }
 }
 
@@ -222,18 +239,28 @@ const communityRouter = router({
         limit: z.number().min(1).max(50).default(20),
       })
     )
-    .query(async ({ input }) => {
-      return db.getCommunityPosts(input);
+    .query(async ({ ctx, input }) => {
+      const result = await db.getCommunityPosts(input);
+      // 익명화: 서버 응답 단계에서 작성자 정보 제거 (프론트 가리기 금지)
+      return {
+        total: result.total,
+        posts: result.posts.map((post) => anonymizeCommunityPost(post, ctx.user?.id ?? null)),
+      };
     }),
 
   byId: publicProcedure
     .input(z.object({ id: z.number() }))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
       await db.incrementCommunityViewCount(input.id);
       const post = await db.getCommunityPostById(input.id);
       if (!post) throw new TRPCError({ code: "NOT_FOUND", message: "文章不存在" });
-      return post;
+      return anonymizeCommunityPost(post, ctx.user?.id ?? null);
     }),
+
+  // 본인 글 확인용 (마이페이지)
+  myPosts: protectedProcedure.query(async ({ ctx }) => {
+    return db.getCommunityPostsByAuthor(ctx.user.id);
+  }),
 
   create: protectedProcedure
     .input(
@@ -275,8 +302,13 @@ const communityRouter = router({
 const commentsRouter = router({
   list: publicProcedure
     .input(z.object({ postType: postTypeEnum, postId: z.number() }))
-    .query(async ({ input }) => {
-      return db.getComments(input.postType, input.postId);
+    .query(async ({ ctx, input }) => {
+      const rows = await db.getComments(input.postType, input.postId);
+      if (input.postType !== "community") return rows as unknown as ReturnType<typeof anonymizeComments>;
+      // 익명화: 글쓴이 댓글 → 原PO, 그 외 → 글 단위 일관 匿名N (서버 응답 단계 처리)
+      const post = await db.getCommunityPostById(input.postId);
+      const postAuthorId = post?.authorId ?? -1;
+      return anonymizeComments(rows, postAuthorId, ctx.user?.id ?? null);
     }),
 
   create: protectedProcedure
@@ -340,6 +372,7 @@ const salonTransfersRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      assertTransfersEnabled();
       await db.createSalonTransfer({
         ...input,
         authorId: ctx.user.id,
@@ -364,6 +397,7 @@ const salonTransfersRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      assertTransfersEnabled();
       const { id, keyMoney, deposit, monthlyRent, ...rest } = input;
       await db.updateSalonTransfer(id, ctx.user.id, {
         ...rest,
@@ -422,6 +456,7 @@ const usedItemsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      assertNoBannedKeywords(input.title, input.description);
       await db.createUsedItem({
         ...input,
         authorId: ctx.user.id,
@@ -441,6 +476,7 @@ const usedItemsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      assertNoBannedKeywords(input.title ?? "", input.description ?? "");
       const { id, price, ...rest } = input;
       await db.updateUsedItem(id, ctx.user.id, {
         ...rest,
@@ -539,7 +575,15 @@ const adminRouter = router({
       status: z.enum(["pending", "resolved", "dismissed"]).optional(),
     }))
     .query(async ({ input }) => {
+      // 사후 자동 플래그: 관리자가 신고 목록을 열 때마다 二手 글을 스캔해 금지 키워드를 자동 신고 등록
+      await db.autoFlagBannedUsedItems(findBannedKeyword);
       return db.getAdminReports(input.page, input.limit, input.status);
+    }),
+  // 익명화 예외: 관리자 대시보드는 신고 처리용으로 실제 계정 표시
+  listCommunityPosts: adminProcedure
+    .input(z.object({ page: z.number().default(1), limit: z.number().default(20) }))
+    .query(async ({ input }) => {
+      return db.getAdminCommunityPosts(input.page, input.limit);
     }),
   updateReportStatus: adminProcedure
     .input(z.object({ id: z.number(), status: z.enum(["pending", "resolved", "dismissed"]) }))

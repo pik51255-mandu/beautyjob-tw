@@ -194,6 +194,58 @@ describe("admin.exportCsv", () => {
   });
 });
 
+// ─── D-1 Tests ────────────────────────────────────────────────────────────────
+
+describe("salonTransfers lock (D-1)", () => {
+  it("잠금 중 create는 PRECONDITION_FAILED (整備中)", async () => {
+    const caller = appRouter.createCaller(makeAuthCtx());
+    await expect(
+      caller.salonTransfers.create({
+        title: "Test transfer",
+        city: "台北市",
+        description: "Test description here",
+      })
+    ).rejects.toThrow(/整備中/);
+  });
+
+  it("잠금 중 update도 차단", async () => {
+    const caller = appRouter.createCaller(makeAuthCtx());
+    await expect(
+      caller.salonTransfers.update({ id: 1, title: "changed title" })
+    ).rejects.toThrow(/整備中/);
+  });
+});
+
+describe("usedItems banned keyword block (D-1)", () => {
+  it("제목에 금지 키워드(雷射) 포함 시 등록 차단", async () => {
+    const caller = appRouter.createCaller(makeAuthCtx());
+    await expect(
+      caller.usedItems.create({
+        title: "二手雷射除毛機",
+        category: "chair",
+        condition: "good",
+        price: 1000,
+        city: "台北市",
+        description: "狀況良好的機器，歡迎詢問細節",
+      })
+    ).rejects.toThrow(/不得刊登/);
+  });
+
+  it("내용에 금지 키워드(醫美) 포함 시 수정도 차단", async () => {
+    const caller = appRouter.createCaller(makeAuthCtx());
+    await expect(
+      caller.usedItems.update({ id: 1, description: "適合醫美診所使用的設備" })
+    ).rejects.toThrow(/不得刊登/);
+  });
+});
+
+describe("admin.listCommunityPosts (익명화 예외 — 관리자뷰)", () => {
+  it("일반 회원은 FORBIDDEN", async () => {
+    const caller = appRouter.createCaller(makeAuthCtx());
+    await expect(caller.admin.listCommunityPosts({ page: 1, limit: 10 })).rejects.toThrow();
+  });
+});
+
 // ─── Jobs Lock (v4) Tests ─────────────────────────────────────────────────────
 
 describe("jobPosts.create with jobs locked", () => {

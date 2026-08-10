@@ -34,7 +34,6 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-3 text-sm">交流資訊</h4>
             <ul className="space-y-2 text-sm text-background/60">
-              <li><Link href="/transfers" className="hover:text-background transition-colors">店面頂讓</Link></li>
               <li><Link href="/used-items" className="hover:text-background transition-colors">二手器材</Link></li>
               <li><Link href="/mypage" className="hover:text-background transition-colors">我的頁面</Link></li>
               <li><Link href="/mypage/favorites" className="hover:text-background transition-colors">收藏清單</Link></li>

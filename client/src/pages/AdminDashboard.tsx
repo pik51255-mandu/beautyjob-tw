@@ -90,6 +90,10 @@ export default function AdminDashboard() {
     { enabled: isAdmin }
   );
   const { data: exportTables } = trpc.admin.exportTableNames.useQuery(undefined, { enabled: isAdmin });
+  const { data: communityData } = trpc.admin.listCommunityPosts.useQuery(
+    { page: 1, limit: 10 },
+    { enabled: isAdmin }
+  );
 
   const updateReportStatus = trpc.admin.updateReportStatus.useMutation({
     onSuccess: () => {
@@ -282,6 +286,10 @@ export default function AdminDashboard() {
               <Users className="w-3.5 h-3.5" />
               最新會員
             </TabsTrigger>
+            <TabsTrigger value="posts" className="gap-1.5">
+              <MessageSquare className="w-3.5 h-3.5" />
+              社群文章
+            </TabsTrigger>
             <TabsTrigger value="export" className="gap-1.5">
               <Download className="w-3.5 h-3.5" />
               CSV 匯出
@@ -436,6 +444,55 @@ export default function AdminDashboard() {
                             <td className="px-4 py-3 text-muted-foreground text-xs">
                               {format(new Date(u.createdAt), "yyyy/MM/dd HH:mm")}
                             </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Community Posts Tab — 익명화 예외: 신고 처리용 실제 계정 표시 */}
+          <TabsContent value="posts">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">最新社群文章（含實際帳號 — 僅供檢舉處理）</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">ID</th>
+                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">標題</th>
+                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">作者（實名）</th>
+                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">Email</th>
+                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">發表時間</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {!communityData ? (
+                        Array.from({ length: 3 }).map((_, i) => (
+                          <tr key={i} className="border-b">
+                            {Array.from({ length: 5 }).map((_, j) => (
+                              <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>
+                            ))}
+                          </tr>
+                        ))
+                      ) : communityData.items.length === 0 ? (
+                        <tr><td colSpan={5} className="text-center text-muted-foreground py-8">尚無文章</td></tr>
+                      ) : (
+                        communityData.items.map((p) => (
+                          <tr key={p.id} className="border-b hover:bg-muted/30 transition-colors">
+                            <td className="px-4 py-3 text-muted-foreground">#{p.id}</td>
+                            <td className="px-4 py-3 font-medium">
+                              <Link href={`/community/${p.id}`} className="hover:text-primary transition-colors">{p.title}</Link>
+                            </td>
+                            <td className="px-4 py-3">{p.authorName ?? `會員 #${p.authorId}`}</td>
+                            <td className="px-4 py-3 text-muted-foreground text-xs">{p.authorEmail ?? "—"}</td>
+                            <td className="px-4 py-3 text-muted-foreground text-xs">{format(new Date(p.createdAt), "yyyy/MM/dd HH:mm")}</td>
                           </tr>
                         ))
                       )}

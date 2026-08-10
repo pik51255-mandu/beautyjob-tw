@@ -1,0 +1,1 @@
+ALTER TABLE `used_items` MODIFY COLUMN `category` enum('chair','mirror_station','wash_bed','dryer','iron','perm_machine','steamer','clipper','wash_basin','trolley','scissors','hood_heater') NOT NULL;

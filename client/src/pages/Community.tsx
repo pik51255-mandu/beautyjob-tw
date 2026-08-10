@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { MessageSquare, Eye, Plus, Pin } from "lucide-react";
+import { MessageSquare, Eye, Plus, Pin, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
@@ -49,6 +49,12 @@ export default function Community() {
             </Link>
           </Button>
         )}
+      </div>
+
+      {/* 익명 게시판 고지 (D-1) */}
+      <div className="mb-4 flex items-start gap-2.5 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800 leading-relaxed">
+        <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5" />
+        <p>本社群為匿名發文，請安心交流。惟違法或侵權內容，本平台仍得依法配合調查。</p>
       </div>
 
       {/* Category Filter */}

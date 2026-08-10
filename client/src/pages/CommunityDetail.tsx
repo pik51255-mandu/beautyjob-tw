@@ -15,7 +15,7 @@ import ReportButton from "@/components/ReportButton";
 export default function CommunityDetail() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const utils = trpc.useUtils();
   const [comment, setComment] = useState("");
 
@@ -61,7 +61,7 @@ export default function CommunityDetail() {
     );
   }
 
-  const isOwner = user?.id === post.authorId;
+  const isOwner = post.isMine;
 
   return (
     <div className="container py-8 max-w-3xl mx-auto">
@@ -78,6 +78,7 @@ export default function CommunityDetail() {
               </Badge>
               <h1 className="text-2xl font-bold">{post.title}</h1>
               <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+                <span className="font-medium text-foreground/70">{post.displayName}</span>
                 <span>{format(new Date(post.createdAt), "yyyy/MM/dd HH:mm")}</span>
                 <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" />{post.viewCount}</span>
                 <span className="flex items-center gap-1"><MessageSquare className="w-3.5 h-3.5" />{post.commentCount}</span>
@@ -118,15 +119,17 @@ export default function CommunityDetail() {
           {comments && comments.length > 0 ? (
             comments.map((c) => (
               <div key={c.id} className="p-4 flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">
-                  {c.authorId}
+                <div className={`h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold px-2.5 ${
+                  c.displayName === "原PO" ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
+                }`}>
+                  {c.displayName}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(c.createdAt), { addSuffix: true, locale: zhTW })}
                     </span>
-                    {user?.id === c.authorId && (
+                    {c.isMine && (
                       <button
                         onClick={() => deleteComment.mutate({ id: c.id })}
                         className="text-xs text-muted-foreground hover:text-destructive transition-colors"
