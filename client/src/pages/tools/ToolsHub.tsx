@@ -47,13 +47,14 @@ export default function ToolsHub() {
     },
   ];
 
-  const ownerTools: { icon: React.ReactNode; titleKey: ToolStringKey; descKey: ToolStringKey; href: string; color: string }[] = [
+  const ownerTools: { icon: React.ReactNode; titleKey: ToolStringKey; descKey: ToolStringKey; href: string; color: string; comingSoon: boolean }[] = [
     {
       icon: <FlaskConical className="w-6 h-6" />,
       titleKey: "hubProductCostTitle",
       descKey: "hubProductCostDesc",
       href: "/tools/product-cost",
       color: "bg-violet-50 text-violet-600",
+      comingSoon: false,
     },
     {
       icon: <LineChart className="w-6 h-6" />,
@@ -61,6 +62,7 @@ export default function ToolsHub() {
       descKey: "hubBizSimDesc",
       href: "/tools/biz-simulator",
       color: "bg-emerald-50 text-emerald-600",
+      comingSoon: true,
     },
   ];
 
@@ -111,9 +113,11 @@ export default function ToolsHub() {
               href={tool.href}
               className="group bg-white rounded-xl border border-border p-6 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 relative"
             >
-              <Badge className="absolute top-4 right-4 bg-amber-100 text-amber-700 border-amber-200 text-xs">
-                {t("hubComingSoon")}
-              </Badge>
+              {tool.comingSoon && (
+                <Badge className="absolute top-4 right-4 bg-amber-100 text-amber-700 border-amber-200 text-xs">
+                  {t("hubComingSoon")}
+                </Badge>
+              )}
               <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center mb-4`}>
                 {tool.icon}
               </div>

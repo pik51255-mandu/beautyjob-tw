@@ -272,6 +272,67 @@ export const toolStrings = {
     ko: "급여·창업비용·사장님 경영 도구를 한곳에",
   },
 
+  // ─── 藥水成本計算器 (C-3) ───
+  pcPageTitle: {
+    zh: "藥水成本計算器｜染燙材料成本・材料率",
+    ko: "약값 계산기｜염색·펌 재료 원가·재료율",
+  },
+  pcMetaDescription: {
+    zh: "美髮沙龍藥水成本計算：染膏、雙氧乳、燙髮劑每次施術的材料成本與材料率，並可按月比對預估與實際支出。",
+    ko: "미용실 약값 계산: 염모제·산화제·펌제의 시술 1회당 재료 원가와 재료율, 월별 예상 vs 실제 지출 비교까지.",
+  },
+  pcHeading: { zh: "藥水成本計算器", ko: "약값 계산기" },
+  pcSubheading: {
+    zh: "每次施術的藥水成本與材料率，再按月驗證實際支出",
+    ko: "시술 1회당 약값 원가·재료율 계산 + 월간 실지출 검증",
+  },
+
+  // 섹션 A1: 약제
+  pcSectionChemicals: { zh: "A. 藥劑清單", ko: "A. 약제 목록" },
+  pcChemName: { zh: "藥劑名稱", ko: "약제명" },
+  pcChemPrice: { zh: "購入價（NT$）", ko: "구매가 (NT$)" },
+  pcChemTotal: { zh: "總容量（g／ml／支）", ko: "총용량 (g/ml/支)" },
+  pcChemUsage: { zh: "每次用量", ko: "1회 사용량" },
+  pcChemCostPerUse: { zh: "每次成本", ko: "1회당 원가" },
+  pcChemAdd: { zh: "＋新增藥劑", ko: "＋약제 추가" },
+
+  // 섹션 A2: 시술
+  pcSectionTreatments: { zh: "B. 施術定義", ko: "B. 시술 정의" },
+  pcTreatName: { zh: "施術名稱", ko: "시술명" },
+  pcTreatPrice: { zh: "施術價（NT$)", ko: "시술가 (NT$)" },
+  pcTreatChemicals: { zh: "使用藥劑（可調整倍數）", ko: "사용 약제 (배수 조정 가능)" },
+  pcTreatAdd: { zh: "＋新增施術", ko: "＋시술 추가" },
+  pcTreatCost: { zh: "每次藥水成本", ko: "1회당 약값 원가" },
+  pcTreatRate: { zh: "材料率", ko: "재료율" },
+  pcMultiplier: { zh: "倍數", ko: "배수" },
+  pcRemove: { zh: "刪除", ko: "삭제" },
+
+  // 결과 카드
+  pcResultTitle: { zh: "施術別材料率", ko: "시술별 재료율" },
+  pcSalaryRefNote: {
+    zh: "此材料率可作為薪水試算器『材料費』欄位的參考值",
+    ko: "이 재료율은 급여 계산기의 '재료비' 입력 참고값으로 쓸 수 있습니다",
+  },
+  pcSalaryRefCta: { zh: "前往薪水試算器", ko: "급여 계산기로" },
+
+  // 섹션 C: 월간 검증
+  pcSectionMonthly: { zh: "C. 每月驗證（預估 vs 實際）", ko: "C. 월간 검증 (예측 vs 실제)" },
+  pcMonthLabel: { zh: "月份", ko: "월 선택" },
+  pcMonthlyCount: { zh: "本月施術件數", ko: "월 시술 건수" },
+  pcCountUnit: { zh: "件", ko: "건" },
+  pcExpectedLabel: { zh: "預估本月藥水支出", ko: "예상 월 약값" },
+  pcActualLabel: { zh: "實際本月藥水支出（NT$）", ko: "실제 월 약값 지출 (NT$)" },
+  pcDiffLabel: { zh: "差異", ko: "차이" },
+  pcMonthlyWarn: {
+    zh: "實際藥水支出高於預估，可能存在過量使用、庫存損耗或漏記施術",
+    ko: "실제 약값 지출이 예상보다 높습니다 — 과다 사용·재고 손실·시술 기록 누락 가능성이 있습니다",
+  },
+  pcSaveRecord: { zh: "儲存本月紀錄", ko: "이번 달 기록 저장" },
+  pcRecordSaved: { zh: "紀錄已儲存", ko: "기록이 저장되었습니다" },
+  pcSavedRecords: { zh: "已儲存的月份紀錄", ko: "저장된 월별 기록" },
+  pcNoRecords: { zh: "尚無紀錄", ko: "저장된 기록이 없습니다" },
+  pcDeleteRecord: { zh: "刪除", ko: "삭제" },
+
   // ─── 老闆專區 게이트 ───
   gateLoginTitle: { zh: "請先登入", ko: "로그인이 필요합니다" },
   gateLoginDesc: {
