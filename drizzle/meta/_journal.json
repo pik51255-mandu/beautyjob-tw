@@ -43,6 +43,13 @@
       "when": 1786350946733,
       "tag": "0005_soft_northstar",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1786358863578,
+      "tag": "0006_wild_baron_zemo",
+      "breakpoints": true
     }
   ]
 }

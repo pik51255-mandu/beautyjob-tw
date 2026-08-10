@@ -32,17 +32,10 @@ const FEATURES_GRID = [
   },
   {
     icon: Calculator,
-    title: "薪水試算器",
-    desc: "輸入業績與抽成率，馬上算出勞健保扣除後的實領金額",
-    href: "/tools/salary",
+    title: "美髮工具箱",
+    desc: "薪水試算、開店成本、老闆經營工具一次收齊",
+    href: "/tools",
     color: "bg-cyan-50 text-cyan-600",
-  },
-  {
-    icon: Store,
-    title: "開店成本試算器",
-    desc: "押金、裝潢、人事到損益兩平，開店前先算清楚",
-    href: "/tools/opening-cost",
-    color: "bg-orange-50 text-orange-600",
   },
   {
     icon: BarChart3,

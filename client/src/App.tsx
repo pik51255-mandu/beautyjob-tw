@@ -28,6 +28,9 @@ const KoreanTechniques = lazy(() => import("./pages/info/KoreanTechniques"));
 const SupplyMap = lazy(() => import("./pages/info/SupplyMap"));
 const SalaryCalculator = lazy(() => import("./pages/tools/SalaryCalculator"));
 const OpeningCostCalculator = lazy(() => import("./pages/tools/OpeningCostCalculator"));
+const ToolsHub = lazy(() => import("./pages/tools/ToolsHub"));
+const ProductCost = lazy(() => import("./pages/tools/ProductCost"));
+const BizSimulator = lazy(() => import("./pages/tools/BizSimulator"));
 const Community = lazy(() => import("./pages/Community"));
 const CommunityDetail = lazy(() => import("./pages/CommunityDetail"));
 const CommunityForm = lazy(() => import("./pages/CommunityForm"));
@@ -92,8 +95,11 @@ function Router() {
         )}
 
         {/* Tools */}
+        <Route path="/tools" component={() => <Layout><ToolsHub /></Layout>} />
         <Route path="/tools/salary" component={() => <Layout><SalaryCalculator /></Layout>} />
         <Route path="/tools/opening-cost" component={() => <Layout><OpeningCostCalculator /></Layout>} />
+        <Route path="/tools/product-cost" component={() => <Layout><ProductCost /></Layout>} />
+        <Route path="/tools/biz-simulator" component={() => <Layout><BizSimulator /></Layout>} />
 
         {/* Phase 1 정보 메뉴 */}
         <Route path="/salary-info" component={() => <Layout><SalaryInfo /></Layout>} />

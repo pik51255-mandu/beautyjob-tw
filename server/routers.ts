@@ -37,6 +37,8 @@ const usersRouter = router({
     .input(
       z.object({
         userType: z.enum(["salon_owner", "job_seeker"]).optional(),
+        // 회원 身分 (자율 신고) — Phase 2에서 사업자번호(統一編號) 인증 추가 예정
+        memberType: z.enum(["designer", "owner", "other"]).optional(),
         phone: z.string().max(30).optional(),
         city: z.string().max(50).optional(),
         bio: z.string().optional(),
@@ -627,6 +629,7 @@ export const appRouter = router({
         email: z.string().email(),
         password: z.string().min(6),
         name: z.string().min(1).max(100),
+        memberType: z.enum(["designer", "owner", "other"]).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const existing = await db.getUserByEmail(input.email);
@@ -642,6 +645,7 @@ export const appRouter = router({
           loginMethod: "email",
           lastSignedIn: new Date(),
           passwordHash,
+          memberType: input.memberType ?? null,
         });
         const user = await db.getUserByOpenId(openId);
         if (!user) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "註冊失敗" });
