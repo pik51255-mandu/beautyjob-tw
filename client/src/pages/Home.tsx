@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Eye,
   BarChart3,
+  Calculator,
   GraduationCap,
   Sparkles,
   Map,
@@ -28,6 +29,13 @@ const FEATURES_GRID = [
     desc: "技術分享、行業資訊、問答討論，與全台美髮同業交流成長",
     href: "/community",
     color: "bg-emerald-50 text-emerald-600",
+  },
+  {
+    icon: Calculator,
+    title: "薪水試算器",
+    desc: "輸入業績與抽成率，馬上算出勞健保扣除後的實領金額",
+    href: "/tools/salary",
+    color: "bg-cyan-50 text-cyan-600",
   },
   {
     icon: BarChart3,
