@@ -3,6 +3,7 @@ import { User, Briefcase, FileText, Heart, Store, ShoppingBag, LogOut } from "lu
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { JOB_TYPE_LABELS, WORK_TYPE_LABELS, formatSalaryRange, formatNTD } from "@shared/constants";
@@ -31,6 +32,16 @@ export default function MyPage() {
     onSuccess: () => { toast.success("已取消收藏"); utils.favorites.list.invalidate(); },
   });
 
+  // 회원 身分 변경 (자율 신고 — Phase 2: 사업자번호(統一編號) 인증 예정)
+  const updateMemberType = trpc.users.updateProfile.useMutation({
+    onSuccess: () => {
+      toast.success("會員身分已更新");
+      utils.users.me.invalidate();
+      utils.auth.me.invalidate();
+    },
+    onError: () => toast.error("更新失敗，請稍後再試"),
+  });
+
   if (!isAuthenticated) {
     return (
       <div className="container py-20 text-center max-w-md mx-auto">
@@ -54,9 +65,27 @@ export default function MyPage() {
             <div>
               <h1 className="text-xl font-bold">{user?.name ?? "使用者"}</h1>
               <p className="text-muted-foreground text-sm">{user?.email}</p>
-              <Badge variant="secondary" className="mt-1 text-xs">
-                {user?.role === "admin" ? "管理員" : "一般會員"}
-              </Badge>
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                <Badge variant="secondary" className="text-xs">
+                  {user?.role === "admin" ? "管理員" : "一般會員"}
+                </Badge>
+                <Select
+                  value={user?.memberType ?? "unset"}
+                  onValueChange={(v) => {
+                    if (v !== "unset") updateMemberType.mutate({ memberType: v as any });
+                  }}
+                >
+                  <SelectTrigger className="h-7 text-xs w-auto gap-1 px-2.5">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unset" disabled>身分未設定</SelectItem>
+                    <SelectItem value="designer">設計師 / 助理</SelectItem>
+                    <SelectItem value="owner">店家（老闆）</SelectItem>
+                    <SelectItem value="other">其他</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
           <Button

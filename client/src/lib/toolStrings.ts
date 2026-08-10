@@ -235,6 +235,80 @@ export const toolStrings = {
     ko: "보증금·인테리어·인건비부터 손익분기까지, 창업 전 미리 계산",
   },
 
+  // ─── /tools 허브 ───
+  hubPageTitle: {
+    zh: "美髮工具箱｜薪水・開店成本試算",
+    ko: "미용 도구함｜급여·창업비용 계산",
+  },
+  hubMetaDescription: {
+    zh: "台灣美髮人專用工具箱：薪水試算器、開店成本試算器，以及老闆專區的經營工具（2026 年費率）。",
+    ko: "대만 미용인 전용 도구함: 급여 계산기, 창업비용 계산기, 그리고 사장님 전용 경영 도구 (2026년 요율).",
+  },
+  hubHeading: { zh: "美髮工具箱", ko: "미용 도구함" },
+  hubSubheading: {
+    zh: "薪水、開店成本到經營模擬，美髮人專用計算工具",
+    ko: "급여·창업비용부터 경영 시뮬레이션까지, 미용인 전용 계산 도구",
+  },
+  hubSectionDesigner: { zh: "設計師工具", ko: "디자이너 도구" },
+  hubSectionOwner: { zh: "老闆專區", ko: "사장님 전용" },
+  hubOwnerDesc: {
+    zh: "以店家（老闆）身分登入後即可使用的經營工具",
+    ko: "매장(사장님) 신분으로 로그인하면 사용할 수 있는 경영 도구",
+  },
+  hubComingSoon: { zh: "準備中", ko: "준비 중" },
+  hubProductCostTitle: { zh: "藥水成本計算器", ko: "약값(시술 원가) 계산기" },
+  hubProductCostDesc: {
+    zh: "染燙藥水用量與每次施術的材料成本，一瓶到底能做幾次",
+    ko: "염색·펌 약제 사용량과 시술 1회당 재료 원가, 한 통으로 몇 번 가능한지",
+  },
+  hubBizSimTitle: { zh: "經營損益模擬器", ko: "경영 손익 시뮬레이터" },
+  hubBizSimDesc: {
+    zh: "服務組合、人力與產能，模擬每月損益與損益兩平",
+    ko: "시술 믹스·인력·캐파로 월 손익과 손익분기를 시뮬레이션",
+  },
+  hubEntryTitle: { zh: "美髮工具箱", ko: "미용 도구함" },
+  hubEntryDesc: {
+    zh: "薪水試算、開店成本、老闆經營工具一次收齊",
+    ko: "급여·창업비용·사장님 경영 도구를 한곳에",
+  },
+
+  // ─── 老闆專區 게이트 ───
+  gateLoginTitle: { zh: "請先登入", ko: "로그인이 필요합니다" },
+  gateLoginDesc: {
+    zh: "老闆專區工具需要登入後才能使用",
+    ko: "사장님 전용 도구는 로그인 후 사용할 수 있습니다",
+  },
+  gateLoginCta: { zh: "登入 / 註冊", ko: "로그인 / 회원가입" },
+  gatePromptTitle: { zh: "老闆專區", ko: "사장님 전용 구역" },
+  gatePromptDesc: {
+    zh: "此工具為店家（老闆）專用。要以店家（老闆）身分使用此工具嗎？您的會員身分將更新為「老闆」。",
+    ko: "이 도구는 매장(사장님) 전용입니다. 매장(사장님) 신분으로 이 도구를 사용할까요? 회원 신분이 '사장님'으로 변경됩니다.",
+  },
+  gatePromptCta: { zh: "以店家（老闆）身分使用此工具", ko: "매장(사장님) 신분으로 사용하기" },
+  gatePromptCancel: { zh: "返回工具箱", ko: "도구함으로 돌아가기" },
+  gateSwitching: { zh: "切換中…", ko: "전환 중…" },
+  gateSwitchDone: { zh: "已切換為老闆身分", ko: "사장님 신분으로 전환되었습니다" },
+  gateSwitchFail: { zh: "切換失敗，請稍後再試", ko: "전환에 실패했습니다. 잠시 후 다시 시도해 주세요" },
+
+  // 老闆 도구 準備中 페이지
+  ownerToolComingSoon: {
+    zh: "此工具正在開發中，即將開放",
+    ko: "이 도구는 개발 중이며 곧 오픈합니다",
+  },
+  ownerToolBack: { zh: "返回工具箱", ko: "도구함으로" },
+
+  // 身分 (memberType)
+  memberTypeLabel: { zh: "會員身分", ko: "회원 신분" },
+  memberTypeDesigner: { zh: "設計師 / 助理", ko: "디자이너 / 어시스턴트" },
+  memberTypeOwner: { zh: "店家（老闆）", ko: "매장 (사장님)" },
+  memberTypeOther: { zh: "其他", ko: "기타" },
+  memberTypeUnset: { zh: "未設定", ko: "미설정" },
+  memberTypeNote: {
+    zh: "自我申報，之後可於我的頁面變更（未來將提供統一編號認證）",
+    ko: "자율 신고이며 마이페이지에서 변경 가능 (추후 사업자번호 인증 예정)",
+  },
+  memberTypeSaved: { zh: "會員身分已更新", ko: "회원 신분이 변경되었습니다" },
+
   // 진입 카드 (홈·薪資情報)
   entryCardTitle: { zh: "薪水試算器", ko: "급여 계산기" },
   entryCardDesc: {

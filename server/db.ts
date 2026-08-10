@@ -48,6 +48,11 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     }
   }
 
+  if (user.memberType !== undefined) {
+    values.memberType = user.memberType ?? null;
+    updateSet.memberType = user.memberType ?? null;
+  }
+
   if (user.lastSignedIn !== undefined) {
     values.lastSignedIn = user.lastSignedIn;
     updateSet.lastSignedIn = user.lastSignedIn;
@@ -82,7 +87,14 @@ export async function getUserByEmail(email: string) {
 
 export async function updateUserProfile(
   userId: number,
-  data: { userType?: "salon_owner" | "job_seeker"; phone?: string; city?: string; bio?: string; name?: string }
+  data: {
+    userType?: "salon_owner" | "job_seeker";
+    memberType?: "designer" | "owner" | "other";
+    phone?: string;
+    city?: string;
+    bio?: string;
+    name?: string;
+  }
 ) {
   const db = await getDb();
   if (!db) return;

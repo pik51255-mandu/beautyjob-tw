@@ -20,6 +20,9 @@ export const users = mysqlTable("users", {
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   // 미용업 역할
   userType: mysqlEnum("userType", ["salon_owner", "job_seeker", "unset"]).default("unset").notNull(),
+  // 회원 身分 (자율 신고, 인증 없음) — 老闆專區 게이트용.
+  // Phase 2: 사업자번호(統一編號) 인증 필드 추가 예정 자리.
+  memberType: mysqlEnum("memberType", ["designer", "owner", "other"]),
   // 프로필 추가 정보
   phone: varchar("phone", { length: 30 }),
   city: varchar("city", { length: 50 }),         // 거주/사업 지역

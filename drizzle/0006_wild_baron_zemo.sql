@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `memberType` enum('designer','owner','other');

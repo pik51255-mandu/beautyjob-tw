@@ -16,6 +16,7 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [agreedTerms, setAgreedTerms] = useState(false);
+  const [memberType, setMemberType] = useState<"designer" | "owner" | "other" | "">("");
 
   const handleLineLogin = () => {
     if (!agreedTerms) {
@@ -61,7 +62,7 @@ export default function Register() {
       toast.error("請先閱讀並同意服務條款、隱私權政策與免責聲明");
       return;
     }
-    registerMutation.mutate({ name, email, password });
+    registerMutation.mutate({ name, email, password, memberType: memberType || undefined });
   };
 
   return (
@@ -175,6 +176,34 @@ export default function Register() {
                     autoComplete="new-password"
                   />
                 </div>
+              </div>
+
+              {/* 회원 身分 (자율 신고 — Phase 2: 사업자번호(統一編號) 인증 예정) */}
+              <div className="space-y-2">
+                <Label>會員身分 <span className="text-muted-foreground font-normal text-xs">（選填）</span></Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    ["designer", "設計師 / 助理"],
+                    ["owner", "店家（老闆）"],
+                    ["other", "其他"],
+                  ] as const).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setMemberType(memberType === value ? "" : value)}
+                      className={`rounded-lg border px-2 py-2.5 text-xs font-medium transition-colors ${
+                        memberType === value
+                          ? "border-primary bg-primary/5 text-primary"
+                          : "border-border text-muted-foreground hover:bg-muted/50"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  自我申報，之後可於我的頁面變更（未來將提供統一編號認證）
+                </p>
               </div>
 
               {/* 약관 동의 체크박스 (v4: 필수) */}
