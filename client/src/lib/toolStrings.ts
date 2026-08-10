@@ -123,12 +123,64 @@ export const toolStrings = {
   ocOtherFixed: { zh: "其他固定成本（NT$）", ko: "기타 고정비 (NT$)" },
   ocFixedTotal: { zh: "每月固定成本合計", ko: "월 고정비 합계" },
 
-  // 섹션 C: 변동비 구조
-  ocSectionVariable: { zh: "C. 變動成本結構", ko: "C. 변동비 구조" },
-  ocMaterialRatio: { zh: "材料費率（營業額的 %）", ko: "재료비율 (매출의 %)" },
+  // 섹션 C: 시술 믹스 & 변동비
+  ocSectionVariable: { zh: "C. 服務項目與變動成本", ko: "C. 시술 믹스·변동비" },
   ocCommissionRatio: { zh: "抽成制設計師平均抽成率（%）", ko: "커미션제 디자이너 평균 커미션율 (%)" },
-  ocAvgTicket: { zh: "客單價（平均每客消費 NT$）", ko: "객단가 (평균 1인 소비 NT$)" },
   ocWorkDays: { zh: "每月營業日數", ko: "월 영업일수" },
+
+  // 시술 테이블
+  ocServiceName: { zh: "服務項目", ko: "시술명" },
+  ocServicePrice: { zh: "單價（NT$）", ko: "단가 (NT$)" },
+  ocServiceMaterial: { zh: "材料費率（%）", ko: "재료비율 (%)" },
+  ocServiceShare: { zh: "來客比重（%）", ko: "손님 비중 (%)" },
+  ocServiceMinutes: { zh: "所需時間（分）", ko: "소요시간 (분)" },
+  ocServiceAdd: { zh: "＋新增服務項目", ko: "＋시술 행 추가" },
+  ocServiceRemove: { zh: "刪除", ko: "삭제" },
+  ocServiceHint: {
+    zh: "燙髮若含下壓燙，建議另外新增一行（例：下壓燙 比重 10%）",
+    ko: "다운펌 포함 시 별도 행 추가 권장 (예: 下壓燙 비중 10%)",
+  },
+  ocShareSumWarning: {
+    zh: "來客比重合計不是 100%（目前 {sum}%）— 計算已按比例換算，建議按下方按鈕自動調整",
+    ko: "손님 비중 합계가 100%가 아닙니다 (현재 {sum}%) — 계산은 비율로 환산했으며, 아래 버튼으로 자동 정규화를 권장합니다",
+  },
+  ocNormalizeShares: { zh: "自動調整為 100%", ko: "100%로 자동 정규화" },
+  ocMixAvgTicket: { zh: "加權平均客單價", ko: "가중평균 객단가" },
+  ocMixMaterialRate: { zh: "加權平均材料費率", ko: "가중평균 재료비율" },
+  ocMixAvgMinutes: { zh: "加權平均所需時間", ko: "가중평균 소요시간" },
+  ocMinutesUnit: { zh: "分", ko: "분" },
+
+  // 수수료·변동비 경고
+  ocCardFee: { zh: "刷卡・預約平台手續費（營業額的 %）", ko: "카드·예약앱 수수료 (매출의 %)" },
+  ocVariableWarning: {
+    zh: "變動成本率超過 95% — 幾乎沒有毛利空間，請重新檢視抽成率與材料費率",
+    ko: "변동비율이 95%를 초과합니다 — 마진이 거의 없으니 커미션율·재료비율을 재검토하세요",
+  },
+
+  // 店販 (제품 판매)
+  ocRetailToggle: { zh: "含店販（產品銷售）", ko: "店販(제품 판매) 포함" },
+  ocRetailRevenue: { zh: "每月產品營業額預估（NT$）", ko: "월 제품매출 예상 (NT$)" },
+  ocRetailCost: { zh: "產品成本率（%）", ko: "제품 원가율 (%)" },
+  ocRetailIncentive: { zh: "銷售獎金率（%）", ko: "판매 인센티브율 (%)" },
+  ocRetailContribution: { zh: "店販貢獻（加入月損益）", ko: "店販 기여 (월 손익에 가산)" },
+
+  // 섹션 D: 캐파 체크
+  ocSectionCapacity: { zh: "D. 產能檢查（人力・座位）", ko: "D. 캐파 체크 (인력·좌석)" },
+  ocDesigners: { zh: "設計師人數", ko: "디자이너 수" },
+  ocSeats: { zh: "席位（座位）數", ko: "席位(의자) 수" },
+  ocDailyHours: { zh: "每日營業時間（小時）", ko: "일 영업시간 (시간)" },
+  ocUtilization: { zh: "稼動率（%）", ko: "가동률 (%)" },
+  ocMaxDaily: { zh: "每日最大可服務來客數", ko: "일 최대 처리 객수" },
+  ocCapacityWarning: {
+    zh: "以目前人力與座位，此損益兩平來客數實際上無法達成 — 需調整客單價、人力或成本結構",
+    ko: "현재 인력·좌석으로는 이 손익분기 객수를 실제로 달성할 수 없습니다 — 객단가·인력·비용 구조 조정이 필요합니다",
+  },
+  ocScenarioDaily: { zh: "每日來客", ko: "일 객수" },
+  ocScenarioCapacity: { zh: "產能占用", ko: "캐파 대비" },
+  ocPaybackNote: {
+    zh: "※ 回本計算不含押金（押金為可退還資產）",
+    ko: "※ 회수 계산은 押金 제외 (押金은 반환 자산)",
+  },
 
   // 결과
   ocResultTitle: { zh: "試算結果", ko: "계산 결과" },
