@@ -168,3 +168,47 @@ describe("favorites.toggle", () => {
     ).rejects.toThrow();
   });
 });
+
+// ─── Reports (檢舉) Tests ─────────────────────────────────────────────────────
+
+describe("reports.create", () => {
+  it("throws UNAUTHORIZED for unauthenticated user", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    await expect(
+      caller.reports.create({ targetType: "community", targetId: 1, reason: "spam" })
+    ).rejects.toThrow();
+  });
+});
+
+describe("admin.listReports", () => {
+  it("throws FORBIDDEN for non-admin user", async () => {
+    const caller = appRouter.createCaller(makeAuthCtx());
+    await expect(caller.admin.listReports({ page: 1, limit: 10 })).rejects.toThrow();
+  });
+});
+
+describe("admin.exportCsv", () => {
+  it("throws FORBIDDEN for non-admin user", async () => {
+    const caller = appRouter.createCaller(makeAuthCtx());
+    await expect(caller.admin.exportCsv({ table: "users" })).rejects.toThrow();
+  });
+});
+
+// ─── Jobs Lock (v4) Tests ─────────────────────────────────────────────────────
+
+describe("jobPosts.create with jobs locked", () => {
+  it("throws PRECONDITION_FAILED for authenticated user while JOBS_ENABLED is false", async () => {
+    const caller = appRouter.createCaller(makeAuthCtx());
+    await expect(
+      caller.jobPosts.create({
+        title: "Test Job",
+        salonName: "Test Salon",
+        jobType: "designer",
+        workType: "full_time",
+        city: "台北市",
+        salaryType: "monthly",
+        description: "Test description for job posting",
+      })
+    ).rejects.toThrow(/即將開放/);
+  });
+});

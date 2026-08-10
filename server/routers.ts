@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
-import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import { COOKIE_NAME, FEATURES, ONE_YEAR_MS } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { sdk } from "./_core/sdk";
@@ -19,6 +19,15 @@ const postTypeEnum = z.enum(["community", "salon_transfer", "used_item"]);
 const favoriteTypeEnum = z.enum(["job_post", "resume", "salon_transfer", "used_item"]);
 const usedItemCategory = z.enum(["chair", "dryer", "washer", "scissors", "chemical", "furniture", "other"]);
 const usedItemCondition = z.enum(["new", "like_new", "good", "fair"]);
+const reportTargetEnum = z.enum(["community", "salon_transfer", "used_item"]);
+const reportReasonEnum = z.enum(["spam", "fraud", "offensive", "illegal", "other"]);
+
+// 채용 기능 잠금 가드 (v4 커뮤니티 런칭)
+function assertJobsEnabled() {
+  if (!FEATURES.JOBS_ENABLED) {
+    throw new TRPCError({ code: "PRECONDITION_FAILED", message: "徵才功能即將開放" });
+  }
+}
 
 // ─── Users Router ─────────────────────────────────────────────────────────────
 const usersRouter = router({
@@ -91,6 +100,7 @@ const jobPostsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      assertJobsEnabled();
       await db.createJobPost({
         ...input,
         authorId: ctx.user.id,
@@ -122,6 +132,7 @@ const jobPostsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      assertJobsEnabled();
       const { id, salaryMin, salaryMax, ...rest } = input;
       await db.updateJobPost(id, ctx.user.id, {
         ...rest,
@@ -188,6 +199,7 @@ const resumesRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      assertJobsEnabled();
       await db.upsertResume({
         ...input,
         userId: ctx.user.id,
@@ -475,60 +487,23 @@ const favoritesRouter = router({
     }),
 });
 
-// ─── Job Applications Router ─────────────────────────────────────────────────
-const jobApplicationsRouter = router({
-  submit: protectedProcedure
-    .input(z.object({ jobPostId: z.number(), coverLetter: z.string().max(2000).optional() }))
+// ─── Reports Router (檢舉 신고) ──────────────────────────────────────────────
+const reportsRouter = router({
+  create: protectedProcedure
+    .input(
+      z.object({
+        targetType: reportTargetEnum,
+        targetId: z.number(),
+        reason: reportReasonEnum,
+        detail: z.string().max(1000).optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      try {
-        await db.applyToJob(input.jobPostId, ctx.user.id, input.coverLetter);
-        return { success: true };
-      } catch (e: any) {
-        if (e.message === "ALREADY_APPLIED") {
-          throw new TRPCError({ code: "CONFLICT", message: "您已經投遞過此職缺" });
-        }
-        throw e;
-      }
-    }),
-
-  withdraw: protectedProcedure
-    .input(z.object({ jobPostId: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      await db.cancelApplication(input.jobPostId, ctx.user.id);
-      return { success: true };
-    }),
-
-  myApplications: protectedProcedure.query(async ({ ctx }) => {
-    return db.getMyApplications(ctx.user.id);
-  }),
-
-  jobApplications: protectedProcedure
-    .input(z.object({ jobPostId: z.number() }))
-    .query(async ({ ctx, input }) => {
-      const post = await db.getJobPostById(input.jobPostId);
-      if (!post || post.authorId !== ctx.user.id) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "無權限查看" });
-      }
-      return db.getJobApplications(input.jobPostId, ctx.user.id);
-    }),
-
-  status: protectedProcedure
-    .input(z.object({ jobPostId: z.number() }))
-    .query(async ({ ctx, input }) => {
-      return db.getApplicationStatus(input.jobPostId, ctx.user.id);
-    }),
-
-  updateStatus: protectedProcedure
-    .input(z.object({ applicationId: z.number(), status: z.enum(["pending", "reviewed", "accepted", "rejected"]) }))
-    .mutation(async ({ ctx, input }) => {
-      // Verify the caller owns the job post this application belongs to
-      const application = await db.getApplicationById(input.applicationId);
-      if (!application) throw new TRPCError({ code: "NOT_FOUND", message: "Application not found" });
-      const post = await db.getJobPostById(application.jobPostId);
-      if (!post || post.authorId !== ctx.user.id) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "Only the salon owner can update application status" });
-      }
-      await db.updateApplicationStatus(input.applicationId, input.status);
+      await db.createReport({
+        ...input,
+        reporterId: ctx.user.id,
+        detail: input.detail ?? null,
+      });
       return { success: true };
     }),
 });
@@ -555,12 +530,53 @@ const adminRouter = router({
     .query(async ({ input }) => {
       return db.getAdminJobs(input.page, input.limit);
     }),
-  listApplications: adminProcedure
-    .input(z.object({ page: z.number().default(1), limit: z.number().default(20) }))
+  listReports: adminProcedure
+    .input(z.object({
+      page: z.number().default(1),
+      limit: z.number().default(20),
+      status: z.enum(["pending", "resolved", "dismissed"]).optional(),
+    }))
     .query(async ({ input }) => {
-      return db.getAdminApplications(input.page, input.limit);
+      return db.getAdminReports(input.page, input.limit, input.status);
     }),
+  updateReportStatus: adminProcedure
+    .input(z.object({ id: z.number(), status: z.enum(["pending", "resolved", "dismissed"]) }))
+    .mutation(async ({ input }) => {
+      await db.updateReportStatus(input.id, input.status);
+      return { success: true };
+    }),
+  deleteReportedPost: adminProcedure
+    .input(z.object({ targetType: reportTargetEnum, targetId: z.number() }))
+    .mutation(async ({ input }) => {
+      await db.adminDeleteReportedPost(input.targetType, input.targetId);
+      return { success: true };
+    }),
+  exportCsv: adminProcedure
+    .input(z.object({ table: z.enum(db.EXPORT_TABLE_NAMES as [db.ExportTableName, ...db.ExportTableName[]]) }))
+    .query(async ({ input }) => {
+      const rows = await db.getTableRowsForExport(input.table);
+      return { table: input.table, csv: toCsv(rows), rowCount: rows.length };
+    }),
+  exportTableNames: adminProcedure.query(() => db.EXPORT_TABLE_NAMES),
 });
+
+// CSV 직렬화: 셀 이스케이프 + 수식 인젝션 방어, Excel 호환 BOM 포함
+function toCsv(rows: Record<string, unknown>[]): string {
+  if (rows.length === 0) return "﻿";
+  const headers = Object.keys(rows[0]);
+  const escapeCell = (value: unknown): string => {
+    if (value === null || value === undefined) return "";
+    let s = value instanceof Date ? value.toISOString() : String(value);
+    if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+    if (/[",\n\r]/.test(s)) s = `"${s.replace(/"/g, '""')}"`;
+    return s;
+  };
+  const lines = [headers.join(",")];
+  for (const row of rows) {
+    lines.push(headers.map((h) => escapeCell(row[h])).join(","));
+  }
+  return "﻿" + lines.join("\n");
+}
 
 // ─── Stats Router ───────────────────────────────────────────────────────────
 const statsRouter = router({
@@ -646,7 +662,7 @@ export const appRouter = router({
   salonTransfers: salonTransfersRouter,
   usedItems: usedItemsRouter,
   favorites: favoritesRouter,
-  jobApplications: jobApplicationsRouter,
+  reports: reportsRouter,
   stats: statsRouter,
   admin: adminRouter,
 });

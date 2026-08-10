@@ -1,63 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
-import { User, Briefcase, FileText, Heart, Store, ShoppingBag, LogOut, Send, ChevronRight, CheckCircle2, XCircle, Eye, Clock } from "lucide-react";
+import { User, Briefcase, FileText, Heart, Store, ShoppingBag, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { JOB_TYPE_LABELS, WORK_TYPE_LABELS, formatSalaryRange, formatNTD } from "@shared/constants";
-import { formatDistanceToNow, format } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
-
-const APPLICATION_STATUS_CONFIG: Record<string, {
-  label: string;
-  badgeColor: string;
-  cardBorder: string;
-  cardBg: string;
-  icon: React.ElementType;
-  pulse: boolean;
-  highlight: boolean;
-}> = {
-  pending: {
-    label: "待審中",
-    badgeColor: "bg-yellow-100 text-yellow-700 border-yellow-300",
-    cardBorder: "border-border",
-    cardBg: "bg-white",
-    icon: Clock,
-    pulse: false,
-    highlight: false,
-  },
-  reviewed: {
-    label: "已查看",
-    badgeColor: "bg-blue-100 text-blue-700 border-blue-300",
-    cardBorder: "border-blue-300",
-    cardBg: "bg-blue-50/40",
-    icon: Eye,
-    pulse: false,
-    highlight: true,
-  },
-  accepted: {
-    label: "🎉 錄取通知",
-    badgeColor: "bg-emerald-500 text-white border-emerald-600",
-    cardBorder: "border-emerald-400",
-    cardBg: "bg-emerald-50",
-    icon: CheckCircle2,
-    pulse: true,
-    highlight: true,
-  },
-  rejected: {
-    label: "不合適",
-    badgeColor: "bg-red-100 text-red-600 border-red-300",
-    cardBorder: "border-red-200",
-    cardBg: "bg-red-50/30",
-    icon: XCircle,
-    pulse: false,
-    highlight: false,
-  },
-};
+import { FEATURES } from "@shared/const";
 
 export default function MyPage() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -69,7 +22,6 @@ export default function MyPage() {
   const { data: myFavorites } = trpc.favorites.list.useQuery({}, { enabled: isAuthenticated });
   const { data: myTransfers } = trpc.salonTransfers.myPosts.useQuery(undefined, { enabled: isAuthenticated });
   const { data: myUsedItems } = trpc.usedItems.myPosts.useQuery(undefined, { enabled: isAuthenticated });
-  const { data: myApplications } = trpc.jobApplications.myApplications.useQuery(undefined, { enabled: isAuthenticated });
 
   const removeJobPost = trpc.jobPosts.delete.useMutation({
     onSuccess: () => { toast.success("已刪除"); utils.jobPosts.myPosts.invalidate(); },
@@ -77,10 +29,6 @@ export default function MyPage() {
 
   const removeFav = trpc.favorites.toggle.useMutation({
     onSuccess: () => { toast.success("已取消收藏"); utils.favorites.list.invalidate(); },
-  });
-
-  const withdrawApp = trpc.jobApplications.withdraw.useMutation({
-    onSuccess: () => { toast.success("已取消投遞"); utils.jobApplications.myApplications.invalidate(); },
   });
 
   if (!isAuthenticated) {
@@ -124,11 +72,14 @@ export default function MyPage() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+      <div className={`grid grid-cols-2 gap-3 mb-6 ${FEATURES.JOBS_ENABLED ? "sm:grid-cols-4" : "sm:grid-cols-2"}`}>
         {[
-          { icon: Briefcase, label: "我的職缺", count: myJobs?.length ?? 0, tab: "jobs" },
-          { icon: FileText, label: "我的履歷", count: myResume ? 1 : 0, tab: "resume" },
-          { icon: Send, label: "投遞紀錄", count: myApplications?.length ?? 0, tab: "applications" },
+          ...(FEATURES.JOBS_ENABLED
+            ? [
+                { icon: Briefcase, label: "我的職缺", count: myJobs?.length ?? 0, tab: "jobs" },
+                { icon: FileText, label: "我的履歷", count: myResume ? 1 : 0, tab: "resume" },
+              ]
+            : []),
           { icon: Heart, label: "我的收藏", count: myFavorites?.length ?? 0, tab: "favorites" },
           { icon: Store, label: "我的頂讓", count: myTransfers?.length ?? 0, tab: "transfers" },
         ].map((stat) => (
@@ -143,17 +94,16 @@ export default function MyPage() {
         ))}
       </div>
 
-      <Tabs defaultValue="jobs">
+      <Tabs defaultValue={FEATURES.JOBS_ENABLED ? "jobs" : "favorites"}>
         <TabsList className="mb-4 w-full justify-start overflow-x-auto flex-wrap gap-1 h-auto">
-          <TabsTrigger value="jobs">我的職缺</TabsTrigger>
-          <TabsTrigger value="resume">我的履歷</TabsTrigger>
-          <TabsTrigger value="applications">投遞紀錄</TabsTrigger>
+          {FEATURES.JOBS_ENABLED && <TabsTrigger value="jobs">我的職缺</TabsTrigger>}
+          {FEATURES.JOBS_ENABLED && <TabsTrigger value="resume">我的履歷</TabsTrigger>}
           <TabsTrigger value="favorites">我的收藏</TabsTrigger>
           <TabsTrigger value="transfers">頂讓/二手</TabsTrigger>
         </TabsList>
 
         {/* My Job Posts */}
-        <TabsContent value="jobs">
+        {FEATURES.JOBS_ENABLED && <TabsContent value="jobs">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-semibold">我刊登的職缺</h2>
             <Button size="sm" asChild><Link href="/jobs/new">刊登職缺</Link></Button>
@@ -183,10 +133,10 @@ export default function MyPage() {
               <Button className="mt-4" size="sm" asChild><Link href="/jobs/new">立即刊登</Link></Button>
             </div>
           )}
-        </TabsContent>
+        </TabsContent>}
 
         {/* My Resume */}
-        <TabsContent value="resume">
+        {FEATURES.JOBS_ENABLED && <TabsContent value="resume">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-semibold">我的履歷</h2>
             <Button size="sm" asChild><Link href="/resume/edit">{myResume ? "編輯履歷" : "建立履歷"}</Link></Button>
@@ -217,118 +167,7 @@ export default function MyPage() {
               <Button className="mt-4" size="sm" asChild><Link href="/resume/edit">建立履歷</Link></Button>
             </div>
           )}
-        </TabsContent>
-
-        {/* My Applications */}
-        <TabsContent value="applications">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="font-semibold">我的投遞紀錄</h2>
-            <span className="text-sm text-muted-foreground">共 {myApplications?.length ?? 0} 筆</span>
-          </div>
-
-          {/* Status Legend */}
-          {myApplications && myApplications.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4 p-3 bg-muted/30 rounded-lg">
-              {Object.entries(APPLICATION_STATUS_CONFIG).map(([key, cfg]) => (
-                <div key={key} className="flex items-center gap-1.5">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${cfg.badgeColor}`}>
-                    {cfg.label}
-                  </span>
-                </div>
-              ))}
-              <span className="text-xs text-muted-foreground ml-auto self-center">狀態說明</span>
-            </div>
-          )}
-
-          {myApplications && myApplications.length > 0 ? (
-            <div className="space-y-3">
-              {myApplications.map((app: any) => {
-                const cfg = APPLICATION_STATUS_CONFIG[app.status] ?? APPLICATION_STATUS_CONFIG.pending;
-                const StatusIcon = cfg.icon;
-                return (
-                  <div
-                    key={app.id}
-                    className={`rounded-xl border-2 p-4 transition-all duration-300 ${
-                      cfg.cardBg
-                    } ${
-                      cfg.cardBorder
-                    } ${
-                      cfg.highlight ? "shadow-sm" : ""
-                    }`}
-                  >
-                    {/* Accepted: special banner */}
-                    {app.status === "accepted" && (
-                      <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-emerald-500 text-white rounded-lg text-sm font-semibold">
-                        <CheckCircle2 className="w-4 h-4 shrink-0" />
-                        <span>恭喜！您已獲得錄取通知，請盡快與對方聯繫。</span>
-                      </div>
-                    )}
-                    {/* Reviewed: info banner */}
-                    {app.status === "reviewed" && (
-                      <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-xs">
-                        <Eye className="w-3.5 h-3.5 shrink-0" />
-                        <span>對方已查看您的履歷，請耐心等候回覆。</span>
-                      </div>
-                    )}
-
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <Link
-                          href={`/jobs/${app.jobPostId}`}
-                          className={`font-medium hover:text-primary transition-colors ${
-                            app.status === "accepted" ? "text-emerald-700" : ""
-                          }`}
-                        >
-                          查看職缺 #{app.jobPostId}
-                        </Link>
-                        {app.coverLetter && (
-                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{app.coverLetter}</p>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-2">
-                          投遞時間：{format(new Date(app.createdAt), "yyyy/MM/dd HH:mm")}
-                        </p>
-                      </div>
-
-                      <div className="flex flex-col items-end gap-2 shrink-0">
-                        {/* Status Badge with icon */}
-                        <div className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border-2 ${
-                          cfg.badgeColor
-                        } ${
-                          cfg.pulse ? "animate-pulse" : ""
-                        }`}>
-                          <StatusIcon className="w-3.5 h-3.5" />
-                          <span>{cfg.label}</span>
-                        </div>
-
-                        {app.status === "pending" && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-xs text-muted-foreground hover:text-destructive h-7 px-2"
-                            onClick={() => {
-                              if (confirm("確定取消投遞嗎？")) {
-                                withdrawApp.mutate({ jobPostId: app.jobPostId });
-                              }
-                            }}
-                            disabled={withdrawApp.isPending}
-                          >
-                            取消投遞
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <Send className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              <p>尚未投遞任何職缺</p>
-              <Button className="mt-4" size="sm" asChild><Link href="/jobs">瀏覽職缺</Link></Button>
-            </div>
-          )}
-        </TabsContent>
+        </TabsContent>}
 
         {/* My Favorites */}
         <TabsContent value="favorites">

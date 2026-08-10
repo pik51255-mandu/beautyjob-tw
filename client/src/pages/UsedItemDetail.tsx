@@ -7,6 +7,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { USED_ITEM_CATEGORY_LABELS, ITEM_CONDITION_LABELS, formatNTD } from "@shared/constants";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import ReportButton from "@/components/ReportButton";
 
 export default function UsedItemDetail() {
   const { id } = useParams<{ id: string }>();
@@ -56,6 +57,7 @@ export default function UsedItemDetail() {
               <div className="text-2xl font-bold text-primary mt-2">{formatNTD(item.price)}</div>
             </div>
             <div className="flex gap-2 shrink-0">
+              {!isOwner && <ReportButton targetType="used_item" targetId={item.id} />}
               {isAuthenticated && !isOwner && (
                 <Button variant="outline" size="icon" onClick={() => favToggle.mutate({ targetType: "used_item", targetId: item.id })} className={isFav ? "text-rose-500 border-rose-200 bg-rose-50" : ""}>
                   <Heart className={`w-4 h-4 ${isFav ? "fill-rose-500" : ""}`} />

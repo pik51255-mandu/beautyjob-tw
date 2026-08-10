@@ -29,6 +29,20 @@
       "when": 1781164333491,
       "tag": "0003_wonderful_greymalkin",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1786350937544,
+      "tag": "0004_chilly_radioactive_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1786350946733,
+      "tag": "0005_soft_northstar",
+      "breakpoints": true
     }
   ]
 }
