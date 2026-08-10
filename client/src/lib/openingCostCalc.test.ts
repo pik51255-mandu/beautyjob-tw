@@ -5,6 +5,7 @@ import {
   calcEmployerBurden,
   calcInitialInvestment,
   calcMaxDailyCustomers,
+  calcPreparationFund,
   calcProductContribution,
   calcScenarios,
   calcServiceMix,
@@ -141,6 +142,42 @@ describe("필수 케이스: 기본 5행 + 월세 4만 + 직원 1명 32,000 + 기
     expect(daily130).toBe(8.2);
     expect(daily130 > maxDaily).toBe(true);
     expect(Math.round((daily130 / maxDaily) * 100)).toBe(124);
+  });
+});
+
+// ─── C-2.3 필수 케이스: 초기투자 + 월 고정비 + 권장 준비 자금 ─────────────────
+describe("C-2.3 필수 케이스: 월세 4만·押金 2개월·頂讓 30만·裝潢 40만·설비 15만·재료비품 5만·예비비 10% + 직원 1명 32,000·수도광열 8,000·마케팅 5,000·기타 5,000·운전자금 6개월", () => {
+  const initial = calcInitialInvestment({
+    monthlyRent: 40_000,
+    depositMonths: 2,
+    transferFee: 300_000,
+    interior: 400_000,
+    equipment: 150_000,
+    initialSupplies: 50_000,
+    reservePct: 10,
+  });
+  const staff = calcStaffCost(1, 32_000);
+  const fixed = 40_000 + staff.total + 8_000 + 5_000 + 5_000;
+
+  it("카드① 초기 투자 총액 1,078,000 — 押金 80,000(반환성) / 소멸성 998,000 구분", () => {
+    expect(initial.deposit).toBe(80_000);
+    expect(initial.subtotal).toBe(980_000);
+    expect(initial.reserve).toBe(98_000);
+    expect(initial.total).toBe(1_078_000);
+    expect(initial.total - initial.deposit).toBe(998_000); // 소멸성
+  });
+
+  it("카드② 월 고정비 96,445 — 인건비 실부담 38,445 (명목 32,000 + 고용주 6,445)", () => {
+    expect(staff.total).toBe(38_445);
+    expect(fixed).toBe(96_445);
+  });
+
+  it("카드③ 권장 준비 자금 = 1,078,000 + 96,445 × 6 = 1,656,670", () => {
+    expect(calcPreparationFund(initial.total, fixed, 6)).toBe(1_656_670);
+  });
+
+  it("운전자금 0개월이면 준비 자금 = 초기 투자 총액", () => {
+    expect(calcPreparationFund(initial.total, fixed, 0)).toBe(initial.total);
   });
 });
 

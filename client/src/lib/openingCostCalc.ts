@@ -71,7 +71,19 @@ export function calcInitialInvestment(input: InitialInvestmentInput): {
   return { deposit, subtotal, reserve, total: subtotal + reserve };
 }
 
+// ─── 권장 준비 자금 ───────────────────────────────────────────────────────────
+// 초기 투자 총액 + 월 고정비 × 운전자금 개월수
+export function calcPreparationFund(
+  initialTotal: number,
+  monthlyFixedCost: number,
+  workingCapitalMonths: number
+): number {
+  return Math.round(initialTotal + monthlyFixedCost * Math.max(0, workingCapitalMonths));
+}
+
 // ─── 시술 믹스 (다올살롱 실측 모델) ───────────────────────────────────────────
+// ※ C-2.3부터 開店成本試算器 페이지에서는 사용하지 않음 —
+//   C-3 약값 계산기 재사용 예정으로 모듈·테스트는 보존.
 export type ServiceRow = {
   name: string;
   price: number;       // 단가 NT$
