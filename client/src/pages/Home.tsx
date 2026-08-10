@@ -38,6 +38,13 @@ const FEATURES_GRID = [
     color: "bg-cyan-50 text-cyan-600",
   },
   {
+    icon: Store,
+    title: "開店成本試算器",
+    desc: "押金、裝潢、人事到損益兩平，開店前先算清楚",
+    href: "/tools/opening-cost",
+    color: "bg-orange-50 text-orange-600",
+  },
+  {
     icon: BarChart3,
     title: "薪資情報",
     desc: "設計師、助理、染髮師等各職務薪資行情整理（準備中）",

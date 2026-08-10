@@ -21,6 +21,14 @@ export const HEALTH_INSURANCE_MAX = 313_000;    // 급距 상한
 export const PENSION_SELF_MAX_BASE = 150_000;   // 自提 기준 상한
 export const PENSION_SELF_RATE_MAX = 0.06;
 
+// ─── 고용주 부담 (開店成本試算器용, 2026-08-10 검증값) ───────────────────────
+export const LABOR_INSURANCE_EMPLOYER_SHARE = 0.7;   // 勞保 고용주부담 70%
+export const HEALTH_INSURANCE_EMPLOYER_SHARE = 0.6;  // 健保 고용주부담 60%
+export const HEALTH_INSURANCE_AVG_DEPENDENTS_FACTOR = 1.56; // 평균 권속 0.56인 포함 계수
+export const PENSION_EMPLOYER_RATE = 0.06;           // 勞退 고용주 제교 6% (실급여 기준)
+export const PENSION_EMPLOYER_MAX_BASE = 150_000;    // 제교 기준 상한
+// 職災保險은 업종별 요율이 상이하여 미포함 — 시산기 면책에 명시
+
 // 勞保 투보급距 분급표 (2026, 최저 29,500 ~ 최고 45,800).
 // 급距 사이의 실급여는 "상위 급距"를 적용한다 (예: 35,000 → 36,300).
 export const INSURED_SALARY_BRACKETS: number[] = [

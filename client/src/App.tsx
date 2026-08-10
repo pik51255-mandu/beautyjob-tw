@@ -27,6 +27,7 @@ const Courses = lazy(() => import("./pages/info/Courses"));
 const KoreanTechniques = lazy(() => import("./pages/info/KoreanTechniques"));
 const SupplyMap = lazy(() => import("./pages/info/SupplyMap"));
 const SalaryCalculator = lazy(() => import("./pages/tools/SalaryCalculator"));
+const OpeningCostCalculator = lazy(() => import("./pages/tools/OpeningCostCalculator"));
 const Community = lazy(() => import("./pages/Community"));
 const CommunityDetail = lazy(() => import("./pages/CommunityDetail"));
 const CommunityForm = lazy(() => import("./pages/CommunityForm"));
@@ -92,6 +93,7 @@ function Router() {
 
         {/* Tools */}
         <Route path="/tools/salary" component={() => <Layout><SalaryCalculator /></Layout>} />
+        <Route path="/tools/opening-cost" component={() => <Layout><OpeningCostCalculator /></Layout>} />
 
         {/* Phase 1 정보 메뉴 */}
         <Route path="/salary-info" component={() => <Layout><SalaryInfo /></Layout>} />

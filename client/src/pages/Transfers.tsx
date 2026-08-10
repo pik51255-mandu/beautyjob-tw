@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { Store, MapPin, Eye, Plus, Heart } from "lucide-react";
+import { Store, MapPin, Eye, Plus, Heart, Calculator, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
@@ -36,7 +36,21 @@ export default function Transfers() {
 
   return (
     <div className="container py-8">
-      <div className="mb-6"><DisclaimerBanner /></div>
+      <div className="mb-4"><DisclaimerBanner /></div>
+      {/* 開店成本試算器 진입 카드 */}
+      <Link
+        href="/tools/opening-cost"
+        className="mb-6 flex items-center gap-3 rounded-xl border border-border bg-white p-4 hover:shadow-md transition-all duration-200 group"
+      >
+        <div className="w-10 h-10 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+          <Calculator className="w-5 h-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm group-hover:text-primary transition-colors">開店成本試算器</p>
+          <p className="text-xs text-muted-foreground mt-0.5">押金、裝潢、人事到損益兩平，開店前先算清楚</p>
+        </div>
+        <ArrowRight className="w-4 h-4 text-primary shrink-0 group-hover:translate-x-1 transition-transform" />
+      </Link>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold">店面頂讓</h1>
