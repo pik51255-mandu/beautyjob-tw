@@ -35,6 +35,7 @@ const Community = lazy(() => import("./pages/Community"));
 const CommunityDetail = lazy(() => import("./pages/CommunityDetail"));
 const CommunityForm = lazy(() => import("./pages/CommunityForm"));
 const Transfers = lazy(() => import("./pages/Transfers"));
+const TransfersComingSoon = lazy(() => import("./pages/TransfersComingSoon"));
 const TransferDetail = lazy(() => import("./pages/TransferDetail"));
 const TransferForm = lazy(() => import("./pages/TransferForm"));
 const UsedItems = lazy(() => import("./pages/UsedItems"));
@@ -118,11 +119,20 @@ function Router() {
         <Route path="/community/:id/edit" component={() => <Layout><CommunityForm /></Layout>} />
         <Route path="/community/:id" component={() => <Layout><CommunityDetail /></Layout>} />
 
-        {/* Transfers */}
-        <Route path="/transfers" component={() => <Layout><Transfers /></Layout>} />
-        <Route path="/transfers/new" component={() => <Layout><TransferForm /></Layout>} />
-        <Route path="/transfers/:id/edit" component={() => <Layout><TransferForm /></Layout>} />
-        <Route path="/transfers/:id" component={() => <Layout><TransferDetail /></Layout>} />
+        {/* Transfers — D-1: 잠금 시 모든 頂讓 URL이 整備中 페이지 (재오픈: 변호사 확인 후 별도 지시) */}
+        {FEATURES.TRANSFER_ENABLED ? (
+          <>
+            <Route path="/transfers" component={() => <Layout><Transfers /></Layout>} />
+            <Route path="/transfers/new" component={() => <Layout><TransferForm /></Layout>} />
+            <Route path="/transfers/:id/edit" component={() => <Layout><TransferForm /></Layout>} />
+            <Route path="/transfers/:id" component={() => <Layout><TransferDetail /></Layout>} />
+          </>
+        ) : (
+          <>
+            <Route path="/transfers/:rest*" component={() => <Layout><TransfersComingSoon /></Layout>} />
+            <Route path="/transfers" component={() => <Layout><TransfersComingSoon /></Layout>} />
+          </>
+        )}
 
         {/* Used Items */}
         <Route path="/used-items" component={() => <Layout><UsedItems /></Layout>} />

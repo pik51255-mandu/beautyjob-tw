@@ -4,7 +4,9 @@ export const COOKIE_NAME = "app_session_id";
 // true로 바꾸면 메뉴·라우트·서버 뮤테이션이 다시 열린다.
 export const FEATURES = {
   JOBS_ENABLED: false,
-  // 開店成本試算器의 "看店面頂讓物件" CTA — 頂讓 매물이 쌓이면 true로
+  // 店面頂讓 게시판 잠금 (D-1). 재오픈 조건 — 변호사 확인 + 운영 인력 확보 후 별도 지시.
+  TRANSFER_ENABLED: false,
+  // 開店成本試算器의 "看店面頂讓物件" CTA — TRANSFER_ENABLED 재오픈 전까지 false 유지
   TRANSFER_CTA_ENABLED: false,
 } as const;
 export const ONE_YEAR_MS = 1000 * 60 * 60 * 24 * 365;

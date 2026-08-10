@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { User, Briefcase, FileText, Heart, Store, ShoppingBag, LogOut } from "lucide-react";
+import { User, Briefcase, FileText, Heart, Store, ShoppingBag, LogOut, MessageSquare, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,7 +21,8 @@ export default function MyPage() {
   const { data: myJobs } = trpc.jobPosts.myPosts.useQuery(undefined, { enabled: isAuthenticated });
   const { data: myResume } = trpc.resumes.mine.useQuery(undefined, { enabled: isAuthenticated });
   const { data: myFavorites } = trpc.favorites.list.useQuery({}, { enabled: isAuthenticated });
-  const { data: myTransfers } = trpc.salonTransfers.myPosts.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: myTransfers } = trpc.salonTransfers.myPosts.useQuery(undefined, { enabled: isAuthenticated && FEATURES.TRANSFER_ENABLED });
+  const { data: myCommunityPosts } = trpc.community.myPosts.useQuery(undefined, { enabled: isAuthenticated });
   const { data: myUsedItems } = trpc.usedItems.myPosts.useQuery(undefined, { enabled: isAuthenticated });
 
   const removeJobPost = trpc.jobPosts.delete.useMutation({
@@ -109,8 +110,11 @@ export default function MyPage() {
                 { icon: FileText, label: "我的履歷", count: myResume ? 1 : 0, tab: "resume" },
               ]
             : []),
+          { icon: MessageSquare, label: "我的文章", count: myCommunityPosts?.length ?? 0, tab: "posts" },
           { icon: Heart, label: "我的收藏", count: myFavorites?.length ?? 0, tab: "favorites" },
-          { icon: Store, label: "我的頂讓", count: myTransfers?.length ?? 0, tab: "transfers" },
+          ...(FEATURES.TRANSFER_ENABLED
+            ? [{ icon: Store, label: "我的頂讓", count: myTransfers?.length ?? 0, tab: "transfers" }]
+            : [{ icon: ShoppingBag, label: "我的二手", count: myUsedItems?.length ?? 0, tab: "transfers" }]),
         ].map((stat) => (
           <div
             key={stat.label}
@@ -123,12 +127,13 @@ export default function MyPage() {
         ))}
       </div>
 
-      <Tabs defaultValue={FEATURES.JOBS_ENABLED ? "jobs" : "favorites"}>
+      <Tabs defaultValue={FEATURES.JOBS_ENABLED ? "jobs" : "posts"}>
         <TabsList className="mb-4 w-full justify-start overflow-x-auto flex-wrap gap-1 h-auto">
           {FEATURES.JOBS_ENABLED && <TabsTrigger value="jobs">我的職缺</TabsTrigger>}
           {FEATURES.JOBS_ENABLED && <TabsTrigger value="resume">我的履歷</TabsTrigger>}
+          <TabsTrigger value="posts">我的文章</TabsTrigger>
           <TabsTrigger value="favorites">我的收藏</TabsTrigger>
-          <TabsTrigger value="transfers">頂讓/二手</TabsTrigger>
+          <TabsTrigger value="transfers">{FEATURES.TRANSFER_ENABLED ? "頂讓/二手" : "我的二手"}</TabsTrigger>
         </TabsList>
 
         {/* My Job Posts */}
@@ -198,6 +203,37 @@ export default function MyPage() {
           )}
         </TabsContent>}
 
+        {/* My Community Posts — 익명 게시판이지만 본인 글은 여기서 확인 */}
+        <TabsContent value="posts">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="font-semibold">我發表的文章</h2>
+            <Button size="sm" asChild><Link href="/community/new">發表文章</Link></Button>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4">社群為匿名發文 — 其他會員只會看到「匿名」，此清單僅您本人可見。</p>
+          {myCommunityPosts && myCommunityPosts.length > 0 ? (
+            <div className="space-y-3">
+              {myCommunityPosts.map((post) => (
+                <div key={post.id} className="bg-white rounded-xl border border-border p-4 flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <Link href={`/community/${post.id}`} className="font-medium hover:text-primary transition-colors truncate block">{post.title}</Link>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                      <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{post.viewCount}</span>
+                      <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" />{post.commentCount}</span>
+                      <span>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: zhTW })}</span>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" asChild className="shrink-0"><Link href={`/community/${post.id}/edit`}>編輯</Link></Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <MessageSquare className="w-10 h-10 mx-auto mb-3 opacity-30" />
+              <p>尚未發表文章</p>
+            </div>
+          )}
+        </TabsContent>
+
         {/* My Favorites */}
         <TabsContent value="favorites">
           <h2 className="font-semibold mb-4">我的收藏</h2>
@@ -243,7 +279,7 @@ export default function MyPage() {
         {/* Transfers & Used Items */}
         <TabsContent value="transfers">
           <div className="space-y-6">
-            <div>
+            {FEATURES.TRANSFER_ENABLED && <div>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="font-semibold">我的頂讓資訊</h2>
                 <Button size="sm" asChild><Link href="/transfers/new">刊登頂讓</Link></Button>
@@ -265,7 +301,7 @@ export default function MyPage() {
                   <p>尚未刊登頂讓資訊</p>
                 </div>
               )}
-            </div>
+            </div>}
 
             <div>
               <div className="flex justify-between items-center mb-4">

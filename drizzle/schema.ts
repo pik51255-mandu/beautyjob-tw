@@ -182,14 +182,20 @@ export const usedItems = mysqlTable("used_items", {
   id: int("id").autoincrement().primaryKey(),
   authorId: int("authorId").notNull(),
   title: varchar("title", { length: 200 }).notNull(),
+  // D-1: 명시 목록만 허용 (shared/usedItemCatalog.ts와 동기 유지)
   category: mysqlEnum("category", [
-    "chair",        // 美髮椅
-    "dryer",        // 吹風機/烘罩
-    "washer",       // 洗頭台
-    "scissors",     // 剪刀/工具
-    "chemical",     // 藥水/材料
-    "furniture",    // 家具/裝潢
-    "other",
+    "chair",          // 美髮椅
+    "mirror_station", // 鏡台
+    "wash_bed",       // 洗頭床(沖水床)
+    "dryer",          // 吹風機
+    "iron",           // 電棒·離子夾
+    "perm_machine",   // 燙髮機
+    "steamer",        // 蒸氣機
+    "clipper",        // 推剪
+    "wash_basin",     // 洗髮槽
+    "trolley",        // 美髮推車
+    "scissors",       // 美髮剪刀
+    "hood_heater",    // 烘罩·加熱器具
   ]).notNull(),
   condition: mysqlEnum("condition", ["new", "like_new", "good", "fair"]).notNull(),
   price: decimal("price", { precision: 10, scale: 0 }).notNull(),  // NT$

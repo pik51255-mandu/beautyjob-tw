@@ -274,6 +274,39 @@ export async function deleteCommunityPost(id: number, authorId: number) {
   await db.delete(communityPosts).where(and(eq(communityPosts.id, id), eq(communityPosts.authorId, authorId)));
 }
 
+// 본인 글 목록 (마이페이지 — 익명화 대상 아님)
+export async function getCommunityPostsByAuthor(authorId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(communityPosts).where(eq(communityPosts.authorId, authorId)).orderBy(desc(communityPosts.createdAt));
+}
+
+// 관리자용: 실제 계정 정보 포함 커뮤니티 글 목록 (신고 처리용 — 익명화 예외)
+export async function getAdminCommunityPosts(page: number, limit: number) {
+  const db = await getDb();
+  if (!db) return { items: [], total: 0 };
+  const offset = (page - 1) * limit;
+  const [items, countResult] = await Promise.all([
+    db
+      .select({
+        id: communityPosts.id,
+        title: communityPosts.title,
+        category: communityPosts.category,
+        createdAt: communityPosts.createdAt,
+        authorId: communityPosts.authorId,
+        authorName: users.name,
+        authorEmail: users.email,
+      })
+      .from(communityPosts)
+      .leftJoin(users, eq(communityPosts.authorId, users.id))
+      .orderBy(desc(communityPosts.createdAt))
+      .limit(limit)
+      .offset(offset),
+    db.select({ count: sql<number>`count(*)` }).from(communityPosts),
+  ]);
+  return { items, total: Number(countResult[0]?.count ?? 0) };
+}
+
 export async function incrementCommunityViewCount(id: number) {
   const db = await getDb();
   if (!db) return;
@@ -492,6 +525,36 @@ export async function updateReportStatus(id: number, status: "pending" | "resolv
   const db = await getDb();
   if (!db) return;
   await db.update(reports).set({ status }).where(eq(reports.id, id));
+}
+
+// 사후 자동 플래그 (D-1): 판매 중 二手 글에서 금지 키워드 감지 시 reports 큐에 자동 신고.
+// reporterId 0 = 시스템, detail의 [自動偵測] 마커로 중복 등록 방지.
+export async function autoFlagBannedUsedItems(
+  findKeyword: (text: string) => string | null
+): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const items = await db.select().from(usedItems).where(eq(usedItems.isSold, false));
+  let flagged = 0;
+  for (const item of items) {
+    const keyword = findKeyword(`${item.title}\n${item.description}`);
+    if (!keyword) continue;
+    const existing = await db
+      .select({ id: reports.id })
+      .from(reports)
+      .where(and(eq(reports.targetType, "used_item"), eq(reports.targetId, item.id)))
+      .limit(1);
+    if (existing.length > 0) continue;
+    await db.insert(reports).values({
+      reporterId: 0,
+      targetType: "used_item",
+      targetId: item.id,
+      reason: "illegal",
+      detail: `[自動偵測] 醫療器材疑慮（關鍵字：${keyword}）`,
+    });
+    flagged++;
+  }
+  return flagged;
 }
 
 // 관리자 강제 삭제: 작성자와 무관하게 대상 게시글을 제거하고 관련 신고를 일괄 처리
