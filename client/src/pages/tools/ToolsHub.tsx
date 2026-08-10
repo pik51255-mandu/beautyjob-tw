@@ -62,7 +62,7 @@ export default function ToolsHub() {
       descKey: "hubBizSimDesc",
       href: "/tools/biz-simulator",
       color: "bg-emerald-50 text-emerald-600",
-      comingSoon: true,
+      comingSoon: false,
     },
   ];
 

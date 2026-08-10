@@ -333,6 +333,37 @@ export const toolStrings = {
   pcNoRecords: { zh: "尚無紀錄", ko: "저장된 기록이 없습니다" },
   pcDeleteRecord: { zh: "刪除", ko: "삭제" },
 
+  // ─── 經營損益模擬器 (C-4) — 대부분 oc* 키 재사용, 고유분만 추가 ───
+  bsPageTitle: {
+    zh: "經營損益模擬器｜服務組合・損益兩平・產能",
+    ko: "경영 손익 시뮬레이터｜시술 믹스·손익분기·캐파",
+  },
+  bsMetaDescription: {
+    zh: "美髮沙龍經營模擬：服務組合、抽成與手續費、人力產能，計算損益兩平營業額與情境損益（2026 年費率）。",
+    ko: "미용실 경영 시뮬레이션: 시술 믹스·커미션·수수료·인력 캐파로 손익분기 매출과 시나리오 손익 계산 (2026년 요율).",
+  },
+  bsSubheading: {
+    zh: "服務組合 × 成本結構 × 產能，模擬每月損益兩平",
+    ko: "시술 믹스 × 비용 구조 × 캐파로 월 손익분기를 시뮬레이션",
+  },
+  bsSectionMix: { zh: "A. 服務組合", ko: "A. 시술 믹스" },
+  bsSectionFixed: { zh: "B. 每月固定成本", ko: "B. 월 고정비" },
+  bsSectionVariable: { zh: "C. 變動成本結構", ko: "C. 변동비 구조" },
+  bsSectionCapacity: { zh: "D. 產能（人力・座位）", ko: "D. 캐파 (인력·좌석)" },
+  bsImportFromProductCost: { zh: "從藥水成本計算器匯入", ko: "약값 계산기에서 가져오기" },
+  bsImportFromOpeningCost: { zh: "從開店成本試算器匯入", ko: "창업비용 계산기에서 가져오기" },
+  bsImportDone: { zh: "已匯入", ko: "가져왔습니다" },
+  bsNoImportData: {
+    zh: "尚無可匯入的資料 — 請先使用該計算器",
+    ko: "가져올 데이터가 없습니다 — 해당 계산기를 먼저 사용해 주세요",
+  },
+  bsImportHintMix: {
+    zh: "匯入後請填寫各服務的來客比重與所需時間",
+    ko: "가져온 뒤 각 시술의 손님 비중·소요시간을 입력하세요",
+  },
+  bsFixedLabel: { zh: "每月固定成本（NT$，含雇主負擔）", ko: "월 고정비 (NT$, 고용주 부담 포함)" },
+  bsWorkDaysLabel: { zh: "每月營業日數", ko: "월 영업일수" },
+
   // ─── 老闆專區 게이트 ───
   gateLoginTitle: { zh: "請先登入", ko: "로그인이 필요합니다" },
   gateLoginDesc: {
