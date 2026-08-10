@@ -89,20 +89,23 @@ export type ServiceMix = {
 
 // 비중 합이 100이 아니어도 계산은 비중 합 기준으로 정규화해서 수행한다
 // (UI에서는 합≠100 경고 + 자동 정규화 버튼 제공).
+// 客單價·소요시간은 객수(비중) 가중, 재료비율은 "매출 대비" 비율이므로 매출 가중:
+//   가중재료비율 = Σ(단가×비중×재료율) ÷ Σ(단가×비중)
 export function calcServiceMix(rows: ServiceRow[]): ServiceMix {
   const shareSum = rows.reduce((s, r) => s + Math.max(0, r.sharePct), 0);
   if (shareSum <= 0) return { shareSum: 0, avgTicket: 0, materialRate: 0, avgMinutes: 0 };
-  let ticket = 0, material = 0, minutes = 0;
+  let ticket = 0, minutes = 0, revenueWeight = 0, materialRevenue = 0;
   for (const r of rows) {
     const w = Math.max(0, r.sharePct) / shareSum;
     ticket += r.price * w;
-    material += (Math.max(0, r.materialPct) / 100) * w;
     minutes += r.minutes * w;
+    revenueWeight += r.price * w;
+    materialRevenue += r.price * w * (Math.max(0, r.materialPct) / 100);
   }
   return {
     shareSum: Math.round(shareSum * 10) / 10,
     avgTicket: Math.round(ticket),
-    materialRate: material,
+    materialRate: revenueWeight > 0 ? materialRevenue / revenueWeight : 0,
     avgMinutes: Math.round(minutes * 10) / 10,
   };
 }
