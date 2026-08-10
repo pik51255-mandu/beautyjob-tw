@@ -10,6 +10,7 @@ import { COMMUNITY_CATEGORY_LABELS } from "@shared/constants";
 import { format, formatDistanceToNow } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { toast } from "sonner";
+import ReportButton from "@/components/ReportButton";
 
 export default function CommunityDetail() {
   const { id } = useParams<{ id: string }>();
@@ -82,17 +83,21 @@ export default function CommunityDetail() {
                 <span className="flex items-center gap-1"><MessageSquare className="w-3.5 h-3.5" />{post.commentCount}</span>
               </div>
             </div>
-            {isOwner && (
-              <div className="flex gap-2 shrink-0">
-                <Button variant="outline" size="sm" asChild>
-                  <a href={`/community/${post.id}/edit`}><Edit className="w-4 h-4 mr-1" />編輯</a>
-                </Button>
-                <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/5"
-                  onClick={() => { if (confirm("確定要刪除？")) deletePost.mutate({ id: post.id }); }}>
-                  <Trash2 className="w-4 h-4 mr-1" />刪除
-                </Button>
-              </div>
-            )}
+            <div className="flex gap-2 shrink-0">
+              {isOwner ? (
+                <>
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={`/community/${post.id}/edit`}><Edit className="w-4 h-4 mr-1" />編輯</a>
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/5"
+                    onClick={() => { if (confirm("確定要刪除？")) deletePost.mutate({ id: post.id }); }}>
+                    <Trash2 className="w-4 h-4 mr-1" />刪除
+                  </Button>
+                </>
+              ) : (
+                <ReportButton targetType="community" targetId={post.id} />
+              )}
+            </div>
           </div>
         </div>
 

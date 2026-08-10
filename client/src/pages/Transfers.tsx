@@ -9,6 +9,7 @@ import { TW_CITIES, formatNTD } from "@shared/constants";
 import { formatDistanceToNow } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { toast } from "sonner";
+import DisclaimerBanner from "@/components/DisclaimerBanner";
 
 export default function Transfers() {
   const { isAuthenticated } = useAuth();
@@ -35,6 +36,7 @@ export default function Transfers() {
 
   return (
     <div className="container py-8">
+      <div className="mb-6"><DisclaimerBanner /></div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold">店面頂讓</h1>

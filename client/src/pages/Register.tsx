@@ -15,8 +15,13 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [agreedTerms, setAgreedTerms] = useState(false);
 
   const handleLineLogin = () => {
+    if (!agreedTerms) {
+      toast.error("請先閱讀並同意服務條款、隱私權政策與免責聲明");
+      return;
+    }
     const clientId = import.meta.env.VITE_LINE_CLIENT_ID;
     if (!clientId) {
       toast.error("LINE 登入尚未設定，請使用電子郵件註冊");
@@ -50,6 +55,10 @@ export default function Register() {
     }
     if (password.length < 6) {
       toast.error("密碼至少需要6個字元");
+      return;
+    }
+    if (!agreedTerms) {
+      toast.error("請先閱讀並同意服務條款、隱私權政策與免責聲明");
       return;
     }
     registerMutation.mutate({ name, email, password });
@@ -168,10 +177,28 @@ export default function Register() {
                 </div>
               </div>
 
+              {/* 약관 동의 체크박스 (v4: 필수) */}
+              <label className="flex items-start gap-2.5 rounded-lg border border-border p-3 text-xs leading-relaxed cursor-pointer hover:bg-muted/40 transition-colors">
+                <input
+                  type="checkbox"
+                  checked={agreedTerms}
+                  onChange={(e) => setAgreedTerms(e.target.checked)}
+                  className="mt-0.5 accent-primary"
+                  data-testid="agree-terms"
+                />
+                <span className="text-muted-foreground">
+                  我已閱讀並同意
+                  <Link href="/terms" className="text-primary hover:underline mx-0.5">服務條款</Link>、
+                  <Link href="/privacy" className="text-primary hover:underline mx-0.5">隱私權政策</Link>與
+                  <Link href="/disclaimer" className="text-primary hover:underline mx-0.5">免責聲明</Link>
+                  <span className="text-destructive ml-0.5">*</span>
+                </span>
+              </label>
+
               <Button
                 type="submit"
                 className="w-full h-11"
-                disabled={registerMutation.isPending}
+                disabled={registerMutation.isPending || !agreedTerms}
               >
                 {registerMutation.isPending ? "註冊中..." : "立即註冊"}
               </Button>
@@ -183,10 +210,6 @@ export default function Register() {
                 立即登入
               </Link>
             </div>
-
-            <p className="text-xs text-center text-muted-foreground">
-              註冊即表示您同意我們的服務條款與隱私政策
-            </p>
           </CardContent>
         </Card>
       </div>

@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /mypage
+Disallow: /login
+Disallow: /register
+Disallow: /onboarding
+Disallow: /api/
+
+Sitemap: https://beautyjob-tw.onrender.com/sitemap.xml

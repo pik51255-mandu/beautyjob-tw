@@ -221,25 +221,33 @@ export const favorites = mysqlTable("favorites", {
 
 export type Favorite = typeof favorites.$inferSelect;
 export type InsertFavorite = typeof favorites.$inferInsert;
-
-// ─── Job Applications (지원 내역) ───────────────────────────────────────────────────────────────────────────────────────
-export const jobApplications = mysqlTable("job_applications", {
+// ─── Reports (檢舉 신고) ──────────────────────────────────────────────────────
+export const reports = mysqlTable("reports", {
   id: int("id").autoincrement().primaryKey(),
-  jobPostId: int("jobPostId").notNull(),           // job_posts.id
-  applicantId: int("applicantId").notNull(),       // users.id (job_seeker)
-  coverLetter: text("coverLetter"),                // 自我介紹 / 求職信
+  reporterId: int("reporterId").notNull(),         // users.id
+  targetType: mysqlEnum("targetType", [
+    "community", "salon_transfer", "used_item"
+  ]).notNull(),
+  targetId: int("targetId").notNull(),
+  reason: mysqlEnum("reason", [
+    "spam",         // 廣告/垃圾訊息
+    "fraud",        // 詐騙/不實資訊
+    "offensive",    // 不當言論/攻擊
+    "illegal",      // 違法內容
+    "other",
+  ]).notNull(),
+  detail: text("detail"),
   status: mysqlEnum("status", [
-    "pending",    // 待審中
-    "reviewed",   // 已查看
-    "accepted",   // 錄取
-    "rejected",   // 不合適
+    "pending",      // 待處理
+    "resolved",     // 已處理 (게시글 삭제 등)
+    "dismissed",    // 駁回
   ]).default("pending").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => [
-  index("idx_app_job").on(table.jobPostId),
-  index("idx_app_applicant").on(table.applicantId),
+  index("idx_report_status").on(table.status),
+  index("idx_report_target").on(table.targetType, table.targetId),
 ]);
 
-export type JobApplication = typeof jobApplications.$inferSelect;
-export type InsertJobApplication = typeof jobApplications.$inferInsert;
+export type Report = typeof reports.$inferSelect;
+export type InsertReport = typeof reports.$inferInsert;

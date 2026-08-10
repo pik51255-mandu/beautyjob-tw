@@ -1,47 +1,43 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
+import { REPORT_REASON_LABELS } from "@/components/ReportButton";
 import { format } from "date-fns";
 import {
   AlertCircle,
   BarChart3,
-  Briefcase,
-  CheckCircle2,
-  Clock,
-  FileText,
+  Download,
+  Flag,
   MessageSquare,
   ShieldAlert,
   ShoppingBag,
   Store,
   TrendingUp,
   Users,
-  XCircle,
+  FileText,
 } from "lucide-react";
 import { Link } from "wouter";
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  pending:  { label: "待審中",  color: "bg-yellow-100 text-yellow-700 border-yellow-200", icon: <Clock className="w-3 h-3" /> },
-  reviewed: { label: "已查看",  color: "bg-blue-100 text-blue-700 border-blue-200",       icon: <CheckCircle2 className="w-3 h-3" /> },
-  accepted: { label: "錄取通知", color: "bg-green-100 text-green-700 border-green-200",   icon: <CheckCircle2 className="w-3 h-3" /> },
-  rejected: { label: "不合適",  color: "bg-red-100 text-red-700 border-red-200",          icon: <XCircle className="w-3 h-3" /> },
-};
+import { toast } from "sonner";
 
 const USER_TYPE_LABELS: Record<string, string> = {
   salon_owner: "沙龍老闆",
   job_seeker:  "求職者",
 };
 
-const JOB_TYPE_LABELS: Record<string, string> = {
-  designer:  "設計師",
-  intern:    "助理",
-  staff:     "員工",
-  colorist:  "染髮師",
-  barber:    "理髮師",
-  manager:   "店長",
-  other:     "其他",
+const REPORT_STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  pending:   { label: "待處理", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
+  resolved:  { label: "已處理", color: "bg-green-100 text-green-700 border-green-200" },
+  dismissed: { label: "已駁回", color: "bg-gray-100 text-gray-500 border-gray-200" },
+};
+
+const REPORT_TARGET_LABELS: Record<string, { label: string; href: (id: number) => string }> = {
+  community:      { label: "社群文章", href: (id) => `/community/${id}` },
+  salon_transfer: { label: "店面頂讓", href: (id) => `/transfers/${id}` },
+  used_item:      { label: "二手器材", href: (id) => `/used-items/${id}` },
 };
 
 function StatCard({
@@ -67,7 +63,7 @@ function StatCard({
             <p className="text-3xl font-bold tracking-tight">{value}</p>
             {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
           </div>
-          <div className={`p-2.5 rounded-lg ${accent.replace("bg-", "bg-").replace("-500", "-100")} text-${accent.replace("bg-", "").replace("-500", "-600")}`}>
+          <div className={`p-2.5 rounded-lg ${accent.replace("-500", "-100")} text-${accent.replace("bg-", "").replace("-500", "-600")}`}>
             {icon}
           </div>
         </div>
@@ -78,23 +74,57 @@ function StatCard({
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
+  const isAdmin = !!user && user.role === "admin";
+  const utils = trpc.useUtils();
+
   const { data: stats, isLoading } = trpc.admin.stats.useQuery(undefined, {
-    enabled: !!user && user.role === "admin",
+    enabled: isAdmin,
     refetchInterval: 30_000,
   });
-
   const { data: usersData } = trpc.admin.listUsers.useQuery(
     { page: 1, limit: 10 },
-    { enabled: !!user && user.role === "admin" }
+    { enabled: isAdmin }
   );
-  const { data: jobsData } = trpc.admin.listJobs.useQuery(
-    { page: 1, limit: 10 },
-    { enabled: !!user && user.role === "admin" }
+  const { data: reportsData } = trpc.admin.listReports.useQuery(
+    { page: 1, limit: 20 },
+    { enabled: isAdmin }
   );
-  const { data: appsData } = trpc.admin.listApplications.useQuery(
-    { page: 1, limit: 10 },
-    { enabled: !!user && user.role === "admin" }
-  );
+  const { data: exportTables } = trpc.admin.exportTableNames.useQuery(undefined, { enabled: isAdmin });
+
+  const updateReportStatus = trpc.admin.updateReportStatus.useMutation({
+    onSuccess: () => {
+      toast.success("檢舉狀態已更新");
+      utils.admin.listReports.invalidate();
+      utils.admin.stats.invalidate();
+    },
+    onError: () => toast.error("更新失敗，請稍後再試"),
+  });
+
+  const deleteReportedPost = trpc.admin.deleteReportedPost.useMutation({
+    onSuccess: () => {
+      toast.success("貼文已刪除，相關檢舉已標記為已處理");
+      utils.admin.listReports.invalidate();
+      utils.admin.stats.invalidate();
+    },
+    onError: () => toast.error("刪除失敗，請稍後再試"),
+  });
+
+  const exportCsvQuery = trpc.useUtils().admin.exportCsv;
+  const handleExport = async (table: string) => {
+    try {
+      const result = await exportCsvQuery.fetch({ table: table as any });
+      const blob = new Blob([result.csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${table}_${format(new Date(), "yyyyMMdd_HHmm")}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`${table}：已匯出 ${result.rowCount} 筆`);
+    } catch {
+      toast.error("匯出失敗，請稍後再試");
+    }
+  };
 
   if (authLoading) {
     return (
@@ -136,7 +166,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <h1 className="text-lg font-bold leading-tight">管理員後台</h1>
-              <p className="text-xs text-muted-foreground">台灣美髮平台 · 數據總覽</p>
+              <p className="text-xs text-muted-foreground">台灣美髮社群 · 數據總覽</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -161,10 +191,9 @@ export default function AdminDashboard() {
           </div>
         ) : stats ? (
           <>
-            {/* Row 1: Users & Jobs */}
             <div>
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                會員 &amp; 職缺
+                會員 &amp; 社群
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard
@@ -175,80 +204,33 @@ export default function AdminDashboard() {
                   accent="bg-blue-500"
                 />
                 <StatCard
-                  title="沙龍老闆"
-                  value={stats.users.salonOwners}
-                  sub={`求職者 ${stats.users.jobSeekers} 人`}
-                  icon={<Store className="w-5 h-5" />}
-                  accent="bg-purple-500"
+                  title="社群文章"
+                  value={stats.community.total}
+                  sub={`本月新增 +${stats.community.newThisMonth}`}
+                  icon={<MessageSquare className="w-5 h-5" />}
+                  accent="bg-indigo-500"
                 />
                 <StatCard
-                  title="刊登職缺"
-                  value={stats.jobs.total}
-                  sub={`有效職缺 ${stats.jobs.active} 則`}
-                  icon={<Briefcase className="w-5 h-5" />}
-                  accent="bg-primary"
+                  title="留言數"
+                  value={stats.community.comments}
+                  icon={<MessageSquare className="w-5 h-5" />}
+                  accent="bg-teal-500"
                 />
                 <StatCard
-                  title="本月新職缺"
-                  value={stats.jobs.newThisMonth}
-                  sub="近 30 天"
-                  icon={<TrendingUp className="w-5 h-5" />}
-                  accent="bg-orange-500"
-                />
-              </div>
-            </div>
-
-            {/* Row 2: Applications */}
-            <div>
-              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                應徵狀況
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatCard
-                  title="總應徵數"
-                  value={stats.applications.total}
-                  icon={<FileText className="w-5 h-5" />}
-                  accent="bg-slate-500"
-                />
-                <StatCard
-                  title="待審中"
-                  value={stats.applications.pending}
-                  icon={<Clock className="w-5 h-5" />}
-                  accent="bg-yellow-500"
-                />
-                <StatCard
-                  title="錄取通知"
-                  value={stats.applications.accepted}
-                  icon={<CheckCircle2 className="w-5 h-5" />}
-                  accent="bg-green-500"
-                />
-                <StatCard
-                  title="不合適"
-                  value={stats.applications.rejected}
-                  icon={<XCircle className="w-5 h-5" />}
+                  title="待處理檢舉"
+                  value={stats.reports.pending}
+                  sub={`累計 ${stats.reports.total} 件`}
+                  icon={<Flag className="w-5 h-5" />}
                   accent="bg-red-500"
                 />
               </div>
             </div>
 
-            {/* Row 3: Content */}
             <div>
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                 內容統計
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatCard
-                  title="求職履歷"
-                  value={stats.content.resumes}
-                  icon={<FileText className="w-5 h-5" />}
-                  accent="bg-teal-500"
-                />
-                <StatCard
-                  title="社群討論"
-                  value={stats.content.community}
-                  icon={<MessageSquare className="w-5 h-5" />}
-                  accent="bg-indigo-500"
-                />
                 <StatCard
                   title="店面頂讓"
                   value={stats.content.transfers}
@@ -261,50 +243,21 @@ export default function AdminDashboard() {
                   icon={<ShoppingBag className="w-5 h-5" />}
                   accent="bg-pink-500"
                 />
+                <StatCard
+                  title="求職履歷"
+                  value={stats.content.resumes}
+                  sub="徵才功能即將開放"
+                  icon={<FileText className="w-5 h-5" />}
+                  accent="bg-slate-500"
+                />
+                <StatCard
+                  title="社群討論"
+                  value={stats.content.community}
+                  icon={<MessageSquare className="w-5 h-5" />}
+                  accent="bg-emerald-500"
+                />
               </div>
             </div>
-
-            {/* Application Ratio Bar */}
-            {stats.applications.total > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4" />
-                    應徵狀態分佈
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex h-4 rounded-full overflow-hidden gap-0.5">
-                    {stats.applications.pending > 0 && (
-                      <div
-                        className="bg-yellow-400 transition-all"
-                        style={{ width: `${(stats.applications.pending / stats.applications.total) * 100}%` }}
-                        title={`待審中 ${stats.applications.pending}`}
-                      />
-                    )}
-                    {stats.applications.accepted > 0 && (
-                      <div
-                        className="bg-green-500 transition-all"
-                        style={{ width: `${(stats.applications.accepted / stats.applications.total) * 100}%` }}
-                        title={`錄取 ${stats.applications.accepted}`}
-                      />
-                    )}
-                    {stats.applications.rejected > 0 && (
-                      <div
-                        className="bg-red-400 transition-all"
-                        style={{ width: `${(stats.applications.rejected / stats.applications.total) * 100}%` }}
-                        title={`不合適 ${stats.applications.rejected}`}
-                      />
-                    )}
-                  </div>
-                  <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-400 inline-block" />待審中 {stats.applications.pending}</span>
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block" />錄取 {stats.applications.accepted}</span>
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-400 inline-block" />不合適 {stats.applications.rejected}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </>
         ) : (
           <div className="flex items-center gap-2 text-muted-foreground py-8 justify-center">
@@ -314,21 +267,129 @@ export default function AdminDashboard() {
         )}
 
         {/* Detail Tables */}
-        <Tabs defaultValue="users">
+        <Tabs defaultValue="reports">
           <TabsList className="mb-4">
+            <TabsTrigger value="reports" className="gap-1.5">
+              <Flag className="w-3.5 h-3.5" />
+              檢舉管理
+              {stats && stats.reports.pending > 0 && (
+                <span className="ml-1 text-[10px] font-bold bg-red-500 text-white rounded-full px-1.5 py-0.5">
+                  {stats.reports.pending}
+                </span>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="users" className="gap-1.5">
               <Users className="w-3.5 h-3.5" />
               最新會員
             </TabsTrigger>
-            <TabsTrigger value="jobs" className="gap-1.5">
-              <Briefcase className="w-3.5 h-3.5" />
-              最新職缺
-            </TabsTrigger>
-            <TabsTrigger value="applications" className="gap-1.5">
-              <FileText className="w-3.5 h-3.5" />
-              最新應徵
+            <TabsTrigger value="export" className="gap-1.5">
+              <Download className="w-3.5 h-3.5" />
+              CSV 匯出
             </TabsTrigger>
           </TabsList>
+
+          {/* Reports Tab */}
+          <TabsContent value="reports">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">檢舉列表（最新 20 件）</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">ID</th>
+                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">對象</th>
+                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">原因</th>
+                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">說明</th>
+                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">狀態</th>
+                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">檢舉時間</th>
+                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {!reportsData ? (
+                        Array.from({ length: 3 }).map((_, i) => (
+                          <tr key={i} className="border-b">
+                            {Array.from({ length: 7 }).map((_, j) => (
+                              <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>
+                            ))}
+                          </tr>
+                        ))
+                      ) : reportsData.items.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="text-center text-muted-foreground py-8">目前沒有檢舉</td>
+                        </tr>
+                      ) : (
+                        reportsData.items.map((r) => {
+                          const target = REPORT_TARGET_LABELS[r.targetType];
+                          const sc = REPORT_STATUS_CONFIG[r.status];
+                          const busy = updateReportStatus.isPending || deleteReportedPost.isPending;
+                          return (
+                            <tr key={r.id} className="border-b hover:bg-muted/30 transition-colors">
+                              <td className="px-4 py-3 text-muted-foreground">#{r.id}</td>
+                              <td className="px-4 py-3">
+                                <Link href={target?.href(r.targetId) ?? "/"} className="text-primary hover:underline">
+                                  {target?.label ?? r.targetType} #{r.targetId}
+                                </Link>
+                              </td>
+                              <td className="px-4 py-3">
+                                <Badge variant="outline" className="text-xs">
+                                  {REPORT_REASON_LABELS[r.reason] ?? r.reason}
+                                </Badge>
+                              </td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs max-w-[200px] truncate">
+                                {r.detail ?? "—"}
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${sc?.color}`}>
+                                  {sc?.label ?? r.status}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-muted-foreground text-xs">
+                                {format(new Date(r.createdAt), "yyyy/MM/dd HH:mm")}
+                              </td>
+                              <td className="px-4 py-3">
+                                {r.status === "pending" ? (
+                                  <div className="flex gap-1.5">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7 text-xs px-2 text-destructive border-red-200 hover:bg-red-50"
+                                      disabled={busy}
+                                      onClick={() => {
+                                        if (confirm("確定刪除此貼文？此操作無法復原。")) {
+                                          deleteReportedPost.mutate({ targetType: r.targetType, targetId: r.targetId });
+                                        }
+                                      }}
+                                    >
+                                      刪除貼文
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-7 text-xs px-2 text-muted-foreground"
+                                      disabled={busy}
+                                      onClick={() => updateReportStatus.mutate({ id: r.id, status: "dismissed" })}
+                                    >
+                                      駁回
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-muted-foreground">—</span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Users Tab */}
           <TabsContent value="users">
@@ -385,131 +446,33 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Jobs Tab */}
-          <TabsContent value="jobs">
+          {/* CSV Export Tab */}
+          <TabsContent value="export">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">最新刊登職缺（前 10 則）</CardTitle>
+                <CardTitle className="text-sm font-medium">資料庫 CSV 匯出（全部資料表）</CardTitle>
               </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b bg-muted/50">
-                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">ID</th>
-                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">職缺名稱</th>
-                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">沙龍名稱</th>
-                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">城市</th>
-                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">職種</th>
-                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">狀態</th>
-                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">刊登時間</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {!jobsData ? (
-                        Array.from({ length: 5 }).map((_, i) => (
-                          <tr key={i} className="border-b">
-                            {Array.from({ length: 7 }).map((_, j) => (
-                              <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>
-                            ))}
-                          </tr>
-                        ))
-                      ) : jobsData.items.length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="text-center text-muted-foreground py-8">尚無職缺資料</td>
-                        </tr>
-                      ) : (
-                        jobsData.items.map((j) => (
-                          <tr key={j.id} className="border-b hover:bg-muted/30 transition-colors">
-                            <td className="px-4 py-3 text-muted-foreground">#{j.id}</td>
-                            <td className="px-4 py-3 font-medium">
-                              <Link href={`/jobs/${j.id}`} className="hover:text-primary transition-colors">
-                                {j.title}
-                              </Link>
-                            </td>
-                            <td className="px-4 py-3 text-muted-foreground">{j.salonName}</td>
-                            <td className="px-4 py-3 text-muted-foreground">{j.city}</td>
-                            <td className="px-4 py-3">
-                              <Badge variant="outline" className="text-xs">
-                                {JOB_TYPE_LABELS[j.jobType] ?? j.jobType}
-                              </Badge>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${j.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                                {j.isActive ? "刊登中" : "已下架"}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-muted-foreground text-xs">
-                              {format(new Date(j.createdAt), "yyyy/MM/dd HH:mm")}
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Applications Tab */}
-          <TabsContent value="applications">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">最新應徵紀錄（前 10 筆）</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b bg-muted/50">
-                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">ID</th>
-                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">職缺 ID</th>
-                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">應徵者 ID</th>
-                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">狀態</th>
-                        <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">應徵時間</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {!appsData ? (
-                        Array.from({ length: 5 }).map((_, i) => (
-                          <tr key={i} className="border-b">
-                            {Array.from({ length: 5 }).map((_, j) => (
-                              <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-full" /></td>
-                            ))}
-                          </tr>
-                        ))
-                      ) : appsData.items.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="text-center text-muted-foreground py-8">尚無應徵資料</td>
-                        </tr>
-                      ) : (
-                        appsData.items.map((a) => {
-                          const sc = STATUS_CONFIG[a.status];
-                          return (
-                            <tr key={a.id} className="border-b hover:bg-muted/30 transition-colors">
-                              <td className="px-4 py-3 text-muted-foreground">#{a.id}</td>
-                              <td className="px-4 py-3">
-                                <Link href={`/jobs/${a.jobPostId}`} className="text-primary hover:underline">
-                                  職缺 #{a.jobPostId}
-                                </Link>
-                              </td>
-                              <td className="px-4 py-3 text-muted-foreground">會員 #{a.applicantId}</td>
-                              <td className="px-4 py-3">
-                                <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium ${sc?.color}`}>
-                                  {sc?.icon}
-                                  {sc?.label ?? a.status}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3 text-muted-foreground text-xs">
-                                {format(new Date(a.createdAt), "yyyy/MM/dd HH:mm")}
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
+              <CardContent>
+                <p className="text-xs text-muted-foreground mb-4">
+                  匯出各資料表全部資料為 CSV 檔（UTF-8 BOM，Excel 可直接開啟）。會員資料表不含密碼欄位。
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {!exportTables ? (
+                    Array.from({ length: 9 }).map((_, i) => <Skeleton key={i} className="h-10 rounded-lg" />)
+                  ) : (
+                    exportTables.map((table) => (
+                      <Button
+                        key={table}
+                        variant="outline"
+                        size="sm"
+                        className="justify-start gap-2"
+                        onClick={() => handleExport(table)}
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        {table}.csv
+                      </Button>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>

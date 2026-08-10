@@ -10,6 +10,7 @@ import { USED_ITEM_CATEGORY_LABELS, ITEM_CONDITION_LABELS, formatNTD } from "@sh
 import { formatDistanceToNow } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { toast } from "sonner";
+import DisclaimerBanner from "@/components/DisclaimerBanner";
 
 const CONDITION_COLORS: Record<string, string> = {
   new: "bg-emerald-100 text-emerald-700",
@@ -44,6 +45,7 @@ export default function UsedItems() {
 
   return (
     <div className="container py-8">
+      <div className="mb-6"><DisclaimerBanner /></div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold">二手器材</h1>

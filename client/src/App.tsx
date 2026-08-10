@@ -9,6 +9,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import { FEATURES } from "@shared/const";
 
 // Lazy-load pages for code splitting
 const JobList = lazy(() => import("./pages/JobList"));
@@ -17,6 +18,14 @@ const JobForm = lazy(() => import("./pages/JobForm"));
 const ResumeList = lazy(() => import("./pages/ResumeList"));
 const ResumeDetail = lazy(() => import("./pages/ResumeDetail"));
 const ResumeEdit = lazy(() => import("./pages/ResumeEdit"));
+const JobsComingSoon = lazy(() => import("./pages/JobsComingSoon"));
+const Terms = lazy(() => import("./pages/legal/Terms"));
+const Privacy = lazy(() => import("./pages/legal/Privacy"));
+const Disclaimer = lazy(() => import("./pages/legal/Disclaimer"));
+const SalaryInfo = lazy(() => import("./pages/info/SalaryInfo"));
+const Courses = lazy(() => import("./pages/info/Courses"));
+const KoreanTechniques = lazy(() => import("./pages/info/KoreanTechniques"));
+const SupplyMap = lazy(() => import("./pages/info/SupplyMap"));
 const Community = lazy(() => import("./pages/Community"));
 const CommunityDetail = lazy(() => import("./pages/CommunityDetail"));
 const CommunityForm = lazy(() => import("./pages/CommunityForm"));
@@ -59,16 +68,37 @@ function Router() {
         <Route path="/" component={() => <Layout><Home /></Layout>} />
         <Route path="/onboarding" component={() => <Layout><Onboarding /></Layout>} />
 
-        {/* Jobs */}
-        <Route path="/jobs" component={() => <Layout><JobList /></Layout>} />
-        <Route path="/jobs/new" component={() => <Layout><JobForm /></Layout>} />
-        <Route path="/jobs/:id/edit" component={() => <Layout><JobForm /></Layout>} />
-        <Route path="/jobs/:id" component={() => <Layout><JobDetail /></Layout>} />
+        {/* Jobs & Resumes — v4: 잠금 시 모든 채용 URL이 "即將開放" 페이지 */}
+        {FEATURES.JOBS_ENABLED ? (
+          <>
+            <Route path="/jobs" component={() => <Layout><JobList /></Layout>} />
+            <Route path="/jobs/new" component={() => <Layout><JobForm /></Layout>} />
+            <Route path="/jobs/:id/edit" component={() => <Layout><JobForm /></Layout>} />
+            <Route path="/jobs/:id" component={() => <Layout><JobDetail /></Layout>} />
+            <Route path="/resumes" component={() => <Layout><ResumeList /></Layout>} />
+            <Route path="/resume/edit" component={() => <Layout><ResumeEdit /></Layout>} />
+            <Route path="/resumes/:id" component={() => <Layout><ResumeDetail /></Layout>} />
+          </>
+        ) : (
+          <>
+            <Route path="/jobs/:rest*" component={() => <Layout><JobsComingSoon /></Layout>} />
+            <Route path="/jobs" component={() => <Layout><JobsComingSoon /></Layout>} />
+            <Route path="/resumes/:rest*" component={() => <Layout><JobsComingSoon /></Layout>} />
+            <Route path="/resumes" component={() => <Layout><JobsComingSoon /></Layout>} />
+            <Route path="/resume/edit" component={() => <Layout><JobsComingSoon /></Layout>} />
+          </>
+        )}
 
-        {/* Resumes */}
-        <Route path="/resumes" component={() => <Layout><ResumeList /></Layout>} />
-        <Route path="/resume/edit" component={() => <Layout><ResumeEdit /></Layout>} />
-        <Route path="/resumes/:id" component={() => <Layout><ResumeDetail /></Layout>} />
+        {/* Phase 1 정보 메뉴 */}
+        <Route path="/salary-info" component={() => <Layout><SalaryInfo /></Layout>} />
+        <Route path="/courses" component={() => <Layout><Courses /></Layout>} />
+        <Route path="/korean-techniques" component={() => <Layout><KoreanTechniques /></Layout>} />
+        <Route path="/supply-map" component={() => <Layout><SupplyMap /></Layout>} />
+
+        {/* Legal */}
+        <Route path="/terms" component={() => <Layout><Terms /></Layout>} />
+        <Route path="/privacy" component={() => <Layout><Privacy /></Layout>} />
+        <Route path="/disclaimer" component={() => <Layout><Disclaimer /></Layout>} />
 
         {/* Community */}
         <Route path="/community" component={() => <Layout><Community /></Layout>} />

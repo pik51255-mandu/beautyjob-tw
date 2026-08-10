@@ -7,8 +7,8 @@ import {
   comments,
   communityPosts,
   favorites,
-  jobApplications,
   jobPosts,
+  reports,
   resumes,
   salonTransfers,
   usedItems,
@@ -457,95 +457,67 @@ export async function isFavorited(userId: number, targetType: string, targetId: 
   return result.length > 0;
 }
 
-// ─── Job Applications ───────────────────────────────────────────────────────────────────────────────────────
-export async function applyToJob(jobPostId: number, applicantId: number, coverLetter?: string) {
+// ─── Reports (檢舉 신고) ──────────────────────────────────────────────────────
+export async function createReport(data: typeof reports.$inferInsert) {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
-  // 중복 지원 방지
-  const existing = await db
-    .select()
-    .from(jobApplications)
-    .where(and(eq(jobApplications.jobPostId, jobPostId), eq(jobApplications.applicantId, applicantId)))
-    .limit(1);
-  if (existing.length > 0) throw new Error("ALREADY_APPLIED");
-  await db.insert(jobApplications).values({ jobPostId, applicantId, coverLetter: coverLetter ?? null });
+  await db.insert(reports).values(data);
 }
 
-export async function cancelApplication(jobPostId: number, applicantId: number) {
+export async function getAdminReports(page: number, limit: number, status?: string) {
+  const db = await getDb();
+  if (!db) return { items: [], total: 0 };
+  const offset = (page - 1) * limit;
+  const where = status ? eq(reports.status, status as any) : undefined;
+  const [items, countResult] = await Promise.all([
+    db.select().from(reports).where(where).orderBy(desc(reports.createdAt)).limit(limit).offset(offset),
+    db.select({ count: sql<number>`count(*)` }).from(reports).where(where),
+  ]);
+  return { items, total: Number(countResult[0]?.count ?? 0) };
+}
+
+export async function updateReportStatus(id: number, status: "pending" | "resolved" | "dismissed") {
   const db = await getDb();
   if (!db) return;
-  await db.delete(jobApplications).where(
-    and(eq(jobApplications.jobPostId, jobPostId), eq(jobApplications.applicantId, applicantId))
-  );
+  await db.update(reports).set({ status }).where(eq(reports.id, id));
 }
 
-export async function getMyApplications(applicantId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  return db
-    .select()
-    .from(jobApplications)
-    .where(eq(jobApplications.applicantId, applicantId))
-    .orderBy(desc(jobApplications.createdAt));
-}
-
-export async function getJobApplications(jobPostId: number, ownerId: number) {
-  const db = await getDb();
-  if (!db) return [];
-  // 직접 JOIN 대신 어플리케이션 목록만 반환 (applicantId 포함)
-  return db
-    .select()
-    .from(jobApplications)
-    .where(eq(jobApplications.jobPostId, jobPostId))
-    .orderBy(desc(jobApplications.createdAt));
-}
-
-export async function getApplicationStatus(jobPostId: number, applicantId: number) {
-  const db = await getDb();
-  if (!db) return null;
-  const result = await db
-    .select()
-    .from(jobApplications)
-    .where(and(eq(jobApplications.jobPostId, jobPostId), eq(jobApplications.applicantId, applicantId)))
-    .limit(1);
-  return result[0] ?? null;
-}
-
-export async function getApplicationById(id: number) {
-  const db = await getDb();
-  if (!db) return null;
-  const result = await db
-    .select()
-    .from(jobApplications)
-    .where(eq(jobApplications.id, id))
-    .limit(1);
-  return result[0] ?? null;
-}
-
-export async function updateApplicationStatus(
-  id: number,
-  status: "pending" | "reviewed" | "accepted" | "rejected"
+// 관리자 강제 삭제: 작성자와 무관하게 대상 게시글을 제거하고 관련 신고를 일괄 처리
+export async function adminDeleteReportedPost(
+  targetType: "community" | "salon_transfer" | "used_item",
+  targetId: number
 ) {
   const db = await getDb();
   if (!db) return;
-  await db.update(jobApplications).set({ status }).where(eq(jobApplications.id, id));
+  if (targetType === "community") {
+    await db.delete(communityPosts).where(eq(communityPosts.id, targetId));
+  } else if (targetType === "salon_transfer") {
+    await db.delete(salonTransfers).where(eq(salonTransfers.id, targetId));
+  } else {
+    await db.delete(usedItems).where(eq(usedItems.id, targetId));
+  }
+  await db.delete(comments).where(and(eq(comments.postType, targetType), eq(comments.postId, targetId)));
+  await db
+    .update(reports)
+    .set({ status: "resolved" })
+    .where(and(eq(reports.targetType, targetType), eq(reports.targetId, targetId)));
 }
 
 // ─── Platform Stats ─────────────────────────────────────────────────────────
 export async function getPlatformStats() {
   const db = await getDb();
-  if (!db) return { jobCount: 0, resumeCount: 0, salonCount: 0, communityCount: 0 };
+  if (!db) return { memberCount: 0, usedItemCount: 0, salonCount: 0, communityCount: 0 };
 
-  const [jobResult, resumeResult, salonResult, communityResult] = await Promise.all([
-    db.select({ count: sql<number>`count(*)` }).from(jobPosts),
-    db.select({ count: sql<number>`count(*)` }).from(resumes),
+  const [memberResult, usedItemResult, salonResult, communityResult] = await Promise.all([
+    db.select({ count: sql<number>`count(*)` }).from(users),
+    db.select({ count: sql<number>`count(*)` }).from(usedItems),
     db.select({ count: sql<number>`count(*)` }).from(salonTransfers),
     db.select({ count: sql<number>`count(*)` }).from(communityPosts),
   ]);
 
   return {
-    jobCount: Number(jobResult[0]?.count ?? 0),
-    resumeCount: Number(resumeResult[0]?.count ?? 0),
+    memberCount: Number(memberResult[0]?.count ?? 0),
+    usedItemCount: Number(usedItemResult[0]?.count ?? 0),
     salonCount: Number(salonResult[0]?.count ?? 0),
     communityCount: Number(communityResult[0]?.count ?? 0),
   };
@@ -562,35 +534,31 @@ export async function getAdminStats() {
 
   const [
     totalUsers, newUsersMonth, salonOwners, jobSeekers,
-    totalJobs, activeJobs, newJobsMonth,
-    totalApplications, pendingApps, acceptedApps, rejectedApps,
-    totalResumes, totalCommunity, totalTransfers, totalUsedItems,
-    recentUsers, recentJobs, recentApplications,
+    totalCommunity, newCommunityMonth, totalComments,
+    totalTransfers, totalUsedItems, totalResumes,
+    pendingReports, totalReports,
+    recentUsers, recentPosts, recentReports,
   ] = await Promise.all([
     db.select({ count: sql<number>`count(*)` }).from(users),
     db.select({ count: sql<number>`count(*)` }).from(users).where(gte(users.createdAt, thirtyDaysAgo)),
     db.select({ count: sql<number>`count(*)` }).from(users).where(eq(users.userType, "salon_owner")),
     db.select({ count: sql<number>`count(*)` }).from(users).where(eq(users.userType, "job_seeker")),
-    db.select({ count: sql<number>`count(*)` }).from(jobPosts),
-    db.select({ count: sql<number>`count(*)` }).from(jobPosts).where(eq(jobPosts.isActive, true)),
-    db.select({ count: sql<number>`count(*)` }).from(jobPosts).where(gte(jobPosts.createdAt, thirtyDaysAgo)),
-    db.select({ count: sql<number>`count(*)` }).from(jobApplications),
-    db.select({ count: sql<number>`count(*)` }).from(jobApplications).where(eq(jobApplications.status, "pending")),
-    db.select({ count: sql<number>`count(*)` }).from(jobApplications).where(eq(jobApplications.status, "accepted")),
-    db.select({ count: sql<number>`count(*)` }).from(jobApplications).where(eq(jobApplications.status, "rejected")),
-    db.select({ count: sql<number>`count(*)` }).from(resumes),
     db.select({ count: sql<number>`count(*)` }).from(communityPosts),
+    db.select({ count: sql<number>`count(*)` }).from(communityPosts).where(gte(communityPosts.createdAt, thirtyDaysAgo)),
+    db.select({ count: sql<number>`count(*)` }).from(comments),
     db.select({ count: sql<number>`count(*)` }).from(salonTransfers),
     db.select({ count: sql<number>`count(*)` }).from(usedItems),
+    db.select({ count: sql<number>`count(*)` }).from(resumes),
+    db.select({ count: sql<number>`count(*)` }).from(reports).where(eq(reports.status, "pending")),
+    db.select({ count: sql<number>`count(*)` }).from(reports),
     // 최근 가입 회원 5명
     db.select({ id: users.id, name: users.name, email: users.email, userType: users.userType, createdAt: users.createdAt })
       .from(users).orderBy(desc(users.createdAt)).limit(5),
-    // 최근 등록 공고 5개
-    db.select({ id: jobPosts.id, title: jobPosts.title, salonName: jobPosts.salonName, city: jobPosts.city, createdAt: jobPosts.createdAt })
-      .from(jobPosts).orderBy(desc(jobPosts.createdAt)).limit(5),
-    // 최근 지원 5건
-    db.select({ id: jobApplications.id, jobPostId: jobApplications.jobPostId, applicantId: jobApplications.applicantId, status: jobApplications.status, createdAt: jobApplications.createdAt })
-      .from(jobApplications).orderBy(desc(jobApplications.createdAt)).limit(5),
+    // 최근 커뮤니티 글 5건
+    db.select({ id: communityPosts.id, title: communityPosts.title, category: communityPosts.category, createdAt: communityPosts.createdAt })
+      .from(communityPosts).orderBy(desc(communityPosts.createdAt)).limit(5),
+    // 최근 신고 5건
+    db.select().from(reports).orderBy(desc(reports.createdAt)).limit(5),
   ]);
 
   return {
@@ -600,16 +568,14 @@ export async function getAdminStats() {
       salonOwners: Number(salonOwners[0]?.count ?? 0),
       jobSeekers: Number(jobSeekers[0]?.count ?? 0),
     },
-    jobs: {
-      total: Number(totalJobs[0]?.count ?? 0),
-      active: Number(activeJobs[0]?.count ?? 0),
-      newThisMonth: Number(newJobsMonth[0]?.count ?? 0),
+    community: {
+      total: Number(totalCommunity[0]?.count ?? 0),
+      newThisMonth: Number(newCommunityMonth[0]?.count ?? 0),
+      comments: Number(totalComments[0]?.count ?? 0),
     },
-    applications: {
-      total: Number(totalApplications[0]?.count ?? 0),
-      pending: Number(pendingApps[0]?.count ?? 0),
-      accepted: Number(acceptedApps[0]?.count ?? 0),
-      rejected: Number(rejectedApps[0]?.count ?? 0),
+    reports: {
+      pending: Number(pendingReports[0]?.count ?? 0),
+      total: Number(totalReports[0]?.count ?? 0),
     },
     content: {
       resumes: Number(totalResumes[0]?.count ?? 0),
@@ -619,8 +585,8 @@ export async function getAdminStats() {
     },
     recent: {
       users: recentUsers,
-      jobs: recentJobs,
-      applications: recentApplications,
+      posts: recentPosts,
+      reports: recentReports,
     },
   };
 }
@@ -655,17 +621,37 @@ export async function getAdminJobs(page: number, limit: number) {
   return { items, total: Number(countResult[0]?.count ?? 0) };
 }
 
-export async function getAdminApplications(page: number, limit: number) {
+// ─── CSV Export (관리자 전용, 실제 전 테이블) ─────────────────────────────────
+// 스키마의 모든 테이블을 등록한다. 테이블을 추가하면 여기에도 등록할 것.
+const EXPORT_TABLES = {
+  users,
+  job_posts: jobPosts,
+  resumes,
+  community_posts: communityPosts,
+  comments,
+  salon_transfers: salonTransfers,
+  used_items: usedItems,
+  favorites,
+  reports,
+} as const;
+
+export type ExportTableName = keyof typeof EXPORT_TABLES;
+export const EXPORT_TABLE_NAMES = Object.keys(EXPORT_TABLES) as ExportTableName[];
+
+// 민감 컬럼은 export에서 제외
+const EXPORT_EXCLUDED_COLUMNS: Record<string, string[]> = {
+  users: ["passwordHash"],
+};
+
+export async function getTableRowsForExport(table: ExportTableName): Promise<Record<string, unknown>[]> {
   const db = await getDb();
-  if (!db) return { items: [], total: 0 };
-  const offset = (page - 1) * limit;
-  const [items, countResult] = await Promise.all([
-    db.select({
-      id: jobApplications.id, jobPostId: jobApplications.jobPostId,
-      applicantId: jobApplications.applicantId, status: jobApplications.status,
-      createdAt: jobApplications.createdAt,
-    }).from(jobApplications).orderBy(desc(jobApplications.createdAt)).limit(limit).offset(offset),
-    db.select({ count: sql<number>`count(*)` }).from(jobApplications),
-  ]);
-  return { items, total: Number(countResult[0]?.count ?? 0) };
+  if (!db) return [];
+  const rows = (await db.select().from(EXPORT_TABLES[table])) as Record<string, unknown>[];
+  const excluded = EXPORT_EXCLUDED_COLUMNS[table];
+  if (!excluded) return rows;
+  return rows.map((row) => {
+    const copy = { ...row };
+    for (const col of excluded) delete copy[col];
+    return copy;
+  });
 }

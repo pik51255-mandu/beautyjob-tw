@@ -6,6 +6,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { formatNTD } from "@shared/constants";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import ReportButton from "@/components/ReportButton";
 
 export default function TransferDetail() {
   const { id } = useParams<{ id: string }>();
@@ -48,6 +49,7 @@ export default function TransferDetail() {
               {post.salonName && <p className="text-muted-foreground mt-1">{post.salonName}</p>}
             </div>
             <div className="flex gap-2 shrink-0">
+              {!isOwner && <ReportButton targetType="salon_transfer" targetId={post.id} />}
               {isAuthenticated && !isOwner && (
                 <Button variant="outline" size="icon" onClick={() => favToggle.mutate({ targetType: "salon_transfer", targetId: post.id })} className={isFav ? "text-rose-500 border-rose-200 bg-rose-50" : ""}>
                   <Heart className={`w-4 h-4 ${isFav ? "fill-rose-500" : ""}`} />

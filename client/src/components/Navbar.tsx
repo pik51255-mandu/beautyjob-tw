@@ -12,13 +12,18 @@ import {
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { FEATURES } from "@shared/const";
 
+// v4 커뮤니티 런칭: Phase 1 메뉴 7종
 const NAV_LINKS = [
-  { href: "/jobs", label: "求職求才" },
-  { href: "/resumes", label: "人才搜尋" },
   { href: "/community", label: "美髮社群" },
+  { href: "/salary-info", label: "薪資情報" },
+  { href: "/courses", label: "教育課程" },
+  { href: "/korean-techniques", label: "韓國技術" },
+  { href: "/supply-map", label: "美材行地圖" },
   { href: "/transfers", label: "店面頂讓" },
   { href: "/used-items", label: "二手器材" },
+  ...(FEATURES.JOBS_ENABLED ? [{ href: "/jobs", label: "徵才專區" }] : []),
 ];
 
 export default function Navbar() {
@@ -50,7 +55,7 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-2.5 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
                   location.startsWith(link.href)
                     ? "text-primary bg-accent"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -81,13 +86,17 @@ export default function Navbar() {
                   <DropdownMenuItem asChild>
                     <Link href="/mypage/favorites">收藏清單</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/jobs/new">刊登職缺</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/resume/edit">編輯履歷</Link>
-                  </DropdownMenuItem>
+                  {FEATURES.JOBS_ENABLED && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link href="/jobs/new">刊登職缺</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/resume/edit">編輯履歷</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive">
                     <LogOut className="w-4 h-4 mr-2" />
@@ -136,9 +145,11 @@ export default function Navbar() {
                 <Link href="/mypage" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted">
                   我的頁面
                 </Link>
-                <Link href="/jobs/new" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-md text-sm font-medium text-primary hover:bg-accent">
-                  刊登職缺
-                </Link>
+                {FEATURES.JOBS_ENABLED && (
+                  <Link href="/jobs/new" onClick={() => setMobileOpen(false)} className="block px-3 py-2.5 rounded-md text-sm font-medium text-primary hover:bg-accent">
+                    刊登職缺
+                  </Link>
+                )}
               </>
             )}
           </div>

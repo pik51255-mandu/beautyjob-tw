@@ -49,7 +49,7 @@ export default function JobList() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold">求職求才</h1>
+          <h1 className="text-2xl font-bold">徵才專區</h1>
           <p className="text-muted-foreground text-sm mt-1">
             {data ? `共 ${data.total} 筆職缺` : "載入中..."}
           </p>

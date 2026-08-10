@@ -60,18 +60,12 @@ export default function Onboarding() {
         </div>
         <h1 className="text-2xl font-bold mb-3">設定完成！</h1>
         <p className="text-muted-foreground mb-8">
-          歡迎加入台灣美髮平台，您的帳號已設定完成。
+          歡迎加入台灣美髮社群，您的帳號已設定完成。
         </p>
         <div className="flex flex-col gap-3">
-          {selectedRole === "salon_owner" ? (
-            <Button asChild size="lg">
-              <a href="/jobs/new">立即刊登職缺</a>
-            </Button>
-          ) : (
-            <Button asChild size="lg">
-              <a href="/resume/edit">建立我的履歷</a>
-            </Button>
-          )}
+          <Button asChild size="lg">
+            <a href="/community">逛逛美髮社群</a>
+          </Button>
           <Button variant="outline" onClick={() => navigate("/")}>
             返回首頁
           </Button>
