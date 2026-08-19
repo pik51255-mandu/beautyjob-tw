@@ -571,6 +571,16 @@ const reportsRouter = router({
     }),
 });
 
+// ─── Supply Stores Router (美材行 지도 — 공개 읽기 전용) ──────────────────────
+// 공공 오픈데이터 기반 참조 데이터. 회원 게시물이 아니므로 쓰기 프로시저를 두지 않는다.
+// 응답 필드는 db.getSupplyStores 의 select 화이트리스트로 고정된다.
+const supplyStoresRouter = router({
+  list: publicProcedure.query(async () => {
+    const stores = await db.getSupplyStores();
+    return { stores, total: stores.length };
+  }),
+});
+
 // ─── Admin Router ──────────────────────────────────────────────────────────
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.user.role !== "admin") {
@@ -744,6 +754,7 @@ export const appRouter = router({
   favorites: favoritesRouter,
   reports: reportsRouter,
   stats: statsRouter,
+  supplyStores: supplyStoresRouter,
   admin: adminRouter,
 });
 

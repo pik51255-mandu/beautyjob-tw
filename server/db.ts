@@ -11,6 +11,7 @@ import {
   reports,
   resumes,
   salonTransfers,
+  supplyStores,
   usedItems,
   users,
 } from "../drizzle/schema";
@@ -731,4 +732,26 @@ export async function getTableRowsForExport(table: ExportTableName): Promise<Rec
     for (const col of excluded) delete copy[col];
     return copy;
   });
+}
+
+// ─── Supply Stores (美材行 디렉토리 — 공개 읽기 전용) ─────────────────────────
+// 공공 오픈데이터 기반 참조 데이터라 쓰기 프로시저 없이 조회만 제공한다.
+export async function getSupplyStores() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: supplyStores.id,
+      name: supplyStores.name,
+      address: supplyStores.address,
+      district: supplyStores.district,
+      lat: supplyStores.lat,
+      lng: supplyStores.lng,
+      tier: supplyStores.tier,
+      phone: supplyStores.phone,
+      note: supplyStores.note,
+      coordSource: supplyStores.coordSource,
+    })
+    .from(supplyStores)
+    .orderBy(supplyStores.district, supplyStores.tier, supplyStores.name);
 }
