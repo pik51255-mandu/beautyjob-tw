@@ -10,6 +10,7 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import { anonymizeComments, anonymizeCommunityPost } from "./anonymize";
 import { resolveRoleForEmail } from "./adminBootstrap";
+import { toPublicUser } from "./publicUser";
 import { BANNED_KEYWORD_MESSAGE, USED_ITEM_CATEGORY_VALUES, findBannedKeyword } from "@shared/usedItemCatalog";
 
 // ─── Shared Enums ─────────────────────────────────────────────────────────────
@@ -56,7 +57,8 @@ function assertNoBannedKeywords(title: string, description: string) {
 
 // ─── Users Router ─────────────────────────────────────────────────────────────
 const usersRouter = router({
-  me: publicProcedure.query((opts) => opts.ctx.user),
+  // 보안 감사 #3: DB 행을 그대로 노출하지 않는다 (passwordHash 등 제외)
+  me: publicProcedure.query((opts) => toPublicUser(opts.ctx.user)),
 
   updateProfile: protectedProcedure
     .input(
@@ -692,7 +694,7 @@ export const appRouter = router({
         });
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
-        return { success: true, user };
+        return { success: true, user: toPublicUser(user) };
       }),
 
     // 이메일 회원가입
@@ -729,7 +731,7 @@ export const appRouter = router({
         });
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
-        return { success: true, user };
+        return { success: true, user: toPublicUser(user) };
       }),
   }),
   users: usersRouter,
