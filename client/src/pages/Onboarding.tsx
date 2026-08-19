@@ -87,7 +87,7 @@ export default function Onboarding() {
           </div>
           <h1 className="text-2xl font-bold">完善個人資料</h1>
           <p className="text-muted-foreground mt-2">
-            {selectedRole === "salon_owner" ? "沙龍老闆" : "求職者"} 身份設定
+            {selectedRole === "salon_owner" ? "老闆" : "設計師"} 身份設定
           </p>
         </div>
 
