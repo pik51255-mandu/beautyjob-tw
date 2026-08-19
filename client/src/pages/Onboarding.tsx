@@ -164,7 +164,7 @@ export default function Onboarding() {
         </div>
         <h1 className="text-3xl font-bold">歡迎加入！</h1>
         <p className="text-muted-foreground mt-3 text-lg">
-          請選擇您的使用身份，以獲得最適合的體驗
+          請選擇您的會員身分。
         </p>
       </div>
 
@@ -176,22 +176,22 @@ export default function Onboarding() {
           <div className="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-primary/10 transition-colors">
             <Store className="w-8 h-8 text-rose-600 group-hover:text-primary transition-colors" />
           </div>
-          <h2 className="text-xl font-bold mb-2">沙龍老闆</h2>
+          <h2 className="text-xl font-bold mb-2">老闆</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            我想要刊登職缺、搜尋人才，以及管理我的沙龍資訊
+            我是美髮沙龍的經營者。
           </p>
           <ul className="mt-4 space-y-1.5 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              刊登職缺廣告
+              參與老闆專區交流
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              搜尋求職者履歷
+              使用經營工具（損益模擬、開店費用、藥水成本）
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              發布店面頂讓資訊
+              掌握台灣美髮產業資訊
             </li>
           </ul>
         </button>
@@ -203,22 +203,22 @@ export default function Onboarding() {
           <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-primary/10 transition-colors">
             <User className="w-8 h-8 text-amber-600 group-hover:text-primary transition-colors" />
           </div>
-          <h2 className="text-xl font-bold mb-2">求職者</h2>
+          <h2 className="text-xl font-bold mb-2">設計師</h2>
           <p className="text-muted-foreground text-sm leading-relaxed">
-            我是設計師、助理或其他美髮從業人員，正在尋找工作機會
+            我是設計師、助理等美髮從業人員。
           </p>
           <ul className="mt-4 space-y-1.5 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              建立個人履歷
+              參與社群與同行交流
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              搜尋職缺資訊
+              使用薪資計算機等實用工具
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              收藏喜愛職缺
+              掌握台灣美髮產業資訊
             </li>
           </ul>
         </button>
