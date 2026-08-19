@@ -260,3 +260,30 @@ export const reports = mysqlTable("reports", {
 
 export type Report = typeof reports.$inferSelect;
 export type InsertReport = typeof reports.$inferInsert;
+
+// ─── Supply Stores (美材行 — 공공 오픈데이터 기반 디렉토리) ─────────────────────
+// 회원 게시물이 아니라 정부 공개자료로 구축한 참조 데이터라 authorId 가 없다.
+// 출처: 經濟部 商工行政資料開放平臺(업종·주소) + 高雄市政府 民政局 門牌坐標(좌표)
+export const supplyStores = mysqlTable("supply_stores", {
+  id: int("id").autoincrement().primaryKey(),
+  // 統一編號 — 공공자료의 자연키. upsert 기준이라 unique.
+  taxId: varchar("taxId", { length: 8 }).notNull().unique(),
+  name: varchar("name", { length: 200 }).notNull(),
+  address: varchar("address", { length: 300 }).notNull(),
+  district: varchar("district", { length: 20 }).notNull(),
+  lat: decimal("lat", { precision: 9, scale: 6 }).notNull(),
+  lng: decimal("lng", { precision: 9, scale: 6 }).notNull(),
+  // 1 = 웹 실측검증(已驗證) / 2 = 등기기반(登記資料)
+  tier: int("tier").notNull(),
+  phone: varchar("phone", { length: 40 }),
+  note: text("note"),
+  coordSource: varchar("coordSource", { length: 100 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  index("idx_supply_district").on(table.district),
+  index("idx_supply_tier").on(table.tier),
+]);
+
+export type SupplyStore = typeof supplyStores.$inferSelect;
+export type InsertSupplyStore = typeof supplyStores.$inferInsert;
