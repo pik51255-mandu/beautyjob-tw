@@ -8,6 +8,10 @@ export const FEATURES = {
   TRANSFER_ENABLED: false,
   // 開店成本試算器의 "看店面頂讓物件" CTA — TRANSFER_ENABLED 재오픈 전까지 false 유지
   TRANSFER_CTA_ENABLED: false,
+  // 二手器材 게시판 잠금 (D-2). 재오픈 조건 — 거래 분쟁 대응 방침 확정 후 별도 지시.
+  USED_ITEMS_ENABLED: false,
+  // LINE 로그인 잠금 (D-2a). 재활성 조건 — beautyjob.tw DNS 연결 + LINE 콘솔 콜백 등록.
+  LINE_LOGIN_ENABLED: false,
 } as const;
 export const ONE_YEAR_MS = 1000 * 60 * 60 * 24 * 365;
 export const AXIOS_TIMEOUT_MS = 30_000;

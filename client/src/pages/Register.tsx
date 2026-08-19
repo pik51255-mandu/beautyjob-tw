@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { trpc } from "@/lib/trpc";
+import { FEATURES } from "@shared/const";
 import { toast } from "sonner";
 
 export default function Register() {
@@ -85,7 +86,10 @@ export default function Register() {
             <CardDescription>加入台灣最大美髮求職平台</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* LINE Register Button (準備中) */}
+            {/* LINE Register Button — FEATURES.LINE_LOGIN_ENABLED 로 잠금 (D-2a).
+                재활성 조건: beautyjob.tw DNS 연결 + LINE 콘솔 콜백 등록.
+                코드는 보존하고 조건부 렌더만 한다. */}
+            {FEATURES.LINE_LOGIN_ENABLED ? (
             <Button
               variant="outline"
               className="w-full h-11 border-[#06C755] text-[#06C755] hover:bg-[#06C755] hover:text-white transition-colors"
@@ -97,6 +101,11 @@ export default function Register() {
               </svg>
               使用 LINE 快速註冊
             </Button>
+            ) : (
+              <p className="text-center text-xs text-muted-foreground">
+                LINE 登入將於正式網域開通
+              </p>
+            )}
 
             <div className="relative">
               <Separator />
