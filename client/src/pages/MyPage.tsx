@@ -18,12 +18,12 @@ export default function MyPage() {
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
 
-  const { data: myJobs } = trpc.jobPosts.myPosts.useQuery(undefined, { enabled: isAuthenticated });
-  const { data: myResume } = trpc.resumes.mine.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: myJobs } = trpc.jobPosts.myPosts.useQuery(undefined, { enabled: isAuthenticated && FEATURES.JOBS_ENABLED });
+  const { data: myResume } = trpc.resumes.mine.useQuery(undefined, { enabled: isAuthenticated && FEATURES.JOBS_ENABLED });
   const { data: myFavorites } = trpc.favorites.list.useQuery({}, { enabled: isAuthenticated });
   const { data: myTransfers } = trpc.salonTransfers.myPosts.useQuery(undefined, { enabled: isAuthenticated && FEATURES.TRANSFER_ENABLED });
   const { data: myCommunityPosts } = trpc.community.myPosts.useQuery(undefined, { enabled: isAuthenticated });
-  const { data: myUsedItems } = trpc.usedItems.myPosts.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: myUsedItems } = trpc.usedItems.myPosts.useQuery(undefined, { enabled: isAuthenticated && FEATURES.USED_ITEMS_ENABLED });
 
   const removeJobPost = trpc.jobPosts.delete.useMutation({
     onSuccess: () => { toast.success("已刪除"); utils.jobPosts.myPosts.invalidate(); },
@@ -114,7 +114,10 @@ export default function MyPage() {
           { icon: Heart, label: "我的收藏", count: myFavorites?.length ?? 0, tab: "favorites" },
           ...(FEATURES.TRANSFER_ENABLED
             ? [{ icon: Store, label: "我的頂讓", count: myTransfers?.length ?? 0, tab: "transfers" }]
-            : [{ icon: ShoppingBag, label: "我的二手", count: myUsedItems?.length ?? 0, tab: "transfers" }]),
+            : []),
+          ...(FEATURES.USED_ITEMS_ENABLED
+            ? [{ icon: ShoppingBag, label: "我的二手", count: myUsedItems?.length ?? 0, tab: "transfers" }]
+            : []),
         ].map((stat) => (
           <div
             key={stat.label}
@@ -133,7 +136,11 @@ export default function MyPage() {
           {FEATURES.JOBS_ENABLED && <TabsTrigger value="resume">我的履歷</TabsTrigger>}
           <TabsTrigger value="posts">我的文章</TabsTrigger>
           <TabsTrigger value="favorites">我的收藏</TabsTrigger>
-          <TabsTrigger value="transfers">{FEATURES.TRANSFER_ENABLED ? "頂讓/二手" : "我的二手"}</TabsTrigger>
+          {(FEATURES.TRANSFER_ENABLED || FEATURES.USED_ITEMS_ENABLED) && (
+            <TabsTrigger value="transfers">
+              {FEATURES.TRANSFER_ENABLED && FEATURES.USED_ITEMS_ENABLED ? "頂讓/二手" : FEATURES.TRANSFER_ENABLED ? "我的頂讓" : "我的二手"}
+            </TabsTrigger>
+          )}
         </TabsList>
 
         {/* My Job Posts */}
@@ -303,7 +310,7 @@ export default function MyPage() {
               )}
             </div>}
 
-            <div>
+            {FEATURES.USED_ITEMS_ENABLED && <div>
               <div className="flex justify-between items-center mb-4">
                 <h2 className="font-semibold">我的二手商品</h2>
                 <Button size="sm" asChild><Link href="/used-items/new">刊登二手</Link></Button>
@@ -329,7 +336,7 @@ export default function MyPage() {
                   <p>尚未刊登二手商品</p>
                 </div>
               )}
-            </div>
+            </div>}
           </div>
         </TabsContent>
       </Tabs>

@@ -36,6 +36,7 @@ const CommunityDetail = lazy(() => import("./pages/CommunityDetail"));
 const CommunityForm = lazy(() => import("./pages/CommunityForm"));
 const Transfers = lazy(() => import("./pages/Transfers"));
 const TransfersComingSoon = lazy(() => import("./pages/TransfersComingSoon"));
+const UsedItemsComingSoon = lazy(() => import("./pages/UsedItemsComingSoon"));
 const TransferDetail = lazy(() => import("./pages/TransferDetail"));
 const TransferForm = lazy(() => import("./pages/TransferForm"));
 const UsedItems = lazy(() => import("./pages/UsedItems"));
@@ -134,11 +135,20 @@ function Router() {
           </>
         )}
 
-        {/* Used Items */}
-        <Route path="/used-items" component={() => <Layout><UsedItems /></Layout>} />
-        <Route path="/used-items/new" component={() => <Layout><UsedItemForm /></Layout>} />
-        <Route path="/used-items/:id/edit" component={() => <Layout><UsedItemForm /></Layout>} />
-        <Route path="/used-items/:id" component={() => <Layout><UsedItemDetail /></Layout>} />
+        {/* Used Items — D-2: 잠금 시 모든 二手 URL이 整備中 페이지 (재오픈: 거래 분쟁 대응 방침 확정 후 별도 지시) */}
+        {FEATURES.USED_ITEMS_ENABLED ? (
+          <>
+            <Route path="/used-items" component={() => <Layout><UsedItems /></Layout>} />
+            <Route path="/used-items/new" component={() => <Layout><UsedItemForm /></Layout>} />
+            <Route path="/used-items/:id/edit" component={() => <Layout><UsedItemForm /></Layout>} />
+            <Route path="/used-items/:id" component={() => <Layout><UsedItemDetail /></Layout>} />
+          </>
+        ) : (
+          <>
+            <Route path="/used-items/:rest*" component={() => <Layout><UsedItemsComingSoon /></Layout>} />
+            <Route path="/used-items" component={() => <Layout><UsedItemsComingSoon /></Layout>} />
+          </>
+        )}
 
         {/* MyPage */}
         <Route path="/mypage/:tab?" component={() => <Layout><MyPage /></Layout>} />

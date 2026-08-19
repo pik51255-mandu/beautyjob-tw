@@ -19,6 +19,7 @@ import DisclaimerBanner from "@/components/DisclaimerBanner";
 import { COMMUNITY_CATEGORY_LABELS } from "@shared/constants";
 import { formatDistanceToNow } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import { FEATURES } from "@shared/const";
 
 // v4 커뮤니티 런칭: Phase 1 메뉴 7종
 const FEATURES_GRID = [
@@ -64,13 +65,16 @@ const FEATURES_GRID = [
     href: "/supply-map",
     color: "bg-sky-50 text-sky-600",
   },
-  {
-    icon: Package,
-    title: "二手器材",
-    desc: "美髮椅、烘罩、剪刀等二手器材資訊，省錢又環保",
-    href: "/used-items",
-    color: "bg-indigo-50 text-indigo-600",
-  },
+  // 二手器材 — D-2 잠금 중에는 카드 자체를 노출하지 않는다 (FEATURES.USED_ITEMS_ENABLED)
+  ...(FEATURES.USED_ITEMS_ENABLED
+    ? [{
+        icon: Package,
+        title: "二手器材",
+        desc: "美髮椅、烘罩、剪刀等二手器材資訊，省錢又環保",
+        href: "/used-items",
+        color: "bg-indigo-50 text-indigo-600",
+      }]
+    : []),
 ];
 
 export default function Home() {
@@ -119,11 +123,14 @@ export default function Home() {
       {/* Stats */}
       <section className="border-y border-border bg-white">
         <div className="container py-8">
-          <div className="grid grid-cols-3 gap-6">
+          <div className={`grid gap-6 ${FEATURES.USED_ITEMS_ENABLED ? "grid-cols-3" : "grid-cols-2"}`}>
             {[
               { label: "社群討論", value: platformStats?.communityCount ?? 0, suffix: "+" },
               { label: "會員", value: platformStats?.memberCount ?? 0, suffix: "+" },
-              { label: "二手器材", value: platformStats?.usedItemCount ?? 0, suffix: "+" },
+              // 二手器材 카운트 — D-2 잠금 중 미노출
+              ...(FEATURES.USED_ITEMS_ENABLED
+                ? [{ label: "二手器材", value: platformStats?.usedItemCount ?? 0, suffix: "+" }]
+                : []),
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-3xl font-bold text-primary">

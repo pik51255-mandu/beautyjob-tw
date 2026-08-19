@@ -9,6 +9,7 @@ import { sdk } from "./_core/sdk";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import { anonymizeComments, anonymizeCommunityPost } from "./anonymize";
+import { resolveRoleForEmail } from "./adminBootstrap";
 import { BANNED_KEYWORD_MESSAGE, USED_ITEM_CATEGORY_VALUES, findBannedKeyword } from "@shared/usedItemCatalog";
 
 // ─── Shared Enums ─────────────────────────────────────────────────────────────
@@ -35,6 +36,13 @@ function assertJobsEnabled() {
 function assertTransfersEnabled() {
   if (!FEATURES.TRANSFER_ENABLED) {
     throw new TRPCError({ code: "PRECONDITION_FAILED", message: "店面頂讓功能整備中" });
+  }
+}
+
+// 二手器材 잠금 가드 (D-2) — 재오픈 조건: 거래 분쟁 대응 방침 확정 후 별도 지시
+function assertUsedItemsEnabled() {
+  if (!FEATURES.USED_ITEMS_ENABLED) {
+    throw new TRPCError({ code: "PRECONDITION_FAILED", message: "二手器材功能整備中" });
   }
 }
 
@@ -83,12 +91,16 @@ const jobPostsRouter = router({
       })
     )
     .query(async ({ input }) => {
+      // 읽기 정합성 (D-2): 잠금 중에는 에러 대신 빈 결과 — 프론트 크래시 방지
+      if (!FEATURES.JOBS_ENABLED) return { posts: [], total: 0 };
       return db.getJobPosts(input);
     }),
 
   byId: publicProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
+      // 읽기 정합성 (D-2): 잠금 중에는 조회수 증가 없이 null
+      if (!FEATURES.JOBS_ENABLED) return null;
       await db.incrementJobViewCount(input.id);
       const post = await db.getJobPostById(input.id);
       if (!post) throw new TRPCError({ code: "NOT_FOUND", message: "職缺不存在" });
@@ -343,12 +355,16 @@ const salonTransfersRouter = router({
       })
     )
     .query(async ({ input }) => {
+      // 읽기 정합성 (D-2): 잠금 중에는 에러 대신 빈 결과 — 프론트 크래시 방지
+      if (!FEATURES.TRANSFER_ENABLED) return { posts: [], total: 0 };
       return db.getSalonTransfers(input);
     }),
 
   byId: publicProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
+      // 읽기 정합성 (D-2): 잠금 중에는 조회수 증가 없이 null
+      if (!FEATURES.TRANSFER_ENABLED) return null;
       await db.incrementSalonTransferViewCount(input.id);
       const post = await db.getSalonTransferById(input.id);
       if (!post) throw new TRPCError({ code: "NOT_FOUND", message: "頂讓資訊不存在" });
@@ -432,12 +448,16 @@ const usedItemsRouter = router({
       })
     )
     .query(async ({ input }) => {
+      // 읽기 정합성 (D-2): 잠금 중에는 에러 대신 빈 결과 — 프론트 크래시 방지
+      if (!FEATURES.USED_ITEMS_ENABLED) return { items: [], total: 0 };
       return db.getUsedItems(input);
     }),
 
   byId: publicProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
+      // 읽기 정합성 (D-2): 잠금 중에는 조회수 증가 없이 null
+      if (!FEATURES.USED_ITEMS_ENABLED) return null;
       await db.incrementUsedItemViewCount(input.id);
       const item = await db.getUsedItemById(input.id);
       if (!item) throw new TRPCError({ code: "NOT_FOUND", message: "商品不存在" });
@@ -456,6 +476,7 @@ const usedItemsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      assertUsedItemsEnabled();
       assertNoBannedKeywords(input.title, input.description);
       await db.createUsedItem({
         ...input,
@@ -476,6 +497,7 @@ const usedItemsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      assertUsedItemsEnabled();
       assertNoBannedKeywords(input.title ?? "", input.description ?? "");
       const { id, price, ...rest } = input;
       await db.updateUsedItem(id, ctx.user.id, {
@@ -488,6 +510,7 @@ const usedItemsRouter = router({
   delete: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
+      assertUsedItemsEnabled();
       await db.deleteUsedItem(input.id, ctx.user.id);
       return { success: true };
     }),
@@ -657,7 +680,12 @@ export const appRouter = router({
         if (!valid) {
           throw new TRPCError({ code: "UNAUTHORIZED", message: "帳號或密碼錯誤" });
         }
-        await db.upsertUser({ openId: user.openId, lastSignedIn: new Date() });
+        // 관리자 부트스트랩 (D-2b): ADMIN_EMAILS 포함 시 승격, 기존 admin 은 강등하지 않음
+        await db.upsertUser({
+          openId: user.openId,
+          lastSignedIn: new Date(),
+          role: resolveRoleForEmail(user.email, user.role),
+        });
         const sessionToken = await sdk.createSessionToken(user.openId, {
           name: user.name || "",
           expiresInMs: ONE_YEAR_MS,
@@ -690,6 +718,8 @@ export const appRouter = router({
           lastSignedIn: new Date(),
           passwordHash,
           memberType: input.memberType ?? null,
+          // 관리자 부트스트랩 (D-2b): ADMIN_EMAILS 포함 시 가입 즉시 admin
+          role: resolveRoleForEmail(input.email, null),
         });
         const user = await db.getUserByOpenId(openId);
         if (!user) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "註冊失敗" });

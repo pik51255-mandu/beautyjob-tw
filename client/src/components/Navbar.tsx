@@ -22,7 +22,7 @@ const NAV_LINKS = [
   { href: "/korean-techniques", label: "韓國技術" },
   { href: "/supply-map", label: "美材行地圖" },
   ...(FEATURES.TRANSFER_ENABLED ? [{ href: "/transfers", label: "店面頂讓" }] : []),
-  { href: "/used-items", label: "二手器材" },
+  ...(FEATURES.USED_ITEMS_ENABLED ? [{ href: "/used-items", label: "二手器材" }] : []),
   ...(FEATURES.JOBS_ENABLED ? [{ href: "/jobs", label: "徵才專區" }] : []),
 ];
 
