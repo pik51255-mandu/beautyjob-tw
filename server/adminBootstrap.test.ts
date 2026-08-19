@@ -47,3 +47,41 @@ describe("resolveRoleForEmail — 3분기", () => {
     expect(resolveRoleForEmail("someone@example.com", "admin", undefined)).toBe("admin");
   });
 });
+
+describe("승격 우회 시도 — 변형 이메일 (보안 감사 #1)", () => {
+  const LIST = "owner@example.com";
+
+  it("대문자 변형은 정규화되어 승격된다 (동일 주소)", () => {
+    expect(isAdminEmail("OWNER@EXAMPLE.COM", LIST)).toBe(true);
+  });
+
+  it("앞뒤 공백은 정규화되어 승격된다 (동일 주소)", () => {
+    expect(isAdminEmail("  owner@example.com  ", LIST)).toBe(true);
+  });
+
+  it("전각 문자는 NFKC 로 정준화되어 동일 주소로 취급된다", () => {
+    // ｏｗｎｅｒ＠ｅｘａｍｐｌｅ．ｃｏｍ (전각)
+    expect(isAdminEmail("ｏｗｎｅｒ＠ｅｘａｍｐｌｅ．ｃｏｍ", LIST)).toBe(true);
+  });
+
+  it("키릴 유사문자(о)는 승격되지 않는다", () => {
+    expect(isAdminEmail("\u043Ewner@example.com", LIST)).toBe(false);
+  });
+
+  it("그리스 유사문자(ο)는 승격되지 않는다", () => {
+    expect(isAdminEmail("\u03BFwner@example.com", LIST)).toBe(false);
+  });
+
+  it("플러스 별칭은 다른 주소이므로 승격되지 않는다", () => {
+    expect(isAdminEmail("owner+admin@example.com", LIST)).toBe(false);
+  });
+
+  it("점 삽입 변형은 다른 주소이므로 승격되지 않는다", () => {
+    expect(isAdminEmail("own.er@example.com", LIST)).toBe(false);
+  });
+
+  it("부분 일치는 승격되지 않는다", () => {
+    expect(isAdminEmail("notowner@example.com", LIST)).toBe(false);
+    expect(isAdminEmail("owner@example.com.evil.com", LIST)).toBe(false);
+  });
+});

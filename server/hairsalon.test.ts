@@ -267,6 +267,28 @@ describe("usedItems banned keyword (D-1) — 로직 단위", () => {
 
 // 읽기 정합성 (D-2): 플래그 false 라우터의 list/byId 는 에러가 아니라 빈 결과를 준다.
 // 프론트가 잠금 상태에서도 크래시하지 않게 하기 위한 계약. 플래그를 true 로 바꾸면 원복된다.
+// 보안 감사 #3: 사용자 객체를 반환하는 경로에 자격증명 재료가 실리지 않아야 한다.
+describe("auth 응답에 passwordHash 부재 (보안 감사 #3)", () => {
+  it("auth.me 는 비로그인 시 null", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    await expect(caller.auth.me()).resolves.toBeNull();
+  });
+
+  it("auth.me 응답에 passwordHash 가 없다", async () => {
+    const caller = appRouter.createCaller(makeAuthCtx());
+    const me = await caller.auth.me();
+    expect(me).not.toBeNull();
+    expect(JSON.stringify(me)).not.toContain("passwordHash");
+  });
+
+  it("auth.me 는 화이트리스트 필드만 노출한다", async () => {
+    const caller = appRouter.createCaller(makeAuthCtx());
+    const me = (await caller.auth.me()) as Record<string, unknown>;
+    expect(Object.keys(me)).not.toContain("passwordHash");
+    expect(me.id).toBe(1);
+  });
+});
+
 describe("flag-off 라우터 읽기 정합성 (D-2)", () => {
   it("jobPosts.list 는 빈 목록", async () => {
     const caller = appRouter.createCaller(makeCtx());

@@ -1,4 +1,9 @@
 import "dotenv/config";
+import { assertRequiredSecrets } from "./secretGuard";
+
+// 보안 감사 #2: 필수 시크릿이 없으면 어떤 초기화보다 먼저 기동을 막는다.
+assertRequiredSecrets();
+
 import express from "express";
 import { createServer } from "http";
 import net from "net";

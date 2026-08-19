@@ -15,13 +15,15 @@ import {
   users,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
+import { buildDbConfig } from "./dbUrl";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      // 보안 감사 #12: URL 문자열 대신 ssl 명시 설정으로 접속한다.
+      _db = drizzle({ connection: buildDbConfig(process.env.DATABASE_URL) });
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
