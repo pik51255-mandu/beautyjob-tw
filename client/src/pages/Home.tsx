@@ -99,8 +99,8 @@ export default function Home() {
               <span className="text-primary">就在台灣美髮社群</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed max-w-2xl">
-              專為台灣美髮業打造的資訊交流社群。技術分享、薪資情報、教育課程一次掌握，
-              台灣美髮人的社群與實用工具平台
+              專為台灣美髮業打造的資訊交流社群。技術分享、薪資情報、教育課程一次掌握。
+              台灣美髮人的社群與實用工具平台。
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <Button size="lg" asChild className="text-base">
