@@ -88,8 +88,8 @@ h2{font-size:19px;margin:26px 0 10px}
 .map{height:320px;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:10px 0}
 .list a{display:block;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin:6px 0;color:var(--fg)}
 .list a:hover{border-color:var(--pri);text-decoration:none}
-.list .nm{font-weight:600}
-.list .ad{font-size:13px;color:var(--mut)}
+.list .nm{font-weight:600;display:block}
+.list .ad{font-size:13px;color:var(--mut);display:block;margin-top:2px}
 footer.site{border-top:1px solid var(--line);margin-top:36px;padding:18px 0;color:var(--mut);font-size:12.5px}
 .parking li{margin:8px 0}
 .sticky-map{position:sticky;top:64px}
