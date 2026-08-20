@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { MapPin, Phone, ShieldCheck, FileText } from "lucide-react";
+import { MapPin, Phone, ShieldCheck, FileText, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
+import { defaultExpandedDistricts, groupByDistrict, toggleDistrict } from "@/lib/supplyGroups";
 
 // 美材行 지도 — Leaflet + OpenStreetMap 타일(무키).
 // 좌표는 高雄市 民政局 門牌坐標 조인 결과, 업체 목록은 經濟部 商工行政 공개자료 기반.
@@ -49,7 +50,10 @@ export default function SupplyMap() {
   const mapEl = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Record<number, L.Marker>>({});
+  const cardRefs = useRef<Record<number, HTMLButtonElement | null>>({});
   const [activeId, setActiveId] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [pendingScrollId, setPendingScrollId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!mapEl.current || mapRef.current) return;
@@ -88,7 +92,12 @@ export default function SupplyMap() {
            <div style="margin-top:6px;font-size:11px;color:${style.color}">${style.label}</div>
          </div>`
       );
-      marker.on("click", () => setActiveId(s.id));
+      marker.on("click", () => {
+        // 마커 → 목록 역방향 연동: 소속 행정구를 펼치고 해당 카드로 스크롤
+        setActiveId(s.id);
+        setExpanded((prev) => (prev.has(s.district) ? prev : new Set(prev).add(s.district)));
+        setPendingScrollId(s.id);
+      });
       markersRef.current[s.id] = marker;
       bounds.push([lat, lng]);
     }
@@ -104,14 +113,34 @@ export default function SupplyMap() {
     setActiveId(s.id);
   }
 
-  const byDistrict = useMemo(() => {
-    const groups = new Map<string, Store[]>();
-    for (const s of stores) {
-      if (!groups.has(s.district)) groups.set(s.district, []);
-      groups.get(s.district)!.push(s);
-    }
-    return Array.from(groups.entries()).sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
-  }, [stores]);
+  const byDistrict = useMemo(() => groupByDistrict(stores), [stores]);
+
+  // 최초 로드 시 건수 1위 행정구만 펼쳐 둔다
+  const initializedRef = useRef(false);
+  useEffect(() => {
+    if (initializedRef.current || byDistrict.length === 0) return;
+    initializedRef.current = true;
+    setExpanded(new Set(defaultExpandedDistricts(byDistrict)));
+  }, [byDistrict]);
+
+  // 펼침이 반영된 뒤에 카드가 존재하므로 렌더 후 스크롤한다
+  useEffect(() => {
+    if (pendingScrollId === null) return;
+    cardRefs.current[pendingScrollId]?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setPendingScrollId(null);
+  }, [pendingScrollId, expanded]);
+
+  function toggleDistrictPanel(district: string, list: Store[]) {
+    const willOpen = !expanded.has(district);
+    setExpanded(toggleDistrict(expanded, district));
+    if (!willOpen) return;
+    const map = mapRef.current;
+    if (!map) return;
+    const bounds = list
+      .map((s) => [Number(s.lat), Number(s.lng)] as [number, number])
+      .filter(([lat, lng]) => Number.isFinite(lat) && Number.isFinite(lng));
+    if (bounds.length) map.fitBounds(bounds, { padding: [28, 28] });
+  }
 
   const verified = stores.filter((s) => s.tier === 1).length;
 
@@ -142,47 +171,72 @@ export default function SupplyMap() {
       />
       {isLoading && <p className="text-sm text-muted-foreground mt-3">地圖資料載入中…</p>}
 
-      <div className="mt-8 space-y-6">
-        {byDistrict.map(([district, list]) => (
-          <div key={district}>
-            <h2 className="font-semibold mb-3 flex items-center gap-2">
-              {district}
-              <span className="text-xs font-normal text-muted-foreground">{list.length} 家</span>
-            </h2>
-            <div className="space-y-2">
-              {list.map((s: Store) => {
-                const style = TIER_STYLE[s.tier] ?? TIER_STYLE[2];
-                return (
-                  <button
-                    key={s.id}
-                    onClick={() => focusStore(s)}
-                    className={`w-full text-left bg-white rounded-xl border p-4 transition-colors hover:border-primary/50 ${
-                      activeId === s.id ? "border-primary" : "border-border"
+      <div className="mt-8 space-y-3">
+        {byDistrict.map(([district, list]) => {
+          const isOpen = expanded.has(district);
+          const panelId = `district-panel-${district}`;
+          return (
+            <div key={district} className="border border-border rounded-xl overflow-hidden bg-white">
+              <h2>
+                <button
+                  type="button"
+                  onClick={() => toggleDistrictPanel(district, list)}
+                  aria-expanded={isOpen}
+                  aria-controls={isOpen ? panelId : undefined}
+                  data-testid={`district-toggle-${district}`}
+                  className="w-full min-h-[44px] px-4 py-3 flex items-center gap-2 text-left font-semibold transition-colors hover:bg-muted/50"
+                >
+                  <ChevronDown
+                    className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform ${
+                      isOpen ? "rotate-180" : ""
                     }`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="font-medium truncate">{s.name}</div>
-                        <div className="text-sm text-muted-foreground mt-1 break-all">{s.address}</div>
-                        {s.phone && (
-                          <div className="text-sm mt-1 flex items-center gap-1 text-primary">
-                            <Phone className="w-3.5 h-3.5" /> {s.phone}
-                          </div>
-                        )}
-                      </div>
-                      <span
-                        className="text-xs shrink-0 px-2 py-1 rounded-md"
-                        style={{ color: style.color, backgroundColor: `${style.color}14` }}
+                    aria-hidden="true"
+                  />
+                  {district}
+                  <span className="text-xs font-normal text-muted-foreground">{list.length} 家</span>
+                </button>
+              </h2>
+              {isOpen && (
+                <div id={panelId} role="region" className="px-4 pb-4 space-y-2">
+                  {list.map((s: Store) => {
+                    const style = TIER_STYLE[s.tier] ?? TIER_STYLE[2];
+                    return (
+                      <button
+                        key={s.id}
+                        ref={(el) => {
+                          cardRefs.current[s.id] = el;
+                        }}
+                        onClick={() => focusStore(s)}
+                        data-testid={`store-card-${s.id}`}
+                        className={`w-full text-left bg-white rounded-xl border p-4 transition-colors hover:border-primary/50 ${
+                          activeId === s.id ? "border-primary" : "border-border"
+                        }`}
                       >
-                        {style.label}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="font-medium truncate">{s.name}</div>
+                            <div className="text-sm text-muted-foreground mt-1 break-all">{s.address}</div>
+                            {s.phone && (
+                              <div className="text-sm mt-1 flex items-center gap-1 text-primary">
+                                <Phone className="w-3.5 h-3.5" /> {s.phone}
+                              </div>
+                            )}
+                          </div>
+                          <span
+                            className="text-xs shrink-0 px-2 py-1 rounded-md"
+                            style={{ color: style.color, backgroundColor: `${style.color}14` }}
+                          >
+                            {style.label}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <p className="text-xs text-muted-foreground mt-10 leading-relaxed">
