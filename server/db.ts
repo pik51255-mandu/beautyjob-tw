@@ -11,6 +11,7 @@ import {
   reports,
   resumes,
   salonTransfers,
+  salons,
   supplyStores,
   usedItems,
   users,
@@ -754,4 +755,98 @@ export async function getSupplyStores() {
     })
     .from(supplyStores)
     .orderBy(supplyStores.district, supplyStores.tier, supplyStores.name);
+}
+
+// ─── Salons (公開資料 기반 참조 테이블) ───────────────────────────────────────
+// 負責人 성명은 스키마에 없으므로 어떤 조회에서도 나갈 수 없다.
+
+export type SalonParking = {
+  name: string;
+  kind: string;
+  distance: number;
+  fee: string | null;
+  moto: string | null;
+};
+
+export type SalonRow = {
+  taxId: string;
+  name: string;
+  address: string;
+  district: string;
+  lat: string | null;
+  lng: string | null;
+  foundedYear: number | null;
+  parking: SalonParking[];
+};
+
+function toSalonRow(r: {
+  taxId: string; name: string; address: string; district: string;
+  lat: string | null; lng: string | null; foundedYear: number | null; parkingJson: string | null;
+}): SalonRow {
+  let parking: SalonParking[] = [];
+  if (r.parkingJson) {
+    try {
+      const parsed = JSON.parse(r.parkingJson);
+      if (Array.isArray(parsed)) parking = parsed as SalonParking[];
+    } catch {
+      parking = [];
+    }
+  }
+  return {
+    taxId: r.taxId, name: r.name, address: r.address, district: r.district,
+    lat: r.lat, lng: r.lng, foundedYear: r.foundedYear, parking,
+  };
+}
+
+const SALON_COLS = {
+  taxId: salons.taxId,
+  name: salons.name,
+  address: salons.address,
+  district: salons.district,
+  lat: salons.lat,
+  lng: salons.lng,
+  foundedYear: salons.foundedYear,
+  parkingJson: salons.parkingJson,
+};
+
+export async function getSalonByTaxId(taxId: string): Promise<SalonRow | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select(SALON_COLS).from(salons).where(eq(salons.taxId, taxId)).limit(1);
+  return rows.length ? toSalonRow(rows[0]) : null;
+}
+
+export async function listSalonsByDistrict(district: string, limit = 5000): Promise<SalonRow[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select(SALON_COLS).from(salons)
+    .where(eq(salons.district, district)).orderBy(salons.name).limit(limit);
+  return rows.map(toSalonRow);
+}
+
+/** 같은 구의 다른 살롱 — 내부 링크망용. 자기 자신은 제외. */
+export async function listNearbySalons(district: string, excludeTaxId: string, limit = 5) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({ taxId: salons.taxId, name: salons.name, address: salons.address })
+    .from(salons)
+    .where(and(eq(salons.district, district), sql`${salons.taxId} <> ${excludeTaxId}`))
+    .limit(limit);
+  return rows;
+}
+
+export async function countSalonsByDistrict(): Promise<{ district: string; count: number }[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({ district: salons.district, count: sql<number>`COUNT(*)` })
+    .from(salons).groupBy(salons.district);
+  return rows.map((r) => ({ district: r.district, count: Number(r.count) }))
+    .sort((a, b) => b.count - a.count || a.district.localeCompare(b.district));
+}
+
+export async function countSalons(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db.select({ c: sql<number>`COUNT(*)` }).from(salons);
+  return Number(rows[0]?.c ?? 0);
 }

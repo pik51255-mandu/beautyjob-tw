@@ -287,3 +287,33 @@ export const supplyStores = mysqlTable("supply_stores", {
 
 export type SupplyStore = typeof supplyStores.$inferSelect;
 export type InsertSupplyStore = typeof supplyStores.$inferInsert;
+
+// ─── 高雄市 미용실 (公開資料 기반 참조 테이블) ────────────────────────────────
+// 출처: 經濟部 商工行政資料開放平臺(업체·주소·설립일) + KCG 民政局 門牌坐標(좌표).
+// 負責人(대표자) 성명은 적법성 판정에 따라 저장하지 않는다 — 컬럼 자체를 두지 않음.
+// 공개 참조 데이터라 authorId 없음(supply_stores 와 동일 성격).
+export const salons = mysqlTable("salons", {
+  id: int("id").autoincrement().primaryKey(),
+  // 統一編號 — 공공자료의 자연키. upsert 기준이라 unique.
+  taxId: varchar("taxId", { length: 8 }).notNull().unique(),
+  name: varchar("name", { length: 200 }).notNull(),
+  address: varchar("address", { length: 300 }).notNull(),
+  district: varchar("district", { length: 20 }).notNull(),
+  // 門牌 조인 실패분(68건)은 좌표 null 로 남긴다 — 보간·중심점 대체 금지.
+  lat: decimal("lat", { precision: 9, scale: 6 }),
+  lng: decimal("lng", { precision: 9, scale: 6 }),
+  // 設立日期(민국력)를 서기 연도로 변환해 저장.
+  foundedYear: int("foundedYear"),
+  // "문패" | "미매칭"
+  geoAccuracy: varchar("geoAccuracy", { length: 20 }).notNull(),
+  coordSource: varchar("coordSource", { length: 100 }),
+  // 적재 시점에 사전 계산한 200m 내 주차장 최대 3곳. 런타임 지오 연산을 하지 않기 위함.
+  parkingJson: text("parkingJson"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  index("idx_salons_district").on(table.district),
+]);
+
+export type Salon = typeof salons.$inferSelect;
+export type InsertSalon = typeof salons.$inferInsert;
