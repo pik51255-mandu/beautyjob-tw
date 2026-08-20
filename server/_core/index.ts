@@ -10,6 +10,7 @@ import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
+import { registerSalonPages } from "../salonPages";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -42,6 +43,8 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerOAuthRoutes(app);
+  // 살롱 서버 렌더 페이지 — SPA 정적 서빙보다 먼저 등록해야 크롤러가 본문을 받는다.
+  registerSalonPages(app);
   // tRPC API
   app.use(
     "/api/trpc",

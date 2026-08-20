@@ -20,6 +20,8 @@ const NAV_LINKS = [
   { href: "/salary-info", label: "薪資情報" },
   { href: "/courses", label: "教育課程" },
   { href: "/korean-techniques", label: "韓國技術" },
+  // /salons 는 서버 렌더 페이지라 SPA 라우터가 아닌 일반 링크로 나가야 한다.
+  { href: "/salons", label: "美髮沙龍", external: true },
   { href: "/supply-map", label: "美材行地圖" },
   ...(FEATURES.TRANSFER_ENABLED ? [{ href: "/transfers", label: "店面頂讓" }] : []),
   ...(FEATURES.USED_ITEMS_ENABLED ? [{ href: "/used-items", label: "二手器材" }] : []),
@@ -51,19 +53,18 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`px-2.5 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
-                  location.startsWith(link.href)
-                    ? "text-primary bg-accent"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const cls = `px-2.5 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
+                location.startsWith(link.href)
+                  ? "text-primary bg-accent"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`;
+              return "external" in link && link.external ? (
+                <a key={link.href} href={link.href} className={cls}>{link.label}</a>
+              ) : (
+                <Link key={link.href} href={link.href} className={cls}>{link.label}</Link>
+              );
+            })}
           </nav>
 
           {/* Right Actions */}
@@ -125,20 +126,20 @@ export default function Navbar() {
         {/* Mobile Nav */}
         {mobileOpen && (
           <div className="md:hidden border-t border-border py-3 space-y-1">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className={`block px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                  location.startsWith(link.href)
-                    ? "text-primary bg-accent"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const cls = `block px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                location.startsWith(link.href)
+                  ? "text-primary bg-accent"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`;
+              return "external" in link && link.external ? (
+                <a key={link.href} href={link.href} className={cls}>{link.label}</a>
+              ) : (
+                <Link key={link.href} href={link.href} onClick={() => setMobileOpen(false)} className={cls}>
+                  {link.label}
+                </Link>
+              );
+            })}
             {isAuthenticated && (
               <>
                 <div className="border-t border-border my-2" />
