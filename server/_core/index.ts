@@ -4,6 +4,7 @@ import { assertRequiredSecrets } from "./secretGuard";
 // 보안 감사 #2: 필수 시크릿이 없으면 어떤 초기화보다 먼저 기동을 막는다.
 assertRequiredSecrets();
 
+import compression from "compression";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
@@ -36,6 +37,8 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+  // 오리진 응답 압축 (실측 2026-08-20: index.html 369KB → 약 105KB. 표준 설정, 그 외 무변경)
+  app.use(compression());
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
