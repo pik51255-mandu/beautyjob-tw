@@ -67,12 +67,8 @@ export default function Footer() {
         {/* 제작사 크레딧 - 한결 頂級美髮沙龍 */}
         <div className="border-t border-background/10 mt-4 pt-4 flex items-center justify-center gap-2 opacity-40 hover:opacity-70 transition-opacity">
           <span className="text-xs text-background/60">Designed &amp; Built by</span>
-          <img
-            src="/manus-storage/hangyeol-logo_2111d3d8.jpg"
-            alt="한결 頂級美髮沙龍"
-            className="h-7 w-auto object-contain brightness-0 invert"
-            style={{ maxWidth: '80px' }}
-          />
+          {/* 로고 이미지 자산 부재로 텍스트 로고타입 사용 (기존 이미지 자리·크기 유지) */}
+          <span className="text-sm font-semibold tracking-wide text-background/80">한결</span>
           <span className="text-xs text-background/60">頂級美髮沙龍</span>
         </div>
       </div>
