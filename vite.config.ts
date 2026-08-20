@@ -4,7 +4,6 @@ import react from "@vitejs/plugin-react";
 import fs from "node:fs";
 import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
-import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
 // =============================================================================
 // Manus Debug Collector - Vite Plugin
@@ -150,7 +149,9 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+// vitePluginManusRuntime 제거 (2026-08-20 정찰 확정): Manus 비주얼 에디터 전용 브릿지로
+// 독립 배포에선 전 기능 도먼트. index.html 에 366KB 인라인 + 무인증 postMessage 채널만 남기므로 적출.
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusDebugCollector()];
 
 export default defineConfig({
   plugins,
