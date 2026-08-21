@@ -850,3 +850,59 @@ export async function countSalons(): Promise<number> {
   const rows = await db.select({ c: sql<number>`COUNT(*)` }).from(salons);
   return Number(rows[0]?.c ?? 0);
 }
+
+// ─── 통계 (/stats) ────────────────────────────────────────────────────────────
+// 전부 DB 집계 — 월간 갱신 시 자동 반영된다(하드코딩 없음).
+
+export type SalonStats = {
+  total: number;
+  withCoord: number;
+  withParking: number;
+  districts: { district: string; count: number }[];
+  decades: { decade: number; count: number }[];
+  recentYears: { year: number; count: number }[];
+  supplyStores: number;
+  latestFoundedYear: number | null;
+};
+
+export async function getSalonStats(): Promise<SalonStats | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  const [totals] = await db.select({
+    total: sql<number>`COUNT(*)`,
+    withCoord: sql<number>`SUM(CASE WHEN ${salons.lat} IS NOT NULL THEN 1 ELSE 0 END)`,
+    withParking: sql<number>`SUM(CASE WHEN ${salons.parkingJson} IS NOT NULL THEN 1 ELSE 0 END)`,
+    latestFoundedYear: sql<number>`MAX(${salons.foundedYear})`,
+  }).from(salons);
+
+  const districts = await countSalonsByDistrict();
+
+  const decadeRows = await db.select({
+    decade: sql<number>`FLOOR(${salons.foundedYear} / 10) * 10`,
+    count: sql<number>`COUNT(*)`,
+  }).from(salons).where(sql`${salons.foundedYear} IS NOT NULL`)
+    .groupBy(sql`FLOOR(${salons.foundedYear} / 10) * 10`)
+    .orderBy(sql`FLOOR(${salons.foundedYear} / 10) * 10`);
+
+  const yearRows = await db.select({
+    year: salons.foundedYear,
+    count: sql<number>`COUNT(*)`,
+  }).from(salons)
+    .where(sql`${salons.foundedYear} >= YEAR(CURDATE()) - 9`)
+    .groupBy(salons.foundedYear).orderBy(salons.foundedYear);
+
+  const [supply] = await db.select({ c: sql<number>`COUNT(*)` }).from(supplyStores);
+
+  return {
+    total: Number(totals?.total ?? 0),
+    withCoord: Number(totals?.withCoord ?? 0),
+    withParking: Number(totals?.withParking ?? 0),
+    districts,
+    decades: decadeRows.map((r) => ({ decade: Number(r.decade), count: Number(r.count) })),
+    recentYears: yearRows.filter((r) => r.year != null)
+      .map((r) => ({ year: Number(r.year), count: Number(r.count) })),
+    supplyStores: Number(supply?.c ?? 0),
+    latestFoundedYear: totals?.latestFoundedYear != null ? Number(totals.latestFoundedYear) : null,
+  };
+}
