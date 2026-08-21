@@ -116,3 +116,6 @@ client/public/__manus__/version.json
 # Python bytecode (content-factory 파서 스크립트)
 __pycache__/
 *.pyc
+
+# Manus 디버그 로컬 로그 (v15 0-7)
+.manus-logs/

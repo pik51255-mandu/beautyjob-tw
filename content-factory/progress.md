@@ -416,3 +416,47 @@ lint 에 4-3 추가 — 본문에 법규명이 있는데 대장에 (파일, 법�
 
 파생 HTML 6종(프리뷰 3 + artifact 3)도 같이 갱신하고 Chromium 으로 렌더 확인.
 검증: 세 글의 教科書沒說的 절 안 인용 0건 / 수치 0건.
+
+---
+
+## v15 실행 기록 (2026-08-22)
+
+### 0. 접속 차단 — **DNS 원인 확정(코드 무죄)**
+
+진단 3종 실측:
+
+| 항목 | 결과 |
+|---|---|
+| `dig beautyjob.tw A` | `15.197.225.128` / `3.33.251.168` (레지스트라 포워딩, NS=`domaincontrol.com`=GoDaddy) |
+| `dig www.beautyjob.tw CNAME` | `cname.manus.space.` ← **여기가 원인** |
+| `curl -L https://beautyjob.tw` | apex 301 → `www` 302 → `manus.im/app-auth` (server: cloudflare = Manus 호스팅) |
+| `curl -L https://beautyjob-tw.onrender.com` | **200, 리다이렉트 0** |
+
+Render 원본은 멀쩡하다. 도메인이 아직 **Manus 호스팅(manus.space)을 가리키고 있어서**
+Manus 플랫폼이 자기 앱 인증으로 튕기는 것이다. `/manus-oauth/callback` 은
+**우리 리포에 없고 git 이력 전체에도 없다**(`git log --all -S`). 우리 코드는 `/api/oauth/callback` 을 쓴다.
+→ 코드 제거 대상 없음. DNS 전환 필요(선후 작업, 별도 목록으로 전달).
+
+검증: V1 홈 200/리다이렉트 0, V2 `/salons`·`/supply-map` 200/0, V3 robots.txt 크롤러 전면 허용
+(단 **페이지 meta 가 아직 noindex** — 도메인 접속 후 해제 예정).
+
+0-7: 로컬 `.manus-logs/` 삭제, `.gitignore` 에 `.manus-logs/` 추가.
+
+### 6. (정정) ch02 教科書沒說的 절 "수치 0건" 은 사실이 아니었다
+
+위 v14 기록에서 "수치 0건"이라고 적었으나, ch02 유도 질문에 `5~10분` 이 남아 있었다.
+해당 수치를 제거하고 프리뷰·artifact 재생성. 재검 결과 ch01 ko·zh / ch02 ko 세 절 모두 0건.
+(ch01 의 `18-MEA` 는 화합물 고유명이므로 수치로 세지 않는다.)
+
+### 2-4. (검증) 문서층 vol 표기 — 교체 필요 0건
+
+`drafts/` · `ch*/` · `review-ko/` 전수 검색 결과 vol 은 전부 `6%＝20vol` 형태로
+**% 뒤 병기**돼 있어 이미 기준 단위가 % 다. % 없이 vol 만 쓴 줄은 단 1곳
+(`18-developer-volume-guide.md:45` — vol 의 정의를 설명하는 문장)이며, 이 글의 주제 자체가
+%↔vol 환산이므로 존치가 맞다. 題庫·인용문 내 표기는 손대지 않았다.
+
+### 7. `git rm --cached` 대상 정정
+
+지시서가 지목한 `content-factory/ch01/src/__pycache__/strings.cpython-311.pyc` 는 존재하지 않는다.
+실제 추적 중이던 pyc 는 `content-factory/scripts/__pycache__/parse_exam_bank.cpython-314.pyc` 하나이며
+이쪽을 인덱스에서 제거했다.
