@@ -64,15 +64,21 @@ function countChinese(s) {
   return (s.match(/[一-鿿]/g) || []).length;
 }
 
-function analyze(file) {
+function analyze(file, kind) {
   const raw = fs.readFileSync(file, "utf8");
   const fmMatch = raw.match(/^---\n([\s\S]*?)\n---\n/);
   const fm = fmMatch ? fmMatch[1] : "";
   const body = fmMatch ? raw.slice(fmMatch[0].length) : raw;
 
+  // 라인 B(기출 해설): 題庫 문항 원문은 정부 공개 자료라 손댈 수 없다.
+  // 원문에 治療 같은 R2 금지어가 실재하므로(04-09·08-64), 인용부(> 로 시작하는 줄)는
+  // R2 검사에서 빼고 우리가 쓴 해설만 본다. R1(간체자·대륙어휘)은 원문 포함 전체 적용 —
+  // 정부 자료가 번체라 간체가 나오면 그건 우리 오타다.
+  const r2Body = kind === "exam" ? body.replace(/^>.*$/gm, "") : body;
+
   // 「」 인용 안은 R2 예외(광고법규 글) — 인용 밖만 검사
   // 그 전에 生髮 화이트리스트를 마스킹한다(原生髮·新生髮根 등은 규제 표현이 아니다).
-  const { masked: maskedBody, counts: growthExceptions } = maskGrowthTerms(body);
+  const { masked: maskedBody, counts: growthExceptions } = maskGrowthTerms(r2Body);
   const bodyOutsideQuotes = maskedBody.replace(/「[^」]*」/g, "「」");
 
   const bannedHits = [];
@@ -142,6 +148,12 @@ function analyze(file) {
   const linkedSlugs = [...body.matchAll(/\]\(\/articles\/([a-z0-9-]+)\)/g)].map((m) => m[1]);
   const unknownSlugs = SLUGS.size ? [...new Set(linkedSlugs.filter((s) => !SLUGS.has(s)))] : [];
 
+  // 라인 B B3: 전 글 하단 고정 출처 문구가 반드시 있어야 한다.
+  const hasSourceLine = /題目來源：勞動部勞動力發展署技能檢定中心\s*測試參考資料/.test(body)
+    && /解析內容為本站原創。/.test(body);
+  // 인용한 문항 수 — `07-048` 같은 qid 앵커로 센다.
+  const examQids = [...new Set([...body.matchAll(/^###\s*(\d{2}-\d{3})\b/gm)].map((m) => m[1]))];
+
   const fmKeys = ["title", "slug", "level", "series", "keywords", "description", "sources"];
   const fmMissing = fmKeys.filter((k) => !new RegExp(`^${k}:`, "m").test(fm));
   const byline = /20年資歷韓國髮型設計師\s*Jacob/.test(raw);
@@ -154,7 +166,7 @@ function analyze(file) {
     bannedHits, mainlandHits, simplifiedHits, fmMissing, byline, descLen,
     hasFieldSection, fieldSectionFilled, questionLines, badQuestions, unknownSlugs, volErrors,
     badSectionName, hasAnswerSlot, answerFilled, status,
-    growthExceptions,
+    growthExceptions, hasSourceLine, examQids,
     quotedBanned: bannedHits.filter((h) => h.count === 0).map((h) => h.word),
     twTerms: TW_TERMS.filter((t) => body.includes(t)),
   };
@@ -172,6 +184,13 @@ function verdict(a, kind) {
   if (a.unknownSlugs.length) fails.push(`미확정 slug 링크: ${a.unknownSlugs.join(",")}`);
   if (a.volErrors.length) fails.push(`雙氧乳 %↔vol 불일치: ${a.volErrors[0]}`);
   if (a.badSectionName.length) fails.push(`섹션명 변형 금지: ${a.badSectionName.join(",")}`);
+  if (kind === "exam") {
+    if (!a.hasSourceLine) fails.push("題目來源 고정 문구 없음(B3)");
+    if (a.examQids.length < 20 || a.examQids.length > 40) {
+      fails.push(`문항 ${a.examQids.length}개(B2: 30±10 밖)`);
+    }
+    if (a.internalLinks < 2) fails.push(`내부링크 ${a.internalLinks}개(2 미만)`);
+  }
   if (kind === "theory") {
     if (!a.hasFieldSection) fails.push("教科書沒說的 섹션 없음");
     else if (a.fieldSectionFilled) fails.push("教科書沒說的 을 AI 가 채움(비워둬야 함)");
@@ -219,7 +238,7 @@ const detail = [`# lint 상세 리포트\n\n생성: ${new Date().toISOString().s
 
 for (const f of files) {
   const kind = f.includes("/exam") ? "exam" : "theory";
-  const a = analyze(f);
+  const a = analyze(f, kind);
   const fails = verdict(a, kind);
   rows.push({ f: path.basename(f), kind, a, fails });
 
@@ -235,10 +254,17 @@ for (const f of files) {
   detail.push(`- front-matter 누락: ${a.fmMissing.length ? a.fmMissing.join(", ") : "없음"}`);
   detail.push(`- 바이라인: ${a.byline ? "있음" : "없음"}`);
   detail.push(`- description 길이: ${a.descLen}字 (상한 80)`);
-  detail.push(`- 教科書沒說的 섹션: ${a.hasFieldSection ? (a.fieldSectionFilled ? "있음 — 채워짐(실패)" : "있음 — 플레이스홀더(정상)") : "없음(실패)"}`);
-  detail.push(`- 現場答 슬롯(1-c): ${a.hasAnswerSlot ? (a.answerFilled ? "작성됨 → publishable" : "[미작성] → draft(zh 발행 불가)") : "없음(실패)"}`);
-  detail.push(`- 유도 질문(R8): ${a.questionLines.length}개${a.badQuestions.length ? ` — 질문문 아님 ${a.badQuestions.length}건` : ""}`);
-  a.questionLines.forEach((q, i) => detail.push(`    ${i + 1}. ${q}`));
+  if (kind === "exam") {
+    // 라인 B 는 教科書沒說的·現場答·FAQ 규칙 대상이 아니다 — 해당 항목을 띄우지 않는다.
+    detail.push(`- 인용 문항 수(B2): ${a.examQids.length}개 (30±10)`);
+    detail.push(`- 題目來源 고정 문구(B3): ${a.hasSourceLine ? "있음" : "없음(실패)"}`);
+    detail.push(`- R2 검사 범위: 인용부(> 줄) 제외, 해설부만`);
+  } else {
+    detail.push(`- 教科書沒說的 섹션: ${a.hasFieldSection ? (a.fieldSectionFilled ? "있음 — 채워짐(실패)" : "있음 — 플레이스홀더(정상)") : "없음(실패)"}`);
+    detail.push(`- 現場答 슬롯(1-c): ${a.hasAnswerSlot ? (a.answerFilled ? "작성됨 → publishable" : "[미작성] → draft(zh 발행 불가)") : "없음(실패)"}`);
+    detail.push(`- 유도 질문(R8): ${a.questionLines.length}개${a.badQuestions.length ? ` — 질문문 아님 ${a.badQuestions.length}건` : ""}`);
+    a.questionLines.forEach((q, i) => detail.push(`    ${i + 1}. ${q}`));
+  }
   detail.push(`- 내부링크 slug 검증(R10): ${a.unknownSlugs.length ? "미확정 " + a.unknownSlugs.join(", ") : "전부 확정 목록 내"}`);
   const gx = Object.entries(a.growthExceptions).filter(([, c]) => c > 0);
   detail.push(`- 生髮 화이트리스트 예외(1-b): ${gx.length ? gx.map(([w, c]) => `${w}×${c}`).join(", ") : "해당 없음"}`);
