@@ -247,3 +247,65 @@ export function safeOrigin(rawHost: string | undefined, rawProto: string | undef
   // 허용목록에 없는 Host 는 반영하지 않는다 — 캐시 오염·링크 위조 방지.
   return ALLOWED_HOSTS.includes(host.split(":")[0]) ? `https://${host}` : DEFAULT_ORIGIN;
 }
+
+// ─── 지도 마커 위계 (표시 계층) ──────────────────────────────────────────────
+// 아이콘은 전부 인라인 SVG 자작이다 — 외부 아이콘 CDN·타사 에셋을 쓰지 않는다.
+
+/** 브랜드 로즈 계열 / 주차 보라 계열. */
+export const PIN_COLORS = { salon: "#e11d48", parking: "#7c3aed" };
+
+/**
+ * 지도 스크립트가 공통으로 쓰는 아이콘 팩토리.
+ * Leaflet divIcon + 인라인 SVG. 브라우저에서 실행되므로 문자열로 내보낸다.
+ */
+export const MAP_ICON_JS = `
+var PIN=${JSON.stringify(PIN_COLORS)};
+function svgScissors(size,color){
+  var s=size;
+  return '<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" aria-hidden="true">'
+    +'<g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">'
+    +'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>'
+    +'<line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/>'
+    +'<line x1="8.12" y1="8.12" x2="12" y2="12"/></g>'
+    +'<g fill="none" stroke="'+color+'" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'
+    +'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>'
+    +'<line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/>'
+    +'<line x1="8.12" y1="8.12" x2="12" y2="12"/></g></svg>';
+}
+/** 살롱 핀 — 물방울 배경 + 가위. big=개별 페이지용 큰 핀. */
+function salonIcon(big,label){
+  var w=big?42:26,h=big?54:34,ic=big?20:13;
+  var html='<div class="pin pin-salon'+(big?' pin-big':'')+'">'
+    +'<svg class="pin-drop" viewBox="0 0 42 54" width="'+w+'" height="'+h+'">'
+    +'<path d="M21 53C21 53 39 32.5 39 20.5C39 10.28 30.94 2 21 2C11.06 2 3 10.28 3 20.5C3 32.5 21 53 21 53Z" '
+    +'fill="'+PIN.salon+'" stroke="#fff" stroke-width="3"/></svg>'
+    +'<span class="pin-ico">'+svgScissors(ic,PIN.salon)+'</span>'
+    +(label?'<span class="pin-label">'+label+'</span>':'')+'</div>';
+  return L.divIcon({className:'',html:html,iconSize:[w,h],iconAnchor:[w/2,h],popupAnchor:[0,-h+6]});
+}
+/** 주차 핀 — 소형 원형 P. */
+function parkingIcon(){
+  var d=22;
+  var html='<div class="pin pin-park"><svg viewBox="0 0 22 22" width="'+d+'" height="'+d+'">'
+    +'<circle cx="11" cy="11" r="9.2" fill="'+PIN.parking+'" stroke="#fff" stroke-width="2.4"/>'
+    +'<text x="11" y="15.2" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" '
+    +'font-family="-apple-system,system-ui,sans-serif">P</text></svg></div>';
+  return L.divIcon({className:'',html:html,iconSize:[d,d],iconAnchor:[d/2,d/2],popupAnchor:[0,-d/2]});
+}
+`;
+
+/** 마커 라벨·핀용 CSS. layout 의 <style> 에 합류한다. */
+export const MAP_ICON_CSS = `
+.pin{position:relative;display:block;line-height:0}
+.pin-ico{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);line-height:0}
+.pin-big .pin-ico{top:36%}
+.pin-label{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:2px;
+  white-space:nowrap;font-size:11.5px;font-weight:600;color:#0f172a;line-height:1.3;
+  background:rgba(255,255,255,.88);border-radius:4px;padding:1px 5px;
+  box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.leaflet-marker-icon .pin-park{filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
+.map-legend{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:6px 0 2px;font-size:13px;color:var(--mut)}
+.map-legend .k{display:inline-flex;align-items:center;gap:5px}
+.map-legend .sw{width:12px;height:12px;border-radius:999px;display:inline-block;border:2px solid #fff;
+  box-shadow:0 0 0 1px var(--line)}
+`;
