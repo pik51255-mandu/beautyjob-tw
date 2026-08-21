@@ -17,11 +17,29 @@ function knownSlugs() {
 const SLUGS = knownSlugs();
 
 // R2 규제 금지어 — 대만 화장품 광고규제(化粧品衛生安全管理法)
+// v8 개정: 단독 刺激·醫療 는 금지가 아니다(刺激嗅覺 은 화장품 정의문에 나온다).
+// 諮詢醫師·就醫 같은 의료인 안내 표현은 허용·권장이다.
 const BANNED = [
   "生髮", "育髮", "活化毛囊", "刺激毛囊", "喚醒毛囊",
-  "治療", "再生", "修復", "修補", "消炎", "抗過敏", "醫療級", "醫藥級",
-  "促進毛髮生長", "防止落髮", "禿頭",
+  "治療", "再生", "修復", "消炎", "抗過敏", "醫療級", "醫療效能",
+  "促進毛髮生長", "防止落髮",
 ];
+
+// 生髮 화이트리스트 — 대만 현장 표준어라 규제 표현이 아니다.
+// 접두 일치이므로 新生髮根 · 學生髮型 도 함께 마스킹된다.
+const GROWTH_WHITELIST = ["原生髮", "新生髮", "學生髮"];
+
+/** 화이트리스트 어휘를 임시 치환해 生髮 부분문자열 과검출을 막는다. */
+function maskGrowthTerms(s) {
+  let masked = s;
+  const counts = {};
+  GROWTH_WHITELIST.forEach((w, i) => {
+    const re = new RegExp(w, "g");
+    counts[w] = (masked.match(re) || []).length;
+    masked = masked.replace(re, `\u0000W${i}\u0000`);
+  });
+  return { masked, counts };
+}
 
 // R1 대륙 어휘·간체 — 번체 대만용어만 허용
 const MAINLAND_WORDS = [
@@ -53,11 +71,13 @@ function analyze(file) {
   const body = fmMatch ? raw.slice(fmMatch[0].length) : raw;
 
   // 「」 인용 안은 R2 예외(광고법규 글) — 인용 밖만 검사
-  const bodyOutsideQuotes = body.replace(/「[^」]*」/g, "「」");
+  // 그 전에 生髮 화이트리스트를 마스킹한다(原生髮·新生髮根 등은 규제 표현이 아니다).
+  const { masked: maskedBody, counts: growthExceptions } = maskGrowthTerms(body);
+  const bodyOutsideQuotes = maskedBody.replace(/「[^」]*」/g, "「」");
 
   const bannedHits = [];
   for (const w of BANNED) {
-    const inQuoteOnly = !bodyOutsideQuotes.includes(w) && body.includes(w);
+    const inQuoteOnly = !bodyOutsideQuotes.includes(w) && maskedBody.includes(w);
     const n = (bodyOutsideQuotes.split(w).length - 1);
     if (n > 0) bannedHits.push({ word: w, count: n });
     else if (inQuoteOnly) bannedHits.push({ word: w, count: 0, note: "「」인용 내부(예외)" });
@@ -123,6 +143,7 @@ function analyze(file) {
     file, chineseCount, tables, faqs, internalLinks,
     bannedHits, mainlandHits, simplifiedHits, fmMissing, byline, descLen,
     hasFieldSection, fieldSectionFilled, questionLines, badQuestions, unknownSlugs, volErrors,
+    growthExceptions,
     quotedBanned: bannedHits.filter((h) => h.count === 0).map((h) => h.word),
     twTerms: TW_TERMS.filter((t) => body.includes(t)),
   };
@@ -180,6 +201,8 @@ for (const f of files) {
   detail.push(`- 유도 질문(R8): ${a.questionLines.length}개${a.badQuestions.length ? ` — 질문문 아님 ${a.badQuestions.length}건` : ""}`);
   a.questionLines.forEach((q, i) => detail.push(`    ${i + 1}. ${q}`));
   detail.push(`- 내부링크 slug 검증(R10): ${a.unknownSlugs.length ? "미확정 " + a.unknownSlugs.join(", ") : "전부 확정 목록 내"}`);
+  const gx = Object.entries(a.growthExceptions).filter(([, c]) => c > 0);
+  detail.push(`- 生髮 화이트리스트 예외(1-b): ${gx.length ? gx.map(([w, c]) => `${w}×${c}`).join(", ") : "해당 없음"}`);
   detail.push(`- 雙氧乳 %↔vol 대응(2-d): ${a.volErrors.length ? "불일치 " + a.volErrors.join(" / ") : "일치 또는 해당없음"}`);
   if (a.quotedBanned.length) {
     detail.push(`- **R9 예외 적용** — 「」인용 안에서만 등장한 금지어: ${a.quotedBanned.join(", ")}`);
