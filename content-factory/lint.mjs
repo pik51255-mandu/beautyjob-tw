@@ -7,6 +7,15 @@
 import fs from "node:fs";
 import path from "node:path";
 
+// R10: 내부링크는 progress.md 의 확정 slug 표에 있는 것만 허용한다.
+function knownSlugs() {
+  try {
+    const md = fs.readFileSync("content-factory/progress.md", "utf8");
+    return new Set([...md.matchAll(/`([a-z0-9-]{4,})`/g)].map((m) => m[1]));
+  } catch { return new Set(); }
+}
+const SLUGS = knownSlugs();
+
 // R2 규제 금지어 — 대만 화장품 광고규제(化粧品衛生安全管理法)
 const BANNED = [
   "生髮", "育髮", "活化毛囊", "刺激毛囊", "喚醒毛囊",
@@ -23,8 +32,10 @@ const MAINLAND_WORDS = [
 // 간체 전용 글자(번체와 형태가 다른 것만)
 const SIMPLIFIED = new Set(
   // 번체와 형태가 다른 간체 전용 글자만. 동형 글자(硬·搜·食 등)를 넣으면 오탐이 난다.
-  "发头产东车门开关语经线风专业联电图数据库样组删编视频质网软务询录册个这们时来国会说过对" +
-  "点种问题实现将变间还进么长银钱铁马鸟鱼贝见页飞韦纟讠钅饣汤烫护养虑觉断继续压历监"
+  // 주의: 두 리터럴을 반드시 괄호로 묶는다. 안 그러면 .split() 이 뒤 리터럴에만 걸려
+  // 배열이 문자열로 변환되면서 ASCII 콤마가 집합에 섞인다(실제로 오탐을 냈던 버그).
+  ("发头产东车门开关语经线风专业联电图数据库样组删编视频质网软务询录册个这们时来国会说过对" +
+   "点种问题实现将变间还进么长银钱铁马鸟鱼贝见页飞韦纟讠钅饣汤烫护养虑觉断继续压历监")
     .split("").filter((c) => c.trim())
 );
 
@@ -66,13 +77,23 @@ function analyze(file) {
   const secMatch = body.match(/^##\s*教科書沒說的\s*$([\s\S]*?)(?=^##\s|\Z)/m);
   const hasFieldSection = Boolean(secMatch);
   let fieldSectionFilled = false;
+  let questionLines = [];
+  let badQuestions = [];
   if (secMatch) {
     const inner = secMatch[1].trim();
-    const isPlaceholder = /^>\s*\[.*(작성 예정|AI 일반론 금지).*\]$/m.test(inner);
-    // 플레이스홀더 외에 실제 문장이 들어갔는지 (중국어 20자 이상이면 AI 가 채운 것으로 본다)
-    const withoutPlaceholder = inner.replace(/^>.*$/gm, "").trim();
-    fieldSectionFilled = !isPlaceholder || countChinese(withoutPlaceholder) >= 20;
+    const isPlaceholder = /^>\s*\[.*작성 예정.*\]$/m.test(inner);
+    // R8: "> 질문N: ..." 줄은 유도 질문이므로 빈칸으로 간주한다.
+    //     단 서술문이 아니라 순수 질문문이어야 한다(물음표로 끝날 것).
+    questionLines = [...inner.matchAll(/^>\s*질문\d*\s*[:：]\s*(.+)$/gm)].map((m) => m[1].trim());
+    badQuestions = questionLines.filter((q) => !/[?？]\s*$/.test(q));
+    // 인용(>) 밖에 남은 실제 서술이 있으면 AI 가 채운 것으로 본다.
+    const withoutQuoted = inner.replace(/^>.*$/gm, "").trim();
+    fieldSectionFilled = !isPlaceholder || countChinese(withoutQuoted) >= 20;
   }
+
+  // R10: 내부링크 slug 존재 검증
+  const linkedSlugs = [...body.matchAll(/\]\(\/articles\/([a-z0-9-]+)\)/g)].map((m) => m[1]);
+  const unknownSlugs = SLUGS.size ? [...new Set(linkedSlugs.filter((s) => !SLUGS.has(s)))] : [];
 
   const fmKeys = ["title", "slug", "level", "series", "keywords", "description", "sources"];
   const fmMissing = fmKeys.filter((k) => !new RegExp(`^${k}:`, "m").test(fm));
@@ -84,7 +105,8 @@ function analyze(file) {
   return {
     file, chineseCount, tables, faqs, internalLinks,
     bannedHits, mainlandHits, simplifiedHits, fmMissing, byline, descLen,
-    hasFieldSection, fieldSectionFilled,
+    hasFieldSection, fieldSectionFilled, questionLines, badQuestions, unknownSlugs,
+    quotedBanned: bannedHits.filter((h) => h.count === 0).map((h) => h.word),
     twTerms: TW_TERMS.filter((t) => body.includes(t)),
   };
 }
@@ -98,9 +120,12 @@ function verdict(a, kind) {
   if (a.fmMissing.length) fails.push(`front-matter 누락 ${a.fmMissing.join(",")}`);
   if (!a.byline) fails.push("바이라인 누락");
   if (a.descLen > 80) fails.push(`description ${a.descLen}字(80 초과)`);
+  if (a.unknownSlugs.length) fails.push(`미확정 slug 링크: ${a.unknownSlugs.join(",")}`);
   if (kind === "theory") {
     if (!a.hasFieldSection) fails.push("教科書沒說的 섹션 없음");
     else if (a.fieldSectionFilled) fails.push("教科書沒說的 을 AI 가 채움(비워둬야 함)");
+    else if (!a.questionLines.length) fails.push("유도 질문 없음(R8)");
+    else if (a.badQuestions.length) fails.push(`유도 질문이 질문문이 아님: ${a.badQuestions[0].slice(0, 20)}…`);
     if (a.chineseCount < 1500) fails.push(`분량 ${a.chineseCount}字(1500 미만)`);
     if (a.tables < 1) fails.push("표 없음");
     if (a.faqs < 3) fails.push(`FAQ ${a.faqs}개(3 미만)`);
@@ -134,6 +159,18 @@ for (const f of files) {
   detail.push(`- 바이라인: ${a.byline ? "있음" : "없음"}`);
   detail.push(`- description 길이: ${a.descLen}字 (상한 80)`);
   detail.push(`- 教科書沒說的 섹션: ${a.hasFieldSection ? (a.fieldSectionFilled ? "있음 — 채워짐(실패)" : "있음 — 플레이스홀더(정상)") : "없음(실패)"}`);
+  detail.push(`- 유도 질문(R8): ${a.questionLines.length}개${a.badQuestions.length ? ` — 질문문 아님 ${a.badQuestions.length}건` : ""}`);
+  a.questionLines.forEach((q, i) => detail.push(`    ${i + 1}. ${q}`));
+  detail.push(`- 내부링크 slug 검증(R10): ${a.unknownSlugs.length ? "미확정 " + a.unknownSlugs.join(", ") : "전부 확정 목록 내"}`);
+  if (a.quotedBanned.length) {
+    detail.push(`- **R9 예외 적용** — 「」인용 안에서만 등장한 금지어: ${a.quotedBanned.join(", ")}`);
+    const raw = fs.readFileSync(f, "utf8");
+    for (const w of a.quotedBanned) {
+      for (const m of raw.matchAll(new RegExp(`[^。\\n]*「[^」]*${w}[^」]*」[^。\\n]*。?`, "g"))) {
+        detail.push(`    · ${m[0].trim().slice(0, 90)}`);
+      }
+    }
+  }
   detail.push(`- 사용된 대만 표준 용어: ${a.twTerms.join(", ") || "(없음)"}`);
   detail.push(`- **판정: ${fails.length ? "실패 — " + fails.join(" / ") : "통과"}**\n`);
 }

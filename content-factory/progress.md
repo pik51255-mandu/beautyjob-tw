@@ -74,15 +74,15 @@ SPA 정적 서빙보다 먼저 등록해 내보내는 패턴이 자리잡혀 있
 | # | 제목 | slug | level | 상태 |
 |---:|---|---|---|---|
 | 1 | 頭髮結構全解析：毛鱗片、皮質層、髓質層 | `hair-structure-basics` | 初級 | **검증통과** |
-| 2 | 頭髮的四種鍵結：氫鍵、鹽鍵、雙硫鍵、胜肽鍵 | `hair-bonds-four-types` | 初級 | 대기 |
-| 3 | pH與美髮：為什麼護髮都是弱酸性？ | `ph-and-hair-care` | 初級 | 대기 |
-| 4 | 一劑二劑在做什麼：氧化與還原入門 | `oxidation-reduction-basics` | 初級 | 대기 |
-| 5 | 洗髮精與潤髮乳的化學：界面活性劑入門 | `surfactant-basics` | 初級 | 대기 |
-| 6 | 毛髮生長週期：生長期、退化期、休止期 | `hair-growth-cycle` | 初級 | 대기 |
-| 7 | 台灣人的頭皮現實：油性頭皮判斷與基礎養護 | `oily-scalp-taiwan` | 初級 | 대기 |
-| 8 | 髮質診斷基本功：看、摸、拉三步驟 | `hair-diagnosis-basics` | 初級 | 대기 |
-| 9 | 多孔性是什麼：為什麼受損髮上色特別快 | `hair-porosity` | 初級 | 대기 |
-| 10 | 染髮前48小時：皮膚測試完整指南 | `patch-test-guide` | 初級 | 대기 |
+| 2 | 頭髮的四種鍵結：氫鍵、鹽鍵、雙硫鍵、胜肽鍵 | `hair-bonds-four-types` | 初級 | **검증통과** |
+| 3 | pH與美髮：為什麼護髮都是弱酸性？ | `ph-and-hair-care` | 初級 | **검증통과** |
+| 4 | 一劑二劑在做什麼：氧化與還原入門 | `oxidation-reduction-basics` | 初級 | **검증통과** |
+| 5 | 洗髮精與潤髮乳的化學：界面活性劑入門 | `surfactant-basics` | 初級 | **검증통과** |
+| 6 | 毛髮生長週期：生長期、退化期、休止期 | `hair-growth-cycle` | 初級 | **검증통과** |
+| 7 | 台灣人的頭皮現實：油性頭皮判斷與基礎養護 | `oily-scalp-taiwan` | 初級 | **검증통과** |
+| 8 | 髮質診斷基本功：看、摸、拉三步驟 | `hair-diagnosis-basics` | 初級 | **검증통과** |
+| 9 | 多孔性是什麼：為什麼受損髮上色特別快 | `hair-porosity` | 初級 | **검증통과** |
+| 10 | 染髮前48小時：皮膚測試完整指南 | `patch-test-guide` | 初級 | **검증통과** |
 | 11 | 燙髮三步驟：還原→重組→氧化的完整原理 | `perm-three-steps` | 中級 | 대기 |
 | 12 | 軟化判斷完全指南：測試軟化的正確方法 | `softening-test-guide` | 中級 | 대기 |
 | 13 | 還原劑比較：TGA、半胱胺酸、半胱胺鹽酸鹽 | `reducing-agents-compared` | 中級 | 대기 |
@@ -118,9 +118,27 @@ SPA 정적 서빙보다 먼저 등록해 내보내는 패턴이 자리잡혀 있
 | 편 | 제목 | slug | 상태 | 字數 | lint | 날짜 |
 |---|---|---|---|---:|---|---|
 | A-1 | 頭髮結構全解析 | `hair-structure-basics` | 검증통과 | 1,889 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-2 | hair-bonds-four-types | `hair-bonds-four-types` | 검증통과 | 2,641 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-3 | ph-and-hair-care | `ph-and-hair-care` | 검증통과 | 3,157 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-4 | oxidation-reduction-basics | `oxidation-reduction-basics` | 검증통과 | 2,742 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-5 | surfactant-basics | `surfactant-basics` | 검증통과 | 3,207 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-6 | hair-growth-cycle | `hair-growth-cycle` | 검증통과 | 2,199 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-7 | oily-scalp-taiwan | `oily-scalp-taiwan` | 검증통과 | 2,643 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-8 | hair-diagnosis-basics | `hair-diagnosis-basics` | 검증통과 | 3,519 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-9 | hair-porosity | `hair-porosity` | 검증통과 | 2,863 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-10 | patch-test-guide | `patch-test-guide` | 검증통과 | 3,467 | 간체 0 / 금지어 0 | 2026-08-21 |
 | B-1 | 燙髮篇 제1편(軟化·試捲) | — | **차단** (PDF 미확보) | — | — | — |
 
 ---
+
+## 알려진 이슈 (해소됨)
+
+- **lint.mjs 연산자 우선순위 버그 (2026-08-21 수정)**: `new Set("A" + "B".split("").filter(...))`
+  에서 `.split()` 이 뒤 리터럴에만 걸려 배열이 문자열화되고, join 구분자인 ASCII 콤마가
+  간체자 집합에 섞였다. 그 결과 본문에 반각 콤마만 있어도 "간체자 1종" 오탐이 났다.
+  배치 ① 집필 에이전트 4명이 독립적으로 이 증상을 보고했고, 일부는 본문에서 콤마·영문
+  화학명을 빼는 방식으로 회피했다. 두 리터럴을 괄호로 묶어 수정했고, 회피로 빠졌던
+  `Toluene-2,5-diamine` 표기를 #10 에 복원했다.
 
 ## 미결·후속
 
