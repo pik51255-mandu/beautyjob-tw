@@ -1,4 +1,4 @@
-import { getLoginUrl } from "@/const";
+import { getInternalLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { TRPCClientError } from "@trpc/client";
 import { useCallback, useEffect, useMemo } from "react";
@@ -9,7 +9,10 @@ type UseAuthOptions = {
 };
 
 export function useAuth(options?: UseAuthOptions) {
-  const { redirectOnUnauthenticated = false, redirectPath = getLoginUrl() } =
+  // 앱 안에서 세션이 없어 튕길 때는 항상 자체 /login 으로 보낸다.
+  // getLoginUrl() 은 환경변수에 따라 외부 OAuth 포털로 나갈 수 있는데,
+  // 그러면 작업 중이던 입력이 통째로 날아간다(눈검사 G).
+  const { redirectOnUnauthenticated = false, redirectPath = getInternalLoginUrl() } =
     options ?? {};
   const utils = trpc.useUtils();
 
