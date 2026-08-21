@@ -180,6 +180,9 @@ function BizSimulatorInner() {
   const bep = calcBep(state.monthlyFixed, variableRatio);
   const bepPossible = Number.isFinite(bep);
   const dailyNeed = calcDailyCustomers(bep, mix.avgTicket, state.workDays);
+  // 營業日數나 客單價가 0이면 계산식이 Infinity 를 낸다. 화면에 그대로 내보내지 않는다
+  // (maxDaily 가 이미 쓰던 "—" 표기와 동일하게 맞춘다).
+  const num = (v: number) => (Number.isFinite(v) ? String(v) : "—");
   const maxDaily = calcMaxDailyCustomers(
     state.designers,
     state.seats,
@@ -204,8 +207,8 @@ function BizSimulatorInner() {
       [t("ocFixedTotal"), fmt(state.monthlyFixed)],
       [t("ocVariableRatio"), `${Math.round(variableRatio * 1000) / 10}%`],
       [t("ocMixAvgTicket"), fmt(mix.avgTicket)],
-      [t("ocDailyCustomers"), `${dailyNeed} ${t("ocCustomersUnit")}`],
-      [t("ocMaxDaily"), `${maxDaily} ${t("ocCustomersUnit")}`],
+      [t("ocDailyCustomers"), `${num(dailyNeed)} ${t("ocCustomersUnit")}`],
+      [t("ocMaxDaily"), `${num(maxDaily)} ${t("ocCustomersUnit")}`],
       ...(productContribution > 0
         ? [[t("ocRetailContribution"), fmtSigned(productContribution)] as [string, string]]
         : []),
@@ -434,7 +437,7 @@ function BizSimulatorInner() {
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs">{t("bsWorkDaysLabel")}</Label>
-            <Input inputMode="numeric" value={state.workDays || ""} onChange={(e) => set("workDays", Math.min(31, numOr0(e.target.value)))} />
+            <Input inputMode="numeric" value={state.workDays || ""} onChange={(e) => set("workDays", Math.min(31, Math.max(1, numOr0(e.target.value))))} />
           </div>
         </div>
         <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-sm">
@@ -464,10 +467,10 @@ function BizSimulatorInner() {
               </div>
               <Row
                 label={t("ocDailyCustomers")}
-                value={`${dailyNeed} ${t("ocCustomersUnit")}（${fmt(mix.avgTicket)} × ${state.workDays}）`}
+                value={`${num(dailyNeed)} ${t("ocCustomersUnit")}（${fmt(mix.avgTicket)} × ${state.workDays}）`}
                 strong
               />
-              <Row label={t("ocMaxDaily")} value={`${Number.isFinite(maxDaily) ? maxDaily : "—"} ${t("ocCustomersUnit")}`} />
+              <Row label={t("ocMaxDaily")} value={`${num(maxDaily)} ${t("ocCustomersUnit")}`} />
 
               {capacityExceeded && (
                 <div className="flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-xs text-red-700 leading-relaxed font-medium">
@@ -504,7 +507,7 @@ function BizSimulatorInner() {
                             <td className={`px-3 py-2 text-right font-semibold ${s.profit > 0 ? "text-emerald-600" : s.profit < 0 ? "text-red-500" : ""}`}>
                               {fmtSigned(s.profit)}
                             </td>
-                            <td className={`px-3 py-2 text-right ${overCap ? "text-red-500 font-semibold" : ""}`}>{daily}</td>
+                            <td className={`px-3 py-2 text-right ${overCap ? "text-red-500 font-semibold" : ""}`}>{num(daily)}</td>
                             <td className={`px-3 py-2 text-right ${overCap ? "text-red-500 font-semibold" : ""}`}>
                               {capPct !== null ? `${capPct}%` : "—"}
                             </td>

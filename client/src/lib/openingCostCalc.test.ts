@@ -190,3 +190,82 @@ describe("calcBep edge cases", () => {
     expect(calcBep(100_000, 0)).toBe(100_000);
   });
 });
+
+// ─── 화면 표기 가드 (눈검사 수정 사이클 1 / B) ───────────────────────────────
+// 계산식이 Infinity 를 내는 것 자체는 의도된 신호값이다. 문제는 그 값이 화면에
+// 그대로 나가는 것이었다 — 실제로 /tools/biz-simulator 에서 raw "Infinity" 가 노출됐다.
+// BizSimulator 는 num() 으로 "—" 로 바꿔 내보낸다. 여기서는 그 계약을 고정한다.
+describe("Infinity 신호값이 나오는 조건", () => {
+  it("영업일수가 0이면 일 필요 객수는 계산 불가다", () => {
+    expect(calcDailyCustomers(1_000_000, 1500, 0)).toBe(Infinity);
+  });
+
+  it("客單價가 0이어도 계산 불가다", () => {
+    expect(calcDailyCustomers(1_000_000, 0, 26)).toBe(Infinity);
+  });
+
+  it("매출 자체가 Infinity(BEP 불가)면 전파된다", () => {
+    expect(calcDailyCustomers(Infinity, 1500, 26)).toBe(Infinity);
+  });
+
+  it("정상 입력에서는 유한한 숫자를 낸다", () => {
+    expect(Number.isFinite(calcDailyCustomers(1_000_000, 1500, 26))).toBe(true);
+  });
+
+  it("변동비율 100% 이상이면 BEP 는 계산 불가다", () => {
+    expect(calcBep(500_000, 1)).toBe(Infinity);
+    expect(calcBep(500_000, 1.2)).toBe(Infinity);
+  });
+});
+
+describe("화면 표기 규약 — 계산 불가는 '—' 로 나가야 한다", () => {
+  // BizSimulator.tsx 의 num() 과 동일한 규약
+  const num = (v: number) => (Number.isFinite(v) ? String(v) : "—");
+
+  it("Infinity 는 절대 화면 문자열이 되지 않는다", () => {
+    expect(num(calcDailyCustomers(1_000_000, 1500, 0))).toBe("—");
+    expect(num(calcDailyCustomers(1_000_000, 0, 26))).toBe("—");
+    expect(num(calcBep(500_000, 1))).toBe("—");
+    expect(num(calcMaxDailyCustomers(2, 3, 10, 0, 0.8))).toBe("—");
+  });
+
+  it("어떤 입력 조합에서도 'Infinity' 문자열이 새지 않는다", () => {
+    const revenues = [0, 1, 1_000_000, Infinity, -5];
+    const tickets = [0, 1500, -1];
+    const days = [0, 1, 26, 31, -3];
+    for (const r of revenues) for (const a of tickets) for (const d of days) {
+      expect(num(calcDailyCustomers(r, a, d))).not.toContain("Infinity");
+    }
+  });
+
+  it("정상값은 숫자 문자열 그대로 나간다", () => {
+    expect(num(calcDailyCustomers(1_000_000, 1500, 26))).toMatch(/^\d+(\.\d+)?$/);
+  });
+});
+
+describe("영업일수 입력 클램프", () => {
+  // BizSimulator 의 onChange 와 동일한 규약: 1..31
+  const clamp = (raw: number) => Math.min(31, Math.max(1, raw));
+
+  it("0 을 넣어도 1 로 저장된다 — localStorage 에 0 이 굳는 것을 막는다", () => {
+    expect(clamp(0)).toBe(1);
+  });
+
+  it("음수도 1 로 올라온다", () => {
+    expect(clamp(-5)).toBe(1);
+  });
+
+  it("31 을 넘으면 31 로 잘린다", () => {
+    expect(clamp(99)).toBe(31);
+  });
+
+  it("정상 범위는 그대로다", () => {
+    expect(clamp(26)).toBe(26);
+  });
+
+  it("클램프된 값으로는 계산이 항상 유한하다", () => {
+    for (const raw of [-5, 0, 1, 26, 99]) {
+      expect(Number.isFinite(calcDailyCustomers(1_000_000, 1500, clamp(raw)))).toBe(true);
+    }
+  });
+});

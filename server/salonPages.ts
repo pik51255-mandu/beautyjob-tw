@@ -80,7 +80,13 @@ ${ldBlocks}
 <style>
 :root{--fg:#0f172a;--mut:#64748b;--line:#e2e8f0;--pri:#e11d48;--bg:#fff;--soft:#f8fafc}
 *{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,"PingFang TC","Noto Sans TC",system-ui,sans-serif;color:var(--fg);background:var(--bg);line-height:1.6}
+/* 본문이 짧은 페이지(404·0건 허브·資料更正)에서 푸터 아래가 비어 색이 끊기던 문제.
+   푸터를 화면 바닥으로 밀어 붙인다. */
+html{min-height:100%}
+body{margin:0;font-family:-apple-system,"PingFang TC","Noto Sans TC",system-ui,sans-serif;color:var(--fg);background:var(--bg);line-height:1.6;
+  min-height:100vh;display:flex;flex-direction:column}
+main.wrap{flex:1 0 auto}
+footer.site{flex-shrink:0}
 a{color:var(--pri);text-decoration:none}a:hover{text-decoration:underline}
 .wrap{max-width:960px;margin:0 auto;padding:16px}
 header.site{border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:500}
@@ -107,7 +113,9 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
 .list .ad{font-size:13px;color:var(--mut);display:block;margin-top:2px}
 footer.site{border-top:1px solid var(--line);margin-top:36px;padding:18px 0;color:var(--mut);font-size:12.5px}
 .parking li{margin:8px 0}
-.sticky-map{position:sticky;top:64px}
+/* sticky 지도가 아래 목록 위로 얹혀 글자를 덮던 문제(눈검사 D).
+   불투명 배경과 z-index 로 겹침만 해소한다 — 레이아웃 재구성은 하지 않는다. */
+.sticky-map{position:sticky;top:64px;z-index:400;background:var(--bg);padding-bottom:8px}
 @media(max-width:760px){.sticky-map{position:static}}
 .hubgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .hubgrid a{border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--fg)}
@@ -284,10 +292,12 @@ function areaPage(req: Request, district: string, list: SalonRow[]): string {
   const years = list.map((s) => s.foundedYear).filter((y): y is number => Boolean(y));
   const oldest = years.length ? Math.min(...years) : null;
   // 인용 최적화: 숫자를 포함한 자기완결 요약 (전부 DB 집계 — 하드코딩 없음)
-  const summary =
-    `高雄市${district}共有 ${list.length} 家美髮沙龍，其中 ${pts.length} 家已完成門牌坐標定位` +
-    (withParking ? `，${withParking} 家在直線距離 200 公尺內有停車場` : "") +
-    (oldest ? `。最早的一家設立於 ${oldest} 年` : "") + "。";
+  const summary = list.length
+    ? `高雄市${district}共有 ${list.length} 家美髮沙龍，其中 ${pts.length} 家已完成門牌坐標定位` +
+      (withParking ? `，${withParking} 家在直線距離 200 公尺內有停車場` : "") +
+      (oldest ? `。最早的一家設立於 ${oldest} 年` : "") + "。"
+    : `高雄市${district}目前收錄 0 家美髮沙龍。本站資料來自公開登記資料，` +
+      `該區可能尚無登記中的美髮沙龍，或資料尚未更新。`;
 
   const body = `
 <h1>${esc(district)}美髮沙龍</h1>
@@ -296,14 +306,14 @@ function areaPage(req: Request, district: string, list: SalonRow[]): string {
 
 <div class="sticky-map">
   ${pts.length ? `<div class="map-legend"><span class="k"><span class="sw" style="background:#e11d48"></span>美髮沙龍（${pts.length}）</span></div>
-  <div class="map" id="map"></div>` : `<p class="meta">此區尚無可顯示的座標資料。</p>`}
+  <div class="map" id="map"></div>` : `<p class="meta">${list.length ? "此區尚無可顯示的座標資料。" : "此區目前收錄 0 家，暫無地圖資料。"}</p>`}
 </div>
 
 <h2>全部沙龍</h2>
-<div class="list" id="list">
+${list.length ? `<div class="list" id="list">
 ${list.map((s) => `<a href="/salon/${encodeURIComponent(s.taxId)}" id="s-${esc(s.taxId)}">
   <span class="nm">${esc(s.name)}</span><span class="ad">${esc(s.address)}</span></a>`).join("")}
-</div>
+</div>` : `<p class="meta">目前收錄 0 家。請參考下方鄰近行政區，或<a href="/salons">瀏覽其他行政區</a>。</p>`}
 
 ${adjacent.length ? `<h2>鄰近行政區</h2><p>${adjacent.map((a) => `<a href="/area/${a.s}">${esc(a.d)}</a>`).join("　")}</p>` : ""}
 <p><a href="/salons">← 返回全部行政區</a></p>
@@ -537,6 +547,31 @@ function dataRequestPage(req: Request): string {
   });
 }
 
+
+// ─── 404 ─────────────────────────────────────────────────────────────────────
+/**
+ * SSR 경로(/area/*, /salon/*)의 미매칭에만 쓴다.
+ * SPA 폴백(app.use("*")) 으로 흘리면 HTTP 200 이 나가 검색엔진이 색인한다 —
+ * 下架된 살롱 URL 이 계속 살아 있는 것처럼 보이는 문제를 막기 위해 상태코드를 지킨다.
+ */
+function sendNotFound(req: Request, res: Response): void {
+  const o = origin(req);
+  const body = `
+<h1>找不到這個頁面</h1>
+<p class="lead">您要找的頁面不存在，可能已經移除或網址有誤。</p>
+<p><a href="/salons">瀏覽高雄市美髮沙龍</a>　<a href="/">返回首頁</a></p>
+<p class="meta">資料如有錯誤或需要下架，請至<a href="/data-request">資料更正／下架申請</a>。</p>`;
+  res.status(404).setHeader("Cache-Control", "no-store");
+  res.type("html").send(layout({
+    title: `找不到頁面｜${SITE}`,
+    description: "您要找的頁面不存在。",
+    canonical: `${o}${req.originalUrl}`,
+    origin: o,
+    breadcrumb: [{ name: "高雄市", url: "/salons" }, { name: "找不到頁面" }],
+    body,
+  }));
+}
+
 // ─── 라우트 등록 ─────────────────────────────────────────────────────────────
 export function registerSalonPages(app: Express) {
   app.get("/salons", async (req: Request, res: Response) => {
@@ -545,19 +580,21 @@ export function registerSalonPages(app: Express) {
     res.type("html").send(indexPage(req, counts, total));
   });
 
-  app.get("/area/:slug", async (req: Request, res: Response, next) => {
+  app.get("/area/:slug", async (req: Request, res: Response) => {
     const district = districtForSlug(req.params.slug);
-    if (!district) return next();
+    // 무효 슬러그만 404. 유효한 행정구는 살롱이 0건이어도 정식 페이지를 낸다
+    // (那瑪夏區처럼 수록 0건인 구가 실재한다).
+    if (!district) return sendNotFound(req, res);
     const list = await listSalonsByDistrict(district);
-    if (!list.length) return next();
     res.setHeader("Cache-Control", CACHE);
     res.type("html").send(areaPage(req, district, list));
   });
 
-  app.get("/salon/:taxId", async (req: Request, res: Response, next) => {
-    if (!/^\d{8}$/.test(req.params.taxId)) return next();
+  app.get("/salon/:taxId", async (req: Request, res: Response) => {
+    if (!/^\d{8}$/.test(req.params.taxId)) return sendNotFound(req, res);
     const s = await getSalonByTaxId(req.params.taxId);
-    if (!s) return next();
+    // 下架된 살롱의 URL 이 200 으로 남으면 검색엔진이 계속 색인한다.
+    if (!s) return sendNotFound(req, res);
     const nearby = await listNearbySalons(s.district, s.taxId, 5);
     res.setHeader("Cache-Control", CACHE);
     res.type("html").send(salonPage(req, s, nearby));
