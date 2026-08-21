@@ -1,0 +1,22 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1080 720' width='1080' height='720'>
+<rect width='1080' height='720' fill='#fbf8f5'/>
+<text x='540' y='76' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='42' font-weight='700' fill='#0f1216' text-anchor='middle'>頭髮四大鍵結・強度比較</text>
+<rect x='60' y='140' width='160' height='58' rx='29' fill='#0f1216'/>
+<text x='140' y='179' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='28' font-weight='700' fill='#fbf8f5' text-anchor='middle'>胜肽鍵</text>
+<rect x='250' y='149' width='690' height='40' rx='20' fill='#0f1216'/>
+<text x='250' y='230' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='500' fill='#6b727e' text-anchor='start'>主鏈骨架・最強</text>
+<rect x='60' y='268' width='160' height='58' rx='29' fill='#b92846'/>
+<text x='140' y='307' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='28' font-weight='700' fill='#fbf8f5' text-anchor='middle'>雙硫鍵</text>
+<rect x='250' y='277' width='520' height='40' rx='20' fill='#b92846'/>
+<text x='250' y='358' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='500' fill='#6b727e' text-anchor='start'>側鏈化學鍵・燙髮的對象</text>
+<rect x='60' y='396' width='160' height='58' rx='29' fill='#ffcfd1'/>
+<text x='140' y='435' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='28' font-weight='700' fill='#641f29' text-anchor='middle'>鹽鍵</text>
+<rect x='250' y='405' width='330' height='40' rx='20' fill='#ffcfd1' stroke='#b92846' stroke-width='3'/>
+<text x='250' y='486' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='500' fill='#6b727e' text-anchor='start'>側鏈・受pH影響</text>
+<rect x='60' y='524' width='160' height='58' rx='29' fill='#00a9b3'/>
+<text x='140' y='563' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='28' font-weight='700' fill='#fbf8f5' text-anchor='middle'>氫鍵</text>
+<rect x='250' y='533' width='185' height='40' rx='20' fill='#00a9b3'/>
+<text x='250' y='614' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='500' fill='#6b727e' text-anchor='start'>側鏈・遇水就斷・最弱</text>
+<line x1='60' y1='652' x2='1020' y2='652' stroke='#ddd6d1' stroke-width='2'/>
+<text x='540' y='692' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='24' font-weight='700' fill='#641f29' text-anchor='middle'>側鏈三鍵決定造型；主鏈一斷，頭髮就斷。</text>
+</svg>

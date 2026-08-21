@@ -1,0 +1,49 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1080 720' width='1080' height='720'>
+<rect width='1080' height='720' fill='#fbf8f5'/>
+<text x='540' y='76' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='42' font-weight='700' fill='#0f1216' text-anchor='middle'>燙髮三部曲：雙硫鍵的拆與接</text>
+<g transform='translate(30,120)'>
+<rect x='0' y='0' width='320' height='440' rx='18' fill='#fbf8f5' stroke='#ddd6d1' stroke-width='3'/>
+<rect x='96' y='-20' width='128' height='44' rx='22' fill='#b92846'/>
+<text x='160' y='10' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='24' font-weight='700' fill='#fbf8f5' text-anchor='middle'>STEP 1</text>
+<text x='160' y='66' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='28' font-weight='700' fill='#0f1216' text-anchor='middle'>第一劑（還原劑）</text>
+<text x='160' y='100' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='24' font-weight='500' fill='#6b727e' text-anchor='middle'>打開雙硫鍵</text>
+<g transform='translate(0,20)'><line x1='132' y1='150' x2='148' y2='150' stroke='#641f29' stroke-width='7' stroke-linecap='round'/>
+<line x1='172' y1='150' x2='188' y2='150' stroke='#641f29' stroke-width='7' stroke-linecap='round'/>
+<path d='M 154 134 L 166 166 M 166 134 L 154 166' stroke='#b92846' stroke-width='4' stroke-linecap='round'/>
+<rect x='60.56' y='112.56' width='74.88' height='74.88' rx='15.84' fill='#b92846' stroke='#641f29' stroke-width='2.88'/>
+<text x='98' y='136' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='700' fill='#fbf8f5' text-anchor='middle'>S</text>
+<rect x='184.56' y='112.56' width='74.88' height='74.88' rx='15.84' fill='#b92846' stroke='#641f29' stroke-width='2.88'/>
+<text x='222' y='136' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='700' fill='#fbf8f5' text-anchor='middle'>S</text><rect x='236' y='210' width='40' height='58' rx='10' fill='#f6e8de' stroke='#b92846' stroke-width='3'/><rect x='246' y='192' width='20' height='20' rx='4' fill='#b92846'/><text x='256' y='296' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='18' font-weight='700' fill='#641f29' text-anchor='middle'>一劑</text></g>
+</g>
+<path d='M 360 340 h 22 m -8 -10 l 10 10 l -10 10' stroke='#641f29' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/>
+<g transform='translate(380,120)'>
+<rect x='0' y='0' width='320' height='440' rx='18' fill='#fbf8f5' stroke='#ddd6d1' stroke-width='3'/>
+<rect x='96' y='-20' width='128' height='44' rx='22' fill='#b92846'/>
+<text x='160' y='10' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='24' font-weight='700' fill='#fbf8f5' text-anchor='middle'>STEP 2</text>
+<text x='160' y='66' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='28' font-weight='700' fill='#0f1216' text-anchor='middle'>捲棒塑形</text>
+<text x='160' y='100' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='24' font-weight='500' fill='#6b727e' text-anchor='middle'>位置重新排列</text>
+<g transform='translate(0,20)'><line x1='132' y1='150' x2='148' y2='150' stroke='#641f29' stroke-width='7' stroke-linecap='round'/>
+<line x1='172' y1='204' x2='188' y2='204' stroke='#641f29' stroke-width='7' stroke-linecap='round'/>
+<path d='M 154 134 L 166 166 M 166 134 L 154 166' stroke='#b92846' stroke-width='4' stroke-linecap='round'/>
+<rect x='60.56' y='112.56' width='74.88' height='74.88' rx='15.84' fill='#b92846' stroke='#641f29' stroke-width='2.88'/>
+<text x='98' y='136' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='700' fill='#fbf8f5' text-anchor='middle'>S</text>
+<rect x='184.56' y='166.56' width='74.88' height='74.88' rx='15.84' fill='#b92846' stroke='#641f29' stroke-width='2.88'/>
+<text x='222' y='190' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='700' fill='#fbf8f5' text-anchor='middle'>S</text><circle cx='160' cy='250' r='34' fill='none' stroke='#0f1216' stroke-width='5'/><path d='M 126 250 a 34 34 0 0 1 68 0' stroke='#b92846' stroke-width='5' fill='none'/></g>
+</g>
+<path d='M 710 340 h 22 m -8 -10 l 10 10 l -10 10' stroke='#641f29' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/>
+<g transform='translate(730,120)'>
+<rect x='0' y='0' width='320' height='440' rx='18' fill='#fbf8f5' stroke='#ddd6d1' stroke-width='3'/>
+<rect x='96' y='-20' width='128' height='44' rx='22' fill='#b92846'/>
+<text x='160' y='10' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='24' font-weight='700' fill='#fbf8f5' text-anchor='middle'>STEP 3</text>
+<text x='160' y='66' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='28' font-weight='700' fill='#0f1216' text-anchor='middle'>第二劑（氧化劑）</text>
+<text x='160' y='100' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='24' font-weight='500' fill='#6b727e' text-anchor='middle'>新位置重新結合</text>
+<g transform='translate(0,20)'><line x1='128' y1='169.0' x2='192' y2='169.0' stroke='#641f29' stroke-width='7' stroke-linecap='round'/>
+<line x1='128' y1='185.0' x2='192' y2='185.0' stroke='#641f29' stroke-width='7' stroke-linecap='round'/>
+<rect x='60.56' y='112.56' width='74.88' height='74.88' rx='15.84' fill='#b92846' stroke='#641f29' stroke-width='2.88'/>
+<text x='98' y='136' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='700' fill='#fbf8f5' text-anchor='middle'>S</text>
+<rect x='184.56' y='166.56' width='74.88' height='74.88' rx='15.84' fill='#b92846' stroke='#641f29' stroke-width='2.88'/>
+<text x='222' y='190' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='700' fill='#fbf8f5' text-anchor='middle'>S</text><rect x='238' y='224' width='36' height='30' rx='6' fill='#b92846'/><path d='M 246 224 v-8 a 10 10 0 0 1 20 0 v8' stroke='#b92846' stroke-width='5' fill='none'/></g>
+</g>
+<text x='540' y='640' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='700' fill='#0f1216' text-anchor='middle'>拆（還原）→ 排（塑形）→ 接（氧化）＝新捲度定住</text>
+<text x='540' y='684' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='500' fill='#6b727e' text-anchor='middle'>一劑拆鍵、二劑接鍵——順序錯了，燙不出也留不住</text>
+</svg>

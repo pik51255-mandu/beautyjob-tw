@@ -1,0 +1,18 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 520' width='480' height='520'>
+<rect width='480' height='520' fill='#fbf8f5'/>
+<line x1='202' y1='196' x2='278' y2='196' stroke='#641f29' stroke-width='9' stroke-linecap='round'/>
+<line x1='202' y1='224' x2='278' y2='224' stroke='#641f29' stroke-width='9' stroke-linecap='round'/>
+<rect x='110.0' y='158.0' width='104.0' height='104.0' rx='22.0' fill='#b92846' stroke='#641f29' stroke-width='4.0'/>
+<rect x='266.0' y='158.0' width='104.0' height='104.0' rx='22.0' fill='#b92846' stroke='#641f29' stroke-width='4.0'/>
+<text x='162' y='186' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='30' font-weight='700' fill='#fbf8f5' text-anchor='middle'>S</text>
+<text x='318' y='186' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='30' font-weight='700' fill='#fbf8f5' text-anchor='middle'>S</text>
+<circle cx='144.0' cy='218.6' r='4.95' fill='#fbf8f5'/><circle cx='180.0' cy='218.6' r='4.95' fill='#fbf8f5'/><path d='M 151.2 238.4 Q 162 247.4 172.8 238.4' stroke='#fbf8f5' stroke-width='2.7' fill='none' stroke-linecap='round'/>
+<circle cx='300.0' cy='218.6' r='4.95' fill='#fbf8f5'/><circle cx='336.0' cy='218.6' r='4.95' fill='#fbf8f5'/><path d='M 307.2 238.4 Q 318 247.4 328.8 238.4' stroke='#fbf8f5' stroke-width='2.7' fill='none' stroke-linecap='round'/>
+<rect x='214.0' y='197' width='52' height='26' rx='12' fill='#641f29'/>
+<text x='240.0' y='217' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='20' font-weight='700' fill='#ffcfd1' text-anchor='middle'>✦</text>
+<rect x='378' y='286' width='48' height='74' rx='12' fill='#f6e8de' stroke='#b92846' stroke-width='4'/>
+<rect x='390' y='262' width='24' height='26' rx='5' fill='#b92846'/>
+<text x='402' y='334' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='20' font-weight='700' fill='#641f29' text-anchor='middle'>一劑</text>
+<text x='240' y='432' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='46' font-weight='700' fill='#0f1216' text-anchor='middle'>雙硫鍵</text>
+<text x='240' y='480' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='500' fill='#6b727e' text-anchor='middle'>握手最緊，只有一劑能鬆開</text>
+</svg>

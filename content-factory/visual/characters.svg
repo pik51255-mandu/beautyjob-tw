@@ -1,0 +1,71 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 1240' width='1000' height='1240'>
+<rect width='1000' height='1240' fill='#fbf8f5'/>
+<text x='500' y='78' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='46' font-weight='700' fill='#0f1216' text-anchor='middle'>頭髮四大鍵結・角色表</text>
+<text x='500' y='120' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='24' font-weight='500' fill='#6b727e' text-anchor='middle'>#2 四大鍵結｜美髮丙級 學科</text>
+<g transform='translate(20,150)'>
+<rect x='0' y='0' width='480' height='520' rx='18' fill='#fbf8f5' stroke='#ddd6d1' stroke-width='3'/>
+<line x1='168' y1='218' x2='312' y2='218' stroke='#00a9b3' stroke-width='4' stroke-dasharray='7 6'/>
+<circle cx='168' cy='218' r='60' fill='#d6eef0' stroke='#00a9b3' stroke-width='4'/>
+<circle cx='152.0' cy='209.0' r='5.5' fill='#0f1216'/><circle cx='192.0' cy='209.0' r='5.5' fill='#0f1216'/><path d='M 156.0 240.0 Q 168 230.0 180.0 240.0' stroke='#0f1216' stroke-width='3.0' fill='none' stroke-linecap='round'/>
+<circle cx='312' cy='218' r='60' fill='#d6eef0' stroke='#00a9b3' stroke-width='4'/>
+<circle cx='294.0' cy='208.0' r='5.5' fill='#0f1216'/><circle cx='334.0' cy='208.0' r='5.5' fill='#0f1216'/><path d='M 300.0 240.0 Q 312 230.0 324.0 240.0' stroke='#0f1216' stroke-width='3.0' fill='none' stroke-linecap='round'/>
+<path d='M 208 240 Q 228.0 262 234.0 252' stroke='#00a9b3' stroke-width='6' fill='none' stroke-linecap='round'/>
+<path d='M 272 240 Q 252.0 262 246.0 252' stroke='#00a9b3' stroke-width='6' fill='none' stroke-linecap='round'/>
+<circle cx='240.0' cy='252' r='11' fill='#00a9b3'/>
+<path d='M 366 68.0 C 384.0 92 382.5 107.0 366 113.0 C 349.5 107.0 348.0 92 366 68.0 Z' fill='#00a9b3'/>
+<path d='M 342 118 Q 330 128 320 132' stroke='#00a9b3' stroke-width='3' fill='none' stroke-dasharray='4 5'/>
+<path d='M 204.8 118 q 15.400000000000002 -33.0 33.0 -8.8 q 13.200000000000001 17.6 -4.4 24.200000000000003 q -15.400000000000002 5.5 -17.6 -8.8 m 24.200000000000003 15.400000000000002 q 19.8 8.8 35.2 -6.6000000000000005' stroke='#b92846' stroke-width='5.5' fill='none' stroke-linecap='round'/>
+<text x='240' y='432' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='46' font-weight='700' fill='#0f1216' text-anchor='middle'>氫鍵</text>
+<text x='240' y='480' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='500' fill='#6b727e' text-anchor='middle'>遇水就放手</text>
+</g>
+<g transform='translate(500,150)'>
+<rect x='0' y='0' width='480' height='520' rx='18' fill='#fbf8f5' stroke='#ddd6d1' stroke-width='3'/>
+<line x1='168' y1='218' x2='312' y2='218' stroke='#b92846' stroke-width='4' stroke-dasharray='3 7'/>
+<circle cx='168' cy='218' r='60' fill='#ffcfd1' stroke='#b92846' stroke-width='4'/>
+<circle cx='312' cy='218' r='60' fill='#d6eef0' stroke='#00a9b3' stroke-width='4'/>
+<circle cx='155.0' cy='214.0' r='5.5' fill='#0f1216'/><circle cx='195.0' cy='214.0' r='5.5' fill='#0f1216'/><path d='M 156.0 234.0 Q 168 244.0 180.0 234.0' stroke='#0f1216' stroke-width='3.0' fill='none' stroke-linecap='round'/>
+<circle cx='299.0' cy='214.0' r='5.5' fill='#0f1216'/><circle cx='339.0' cy='214.0' r='5.5' fill='#0f1216'/><path d='M 300.0 240.0 Q 312 230.0 324.0 240.0' stroke='#0f1216' stroke-width='3.0' fill='none' stroke-linecap='round'/>
+<circle cx='168' cy='140' r='17' fill='#b92846'/><text x='168' y='147' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='700' fill='#fbf8f5' text-anchor='middle'>＋</text>
+<circle cx='312' cy='140' r='17' fill='#00a9b3'/><text x='312' y='147' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='700' fill='#fbf8f5' text-anchor='middle'>－</text>
+<rect x='408' y='150' width='44' height='132' rx='8' fill='#fbf8f5' stroke='#ddd6d1' stroke-width='3'/>
+<rect x='416' y='160' width='28' height='32' rx='4' fill='#b92846'/>
+<rect x='416' y='200' width='28' height='32' rx='4' fill='#f6e8de'/>
+<rect x='416' y='240' width='28' height='32' rx='4' fill='#00a9b3'/>
+<text x='430' y='322' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='700' fill='#6b727e' text-anchor='middle'>pH</text>
+<text x='240' y='432' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='46' font-weight='700' fill='#0f1216' text-anchor='middle'>鹽鍵</text>
+<text x='240' y='480' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='500' fill='#6b727e' text-anchor='middle'>看pH臉色</text>
+</g>
+<g transform='translate(20,690)'>
+<rect x='0' y='0' width='480' height='520' rx='18' fill='#fbf8f5' stroke='#ddd6d1' stroke-width='3'/>
+<line x1='202' y1='196' x2='278' y2='196' stroke='#641f29' stroke-width='9' stroke-linecap='round'/>
+<line x1='202' y1='224' x2='278' y2='224' stroke='#641f29' stroke-width='9' stroke-linecap='round'/>
+<rect x='110.0' y='158.0' width='104.0' height='104.0' rx='22.0' fill='#b92846' stroke='#641f29' stroke-width='4.0'/>
+<rect x='266.0' y='158.0' width='104.0' height='104.0' rx='22.0' fill='#b92846' stroke='#641f29' stroke-width='4.0'/>
+<text x='162' y='186' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='30' font-weight='700' fill='#fbf8f5' text-anchor='middle'>S</text>
+<text x='318' y='186' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='30' font-weight='700' fill='#fbf8f5' text-anchor='middle'>S</text>
+<circle cx='144.0' cy='218.6' r='4.95' fill='#fbf8f5'/><circle cx='180.0' cy='218.6' r='4.95' fill='#fbf8f5'/><path d='M 151.2 238.4 Q 162 247.4 172.8 238.4' stroke='#fbf8f5' stroke-width='2.7' fill='none' stroke-linecap='round'/>
+<circle cx='300.0' cy='218.6' r='4.95' fill='#fbf8f5'/><circle cx='336.0' cy='218.6' r='4.95' fill='#fbf8f5'/><path d='M 307.2 238.4 Q 318 247.4 328.8 238.4' stroke='#fbf8f5' stroke-width='2.7' fill='none' stroke-linecap='round'/>
+<rect x='214.0' y='197' width='52' height='26' rx='12' fill='#641f29'/>
+<text x='240.0' y='217' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='20' font-weight='700' fill='#ffcfd1' text-anchor='middle'>✦</text>
+<rect x='378' y='286' width='48' height='74' rx='12' fill='#f6e8de' stroke='#b92846' stroke-width='4'/>
+<rect x='390' y='262' width='24' height='26' rx='5' fill='#b92846'/>
+<text x='402' y='334' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='20' font-weight='700' fill='#641f29' text-anchor='middle'>一劑</text>
+<text x='240' y='432' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='46' font-weight='700' fill='#0f1216' text-anchor='middle'>雙硫鍵</text>
+<text x='240' y='480' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='500' fill='#6b727e' text-anchor='middle'>握手最緊，只有一劑能鬆開</text>
+</g>
+<g transform='translate(500,690)'>
+<rect x='0' y='0' width='480' height='520' rx='18' fill='#fbf8f5' stroke='#ddd6d1' stroke-width='3'/>
+<rect x='118' y='252' width='60' height='96' fill='#ddd6d1' stroke='#0f1216' stroke-width='4'/>
+<rect x='302' y='252' width='60' height='96' fill='#ddd6d1' stroke='#0f1216' stroke-width='4'/>
+<rect x='58' y='168' width='364' height='84' rx='10' fill='#0f1216'/>
+<circle cx='84' cy='188' r='6' fill='#fbf8f5'/>
+<circle cx='84' cy='232' r='6' fill='#fbf8f5'/>
+<circle cx='396' cy='188' r='6' fill='#fbf8f5'/>
+<circle cx='396' cy='232' r='6' fill='#fbf8f5'/>
+<circle cx='219.0' cy='197.7' r='5.775' fill='#fbf8f5'/><circle cx='261.0' cy='197.7' r='5.775' fill='#fbf8f5'/><line x1='227.4' y1='220.8' x2='252.6' y2='220.8' stroke='#fbf8f5' stroke-width='3.6750000000000003' stroke-linecap='round'/>
+<path d='M 402 96 L 434 148 L 370 148 Z' fill='#ffcfd1' stroke='#b92846' stroke-width='4' stroke-linejoin='round'/>
+<text x='402' y='140' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='700' fill='#b92846' text-anchor='middle'>！</text>
+<text x='240' y='432' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='46' font-weight='700' fill='#0f1216' text-anchor='middle'>胜肽鍵</text>
+<text x='240' y='480' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='500' fill='#6b727e' text-anchor='middle'>主鏈大樑，動了就崩</text>
+</g>
+</svg>
