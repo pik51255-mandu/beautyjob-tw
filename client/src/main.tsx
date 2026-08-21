@@ -6,7 +6,11 @@ import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
+import { installTranslateGuard } from "./lib/translateGuard";
 import "./index.css";
+
+// React 마운트 전에 걸어야 한다 — 번역기가 DOM 을 만지기 시작하기 전에 보호막을 씌운다.
+installTranslateGuard();
 
 const queryClient = new QueryClient();
 
