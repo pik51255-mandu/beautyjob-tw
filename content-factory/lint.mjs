@@ -91,6 +91,23 @@ function analyze(file) {
     fieldSectionFilled = !isPlaceholder || countChinese(withoutQuoted) >= 20;
   }
 
+  // 2-d: 雙氧乳 %↔vol 대응 검증. 같은 줄에 N% 와 Mvol 이 함께 나오면 M === N*10/3 이어야 한다
+  //      (3%=10vol / 6%=20vol / 9%=30vol / 12%=40vol — 02 바이블 1-3 기준).
+  const volErrors = [];
+  for (const line of body.split("\n")) {
+    // 표 행만 검사한다. 서술 문장에는 "6%를 6vol 로 잘못 듣는다" 같은 오류 예시가
+    // 정상적으로 등장하므로, 대응을 단정하는 표 행에서만 판정해야 오탐이 없다.
+    if (!/^\s*\|/.test(line)) continue;
+    const pcts = [...line.matchAll(/(\d{1,2})\s*%/g)].map((m) => Number(m[1]));
+    const vols = [...line.matchAll(/(\d{1,3})\s*(?:vol|VOL|Vol)/g)].map((m) => Number(m[1]));
+    if (pcts.length === 1 && vols.length === 1) {
+      const expect = (pcts[0] * 10) / 3;
+      if (Math.abs(vols[0] - expect) > 0.51) {
+        volErrors.push(`${pcts[0]}% ↔ ${vols[0]}vol (기대 ${Math.round(expect)}vol)`);
+      }
+    }
+  }
+
   // R10: 내부링크 slug 존재 검증
   const linkedSlugs = [...body.matchAll(/\]\(\/articles\/([a-z0-9-]+)\)/g)].map((m) => m[1]);
   const unknownSlugs = SLUGS.size ? [...new Set(linkedSlugs.filter((s) => !SLUGS.has(s)))] : [];
@@ -105,7 +122,7 @@ function analyze(file) {
   return {
     file, chineseCount, tables, faqs, internalLinks,
     bannedHits, mainlandHits, simplifiedHits, fmMissing, byline, descLen,
-    hasFieldSection, fieldSectionFilled, questionLines, badQuestions, unknownSlugs,
+    hasFieldSection, fieldSectionFilled, questionLines, badQuestions, unknownSlugs, volErrors,
     quotedBanned: bannedHits.filter((h) => h.count === 0).map((h) => h.word),
     twTerms: TW_TERMS.filter((t) => body.includes(t)),
   };
@@ -121,6 +138,7 @@ function verdict(a, kind) {
   if (!a.byline) fails.push("바이라인 누락");
   if (a.descLen > 80) fails.push(`description ${a.descLen}字(80 초과)`);
   if (a.unknownSlugs.length) fails.push(`미확정 slug 링크: ${a.unknownSlugs.join(",")}`);
+  if (a.volErrors.length) fails.push(`雙氧乳 %↔vol 불일치: ${a.volErrors[0]}`);
   if (kind === "theory") {
     if (!a.hasFieldSection) fails.push("教科書沒說的 섹션 없음");
     else if (a.fieldSectionFilled) fails.push("教科書沒說的 을 AI 가 채움(비워둬야 함)");
@@ -162,6 +180,7 @@ for (const f of files) {
   detail.push(`- 유도 질문(R8): ${a.questionLines.length}개${a.badQuestions.length ? ` — 질문문 아님 ${a.badQuestions.length}건` : ""}`);
   a.questionLines.forEach((q, i) => detail.push(`    ${i + 1}. ${q}`));
   detail.push(`- 내부링크 slug 검증(R10): ${a.unknownSlugs.length ? "미확정 " + a.unknownSlugs.join(", ") : "전부 확정 목록 내"}`);
+  detail.push(`- 雙氧乳 %↔vol 대응(2-d): ${a.volErrors.length ? "불일치 " + a.volErrors.join(" / ") : "일치 또는 해당없음"}`);
   if (a.quotedBanned.length) {
     detail.push(`- **R9 예외 적용** — 「」인용 안에서만 등장한 금지어: ${a.quotedBanned.join(", ")}`);
     const raw = fs.readFileSync(f, "utf8");

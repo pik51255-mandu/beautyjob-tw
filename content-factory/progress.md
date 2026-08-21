@@ -83,18 +83,18 @@ SPA 정적 서빙보다 먼저 등록해 내보내는 패턴이 자리잡혀 있
 | 8 | 髮質診斷基本功：看、摸、拉三步驟 | `hair-diagnosis-basics` | 初級 | **검증통과** |
 | 9 | 多孔性是什麼：為什麼受損髮上色特別快 | `hair-porosity` | 初級 | **검증통과** |
 | 10 | 染髮前48小時：皮膚測試完整指南 | `patch-test-guide` | 初級 | **검증통과** |
-| 11 | 燙髮三步驟：還原→重組→氧化的完整原理 | `perm-three-steps` | 中級 | 대기 |
-| 12 | 軟化判斷完全指南：測試軟化的正確方法 | `softening-test-guide` | 中級 | 대기 |
-| 13 | 還原劑比較：TGA、半胱胺酸、半胱胺鹽酸鹽 | `reducing-agents-compared` | 中級 | 대기 |
-| 14 | 冷燙、溫塑燙、熱塑燙：原理層面的完整差別 | `perm-types-compared` | 中級 | 대기 |
-| 15 | 離子燙與縮毛矯正：藥水、溫度、設計的差異 | `straightening-compared` | 中級 | 대기 |
-| 16 | 染髮色彩學：色相環與補色中和 | `color-theory-basics` | 中級 | 대기 |
-| 17 | 底色理論：紅→橘→黃的祕密 | `undertone-theory` | 中級 | 대기 |
-| 18 | 雙氧乳設計邏輯：3%、6%、9%、12%怎麼選 | `developer-volume-guide` | 中級 | 대기 |
-| 19 | 漂髮科學：漂粉+雙氧的化學與過硫酸鹽 | `bleaching-science` | 中級 | 대기 |
-| 20 | 蓋白髮的科學：白髮為什麼特別難染 | `grey-coverage-science` | 中級 | 대기 |
-| 21 | 矯色與紫色洗髮精：原理與極限 | `toning-purple-shampoo` | 中級 | 대기 |
-| 22 | 熱損傷科學：幾度開始不可逆？ | `heat-damage-science` | 中級 | 대기 |
+| 11 | 燙髮三步驟：還原→重組→氧化的完整原理 | `perm-three-steps` | 中級 | **검증통과** |
+| 12 | 軟化判斷完全指南：測試軟化的正確方法 | `softening-test-guide` | 中級 | **검증통과** |
+| 13 | 還原劑比較：TGA、半胱胺酸、半胱胺鹽酸鹽 | `reducing-agents-compared` | 中級 | **검증통과** |
+| 14 | 冷燙、溫塑燙、熱塑燙：原理層面的完整差別 | `perm-types-compared` | 中級 | **검증통과** |
+| 15 | 離子燙與縮毛矯正：藥水、溫度、設計的差異 | `straightening-compared` | 中級 | **검증통과** |
+| 16 | 染髮色彩學：色相環與補色中和 | `color-theory-basics` | 中級 | **검증통과** |
+| 17 | 底色理論：紅→橘→黃的祕密 | `undertone-theory` | 中級 | **검증통과** |
+| 18 | 雙氧乳設計邏輯：3%、6%、9%、12%怎麼選 | `developer-volume-guide` | 中級 | **검증통과** |
+| 19 | 漂髮科學：漂粉+雙氧的化學與過硫酸鹽 | `bleaching-science` | 中級 | **검증통과** |
+| 20 | 蓋白髮的科學：白髮為什麼特別難染 | `grey-coverage-science` | 中級 | **검증통과** |
+| 21 | 矯色與紫色洗髮精：原理與極限 | `toning-purple-shampoo` | 中級 | **검증통과** |
+| 22 | 熱損傷科學：幾度開始不可逆？ | `heat-damage-science` | 中級 | **검증통과** |
 | 23 | 結構式護髮的化學：Olaplex、K18差在哪 | `bond-builder-chemistry` | 高級 | 대기 |
 | 24 | 卡色與漂髮發熱的隱形兇手：金屬離子與硬水 | `metallic-salts-hard-water` | 高級 | 대기 |
 | 25 | 酸熱離子護的真相：乙二醛酸原理與安全爭議 | `glyoxylic-acid-truth` | 高級 | 대기 |
@@ -127,6 +127,18 @@ SPA 정적 서빙보다 먼저 등록해 내보내는 패턴이 자리잡혀 있
 | A-8 | hair-diagnosis-basics | `hair-diagnosis-basics` | 검증통과 | 3,519 | 간체 0 / 금지어 0 | 2026-08-21 |
 | A-9 | hair-porosity | `hair-porosity` | 검증통과 | 2,863 | 간체 0 / 금지어 0 | 2026-08-21 |
 | A-10 | patch-test-guide | `patch-test-guide` | 검증통과 | 3,467 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-11 | perm-three-steps | `perm-three-steps` | 검증통과 | 4,456 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-12 | softening-test-guide | `softening-test-guide` | 검증통과 | 4,115 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-13 | reducing-agents-compared | `reducing-agents-compared` | 검증통과 | 3,794 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-14 | perm-types-compared | `perm-types-compared` | 검증통과 | 4,480 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-15 | straightening-compared | `straightening-compared` | 검증통과 | 4,465 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-16 | color-theory-basics | `color-theory-basics` | 검증통과 | 3,444 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-17 | undertone-theory | `undertone-theory` | 검증통과 | 3,994 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-18 | developer-volume-guide | `developer-volume-guide` | 검증통과 | 3,543 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-19 | bleaching-science | `bleaching-science` | 검증통과 | 3,948 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-20 | grey-coverage-science | `grey-coverage-science` | 검증통과 | 5,062 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-21 | toning-purple-shampoo | `toning-purple-shampoo` | 검증통과 | 4,031 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-22 | heat-damage-science | `heat-damage-science` | 검증통과 | 4,005 | 간체 0 / 금지어 0 | 2026-08-21 |
 | B-1 | 燙髮篇 제1편(軟化·試捲) | — | **차단** (PDF 미확보) | — | — | — |
 
 ---
@@ -139,6 +151,20 @@ SPA 정적 서빙보다 먼저 등록해 내보내는 패턴이 자리잡혀 있
   배치 ① 집필 에이전트 4명이 독립적으로 이 증상을 보고했고, 일부는 본문에서 콤마·영문
   화학명을 빼는 방식으로 회피했다. 두 리터럴을 괄호로 묶어 수정했고, 회피로 빠졌던
   `Toluene-2,5-diamine` 표기를 #10 에 복원했다.
+
+## 배치 ② 에서 드러난 lint 이슈
+
+1. **2-d %↔vol 규칙 오탐 (수정 완료)**: 서술문의 「把「6%」聽成「6vol」」처럼 *오류를 경고하는*
+   문장까지 불일치로 잡았다. 대응을 단정하는 **표 행에서만** 판정하도록 좁혔고,
+   표 안 오류(9%↔20vol)는 여전히 검출됨을 음성 대조로 확인했다.
+
+2. **금지어 부분문자열 과검출 (미해결 — 판단 필요)**: `生髮` 를 부분문자열로 매칭하다 보니
+   `新生髮根`·`原生髮`(둘 다 대만 현장 표준어: 뿌리 신생부 / 시술 이력 없는 모발)까지 걸린다.
+   집필 담당 4명이 `新長出來的部分`·`新生區`·`還沒被染燙過的頭髮` 등으로 우회했다.
+   결과 문장 자체는 자연스러우나 표준 업계어를 못 쓰는 상태다.
+   같은 이유로 `刺激`(단독)·`醫療`(단독)도 회피 대상이 됐다 — 원래 금지 대상은
+   `刺激毛囊`·`醫療級` 뿐이다. **R2 를 완화할지(예외 목록 도입) 여부는 선후님 판단 사항**이라
+   임의로 바꾸지 않았다.
 
 ## 미결·후속
 
