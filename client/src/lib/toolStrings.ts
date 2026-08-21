@@ -408,6 +408,54 @@ export const toolStrings = {
     ko: "업적·커미션율 입력만으로 노보·건보 공제 후 실수령액 계산",
   },
   entryCardCta: { zh: "立即試算", ko: "지금 계산하기" },
+  // ─── 染髮調配計算機 (/tools/color-mix) ─────────────────────────────────────
+  cmPageTitle: { zh: "染髮調配計算機｜雙氧乳度數・底色・分量換算", ko: "염색 조제 계산기" },
+  cmMetaDescription: {
+    zh: "輸入現在底色與目標色，計算需要的提升度數與雙氧乳 vol，預測會露出的底色，並換算染膏與雙氧乳分量。調配比例請依產品包裝標示輸入。",
+    ko: "현재 베이스와 목표색을 넣으면 필요 리프트·雙氧乳 vol·底色·분량을 계산합니다.",
+  },
+  cmHeading: { zh: "染髮調配計算機", ko: "염색 조제 계산기" },
+  cmSubheading: {
+    zh: "算提升度數與分量，不猜品牌比例",
+    ko: "리프트와 분량을 계산합니다. 배합비는 추측하지 않습니다",
+  },
+  cmSectionInput: { zh: "輸入條件", ko: "조건 입력" },
+  cmBaseLevel: { zh: "現在底色（度）", ko: "현재 베이스(度)" },
+  cmTargetLevel: { zh: "目標色（度）", ko: "목표색(度)" },
+  cmTone: { zh: "色調系列", ko: "색조 계열" },
+  cmGrey: { zh: "白髮比例", ko: "새치 비율" },
+  cmLength: { zh: "髮長", ko: "모발 길이" },
+  cmVolume: { zh: "髮量", ko: "모량" },
+  cmRatio: { zh: "調配比例（染膏 1 : 雙氧乳 ?）", ko: "배합비(染膏 1 : 雙氧乳 ?)" },
+  cmRatioHint: { zh: "請依產品包裝標示", ko: "제품 포장 표기를 따르세요" },
+  cmTubeG: { zh: "一條染膏容量（g）", ko: "튜브 용량(g)" },
+  cmSectionLift: { zh: "提升度數診斷", ko: "리프트 진단" },
+  cmLiftNeeded: { zh: "需要提升", ko: "필요 리프트" },
+  cmRecommendVol: { zh: "建議雙氧乳", ko: "권장 雙氧乳" },
+  cmDegree: { zh: "度", ko: "度" },
+  cmBleachWarn: { zh: "單靠染髮不足，需先漂髮", ko: "염색만으로 부족 — 탈색 선행 필요" },
+  cmSectionUndertone: { zh: "底色預測", ko: "底色 예측" },
+  cmUndertoneAt: { zh: "此度數會露出的底色", ko: "이 도수에서 드러날 底色" },
+  cmSectionAmount: { zh: "分量換算", ko: "분량 환산" },
+  cmCream: { zh: "染膏", ko: "染膏" },
+  cmDeveloper: { zh: "雙氧乳", ko: "雙氧乳" },
+  cmTubes: { zh: "需要染膏條數", ko: "필요 튜브 수" },
+  cmVolumeNote: {
+    zh: "調配比例是體積(ml)比，不是重量(g)比",
+    ko: "배합비는 체적(ml)비이지 중량(g)비가 아닙니다",
+  },
+  cmSectionRails: { zh: "注意事項", ko: "주의 사항" },
+  cmReadMore: { zh: "延伸閱讀", ko: "더 읽기" },
+  cmDisclaimer: {
+    zh: "本工具為換算參考。實際比例、時間依各品牌說明書為準，並請先做撮取測試（strand test）。",
+    ko: "환산 참고용입니다. 실제 비율·시간은 제품 설명서를 따르고 스트랜드 테스트를 먼저 하세요.",
+  },
+  cmEntryTitle: { zh: "染髮調配計算機", ko: "염색 조제 계산기" },
+  cmEntryDesc: {
+    zh: "底色到目標色要幾度？雙氧乳選幾 vol？分量算給你",
+    ko: "리프트·雙氧乳·분량을 계산합니다",
+  },
+
 } as const;
 
 export type ToolStringKey = keyof typeof toolStrings;

@@ -31,6 +31,7 @@ const OpeningCostCalculator = lazy(() => import("./pages/tools/OpeningCostCalcul
 const ToolsHub = lazy(() => import("./pages/tools/ToolsHub"));
 const ProductCost = lazy(() => import("./pages/tools/ProductCost"));
 const BizSimulator = lazy(() => import("./pages/tools/BizSimulator"));
+const ColorMix = lazy(() => import("./pages/tools/ColorMix"));
 const Community = lazy(() => import("./pages/Community"));
 const CommunityDetail = lazy(() => import("./pages/CommunityDetail"));
 const CommunityForm = lazy(() => import("./pages/CommunityForm"));
@@ -102,6 +103,7 @@ function Router() {
         <Route path="/tools/opening-cost" component={() => <Layout><OpeningCostCalculator /></Layout>} />
         <Route path="/tools/product-cost" component={() => <Layout><ProductCost /></Layout>} />
         <Route path="/tools/biz-simulator" component={() => <Layout><BizSimulator /></Layout>} />
+        <Route path="/tools/color-mix" component={() => <Layout><ColorMix /></Layout>} />
 
         {/* Phase 1 정보 메뉴 */}
         <Route path="/salary-info" component={() => <Layout><SalaryInfo /></Layout>} />

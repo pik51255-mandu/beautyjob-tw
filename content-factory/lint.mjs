@@ -19,7 +19,7 @@ const SLUGS = knownSlugs();
 // R2 규제 금지어 — 대만 화장품 광고규제(化粧品衛生安全管理法)
 // v8 개정: 단독 刺激·醫療 는 금지가 아니다(刺激嗅覺 은 화장품 정의문에 나온다).
 // 諮詢醫師·就醫 같은 의료인 안내 표현은 허용·권장이다.
-const BANNED = [
+export const BANNED = [
   "生髮", "育髮", "活化毛囊", "刺激毛囊", "喚醒毛囊",
   "治療", "再生", "修復", "消炎", "抗過敏", "醫療級", "醫療效能",
   "促進毛髮生長", "防止落髮",
@@ -27,10 +27,10 @@ const BANNED = [
 
 // 生髮 화이트리스트 — 대만 현장 표준어라 규제 표현이 아니다.
 // 접두 일치이므로 新生髮根 · 學生髮型 도 함께 마스킹된다.
-const GROWTH_WHITELIST = ["原生髮", "新生髮", "學生髮"];
+export const GROWTH_WHITELIST = ["原生髮", "新生髮", "學生髮"];
 
 /** 화이트리스트 어휘를 임시 치환해 生髮 부분문자열 과검출을 막는다. */
-function maskGrowthTerms(s) {
+export function maskGrowthTerms(s) {
   let masked = s;
   const counts = {};
   GROWTH_WHITELIST.forEach((w, i) => {
@@ -42,13 +42,13 @@ function maskGrowthTerms(s) {
 }
 
 // R1 대륙 어휘·간체 — 번체 대만용어만 허용
-const MAINLAND_WORDS = [
+export const MAINLAND_WORDS = [
   "洗发水", "染发", "烫发", "头发", "视频", "信息", "质量", "网络",
   "护发", "发质", "发型", "毛鳞片", "皮质层", "双氧",
 ];
 
 // 간체 전용 글자(번체와 형태가 다른 것만)
-const SIMPLIFIED = new Set(
+export const SIMPLIFIED = new Set(
   // 번체와 형태가 다른 간체 전용 글자만. 동형 글자(硬·搜·食 등)를 넣으면 오탐이 난다.
   // 주의: 두 리터럴을 반드시 괄호로 묶는다. 안 그러면 .split() 이 뒤 리터럴에만 걸려
   // 배열이 문자열로 변환되면서 ASCII 콤마가 집합에 섞인다(실제로 오탐을 냈던 버그).
@@ -94,6 +94,10 @@ function analyze(file) {
 
   // B-4: 教科書沒說的 섹션은 반드시 있어야 하고, 반드시 비어 있어야 한다.
   // 이 칸은 사이트의 유일한 차별점이라 AI 일반론으로 채우면 가치가 0이 된다.
+  // 1-b: 「教科書沒說的」는 브랜드 자산이라 변형을 허용하지 않는다.
+  const sectionVariants = [...body.matchAll(/^##\s*(課本[^\n]*|教科書[^\n]*)$/gm)].map((m) => m[1].trim());
+  const badSectionName = sectionVariants.filter((s) => s !== "教科書沒說的");
+
   const secMatch = body.match(/^##\s*教科書沒說的\s*$([\s\S]*?)(?=^##\s|\Z)/m);
   const hasFieldSection = Boolean(secMatch);
   let fieldSectionFilled = false;
@@ -128,6 +132,12 @@ function analyze(file) {
     }
   }
 
+  // 1-c: 現場答 슬롯. [미작성] 이면 draft — zh 발행 불가.
+  const answerSlot = body.match(/^###\s*現場答（선후 작성）\s*$([\s\S]*?)(?=^##\s|^###\s|\Z)/m);
+  const hasAnswerSlot = Boolean(answerSlot);
+  const answerFilled = hasAnswerSlot && !/\[미작성\]/.test(answerSlot[1]);
+  const status = answerFilled ? "publishable" : "draft";
+
   // R10: 내부링크 slug 존재 검증
   const linkedSlugs = [...body.matchAll(/\]\(\/articles\/([a-z0-9-]+)\)/g)].map((m) => m[1]);
   const unknownSlugs = SLUGS.size ? [...new Set(linkedSlugs.filter((s) => !SLUGS.has(s)))] : [];
@@ -143,6 +153,7 @@ function analyze(file) {
     file, chineseCount, tables, faqs, internalLinks,
     bannedHits, mainlandHits, simplifiedHits, fmMissing, byline, descLen,
     hasFieldSection, fieldSectionFilled, questionLines, badQuestions, unknownSlugs, volErrors,
+    badSectionName, hasAnswerSlot, answerFilled, status,
     growthExceptions,
     quotedBanned: bannedHits.filter((h) => h.count === 0).map((h) => h.word),
     twTerms: TW_TERMS.filter((t) => body.includes(t)),
@@ -160,10 +171,12 @@ function verdict(a, kind) {
   if (a.descLen > 80) fails.push(`description ${a.descLen}字(80 초과)`);
   if (a.unknownSlugs.length) fails.push(`미확정 slug 링크: ${a.unknownSlugs.join(",")}`);
   if (a.volErrors.length) fails.push(`雙氧乳 %↔vol 불일치: ${a.volErrors[0]}`);
+  if (a.badSectionName.length) fails.push(`섹션명 변형 금지: ${a.badSectionName.join(",")}`);
   if (kind === "theory") {
     if (!a.hasFieldSection) fails.push("教科書沒說的 섹션 없음");
     else if (a.fieldSectionFilled) fails.push("教科書沒說的 을 AI 가 채움(비워둬야 함)");
     else if (!a.questionLines.length) fails.push("유도 질문 없음(R8)");
+    else if (!a.hasAnswerSlot) fails.push("現場答 슬롯 없음(1-c)");
     else if (a.badQuestions.length) fails.push(`유도 질문이 질문문이 아님: ${a.badQuestions[0].slice(0, 20)}…`);
     if (a.chineseCount < 1500) fails.push(`분량 ${a.chineseCount}字(1500 미만)`);
     if (a.tables < 1) fails.push("표 없음");
@@ -173,8 +186,33 @@ function verdict(a, kind) {
   return fails;
 }
 
+// 1-a: sources 의 PDF 는 500KB 이상이거나 아예 없어야 한다.
+// 0바이트 파일이 "존재 체크"를 통과시키는 사고를 막는다.
+function checkSourcePdfs() {
+  const dir = "content-factory/sources";
+  const problems = [];
+  try {
+    for (const f of fs.readdirSync(dir)) {
+      if (!f.toLowerCase().endsWith(".pdf")) continue;
+      const size = fs.statSync(path.join(dir, f)).size;
+      if (size < 500 * 1024) problems.push(`${f} (${size}B — 500KB 미만)`);
+    }
+  } catch { /* 디렉터리 없으면 통과 */ }
+  return problems;
+}
+
 const files = process.argv.slice(2);
-if (!files.length) { console.error("사용: node content-factory/lint.mjs <파일...>"); process.exit(1); }
+const isCli = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname);
+if (isCli && !files.length) { console.error("사용: node content-factory/lint.mjs <파일...>"); process.exit(1); }
+if (isCli) runCli();
+
+function runCli() {
+
+const pdfProblems = checkSourcePdfs();
+if (pdfProblems.length) {
+  console.log(`✗ sources PDF 규칙 위반(1-a): ${pdfProblems.join(", ")}`);
+  console.log("  → 500KB 미만 PDF 는 삭제하거나 정상 파일로 교체할 것\n");
+}
 
 const rows = [];
 const detail = [`# lint 상세 리포트\n\n생성: ${new Date().toISOString().slice(0, 10)}\n`];
@@ -198,6 +236,7 @@ for (const f of files) {
   detail.push(`- 바이라인: ${a.byline ? "있음" : "없음"}`);
   detail.push(`- description 길이: ${a.descLen}字 (상한 80)`);
   detail.push(`- 教科書沒說的 섹션: ${a.hasFieldSection ? (a.fieldSectionFilled ? "있음 — 채워짐(실패)" : "있음 — 플레이스홀더(정상)") : "없음(실패)"}`);
+  detail.push(`- 現場答 슬롯(1-c): ${a.hasAnswerSlot ? (a.answerFilled ? "작성됨 → publishable" : "[미작성] → draft(zh 발행 불가)") : "없음(실패)"}`);
   detail.push(`- 유도 질문(R8): ${a.questionLines.length}개${a.badQuestions.length ? ` — 질문문 아님 ${a.badQuestions.length}건` : ""}`);
   a.questionLines.forEach((q, i) => detail.push(`    ${i + 1}. ${q}`));
   detail.push(`- 내부링크 slug 검증(R10): ${a.unknownSlugs.length ? "미확정 " + a.unknownSlugs.join(", ") : "전부 확정 목록 내"}`);
@@ -221,16 +260,18 @@ fs.writeFileSync("content-factory/lint-report.md", detail.join("\n"));
 
 // 표준출력: 요약 표만
 const pad = (s, n) => String(s).padEnd(n);
-console.log(`${pad("파일", 34)}${pad("字數", 7)}${pad("표", 4)}${pad("FAQ", 5)}${pad("링크", 6)}${pad("간체", 6)}${pad("금지어", 7)}${pad("現場칸", 8)}판정`);
+console.log(`${pad("파일", 34)}${pad("字數", 7)}${pad("표", 4)}${pad("FAQ", 5)}${pad("링크", 6)}${pad("간체", 6)}${pad("금지어", 7)}${pad("現場칸", 8)}${pad("status", 13)}판정`);
 for (const r of rows) {
   const realBanned = r.a.bannedHits.filter((h) => h.count > 0).length;
   console.log(
     pad(r.f, 34) + pad(r.a.chineseCount, 7) + pad(r.a.tables, 4) + pad(r.a.faqs, 5) +
     pad(r.a.internalLinks, 6) + pad(r.a.simplifiedHits.length, 6) + pad(realBanned, 7) +
     pad(r.a.hasFieldSection ? (r.a.fieldSectionFilled ? "채워짐" : "빈칸") : "없음", 8) +
+    pad(r.a.status, 13) +
     (r.fails.length ? "✗ " + r.fails[0] : "✓ 통과")
   );
 }
 const failed = rows.filter((r) => r.fails.length);
 console.log(`\n통과 ${rows.length - failed.length} / 실패 ${failed.length}  · 상세: content-factory/lint-report.md`);
-process.exit(failed.length ? 1 : 0);
+process.exit(failed.length || pdfProblems.length ? 1 : 0);
+}

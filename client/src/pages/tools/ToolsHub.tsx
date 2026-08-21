@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "wouter";
-import { Wrench, Calculator, Store, Lock, FlaskConical, LineChart, ArrowRight } from "lucide-react";
+import { Wrench, Calculator, Store, Lock, FlaskConical, LineChart, Palette, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { detectToolLang, makeT, type ToolStringKey } from "@/lib/toolStrings";
 
@@ -44,6 +44,13 @@ export default function ToolsHub() {
       descKey: "ocEntryDesc",
       href: "/tools/opening-cost",
       color: "bg-orange-50 text-orange-600",
+    },
+    {
+      icon: <Palette className="w-6 h-6" />,
+      titleKey: "cmEntryTitle",
+      descKey: "cmEntryDesc",
+      href: "/tools/color-mix",
+      color: "bg-rose-50 text-rose-600",
     },
   ];
 
