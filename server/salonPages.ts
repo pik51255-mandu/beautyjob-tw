@@ -18,9 +18,10 @@ import {
 } from "./db";
 import { ADJACENT_DISTRICTS, DISTRICT_SLUGS, districtForSlug, slugForDistrict } from "../shared/districts";
 import {
-  COORD_AS_OF, DATA_AS_OF, INDEXNOW_KEY, REGISTRY_AS_OF, breadcrumbLd, buildRobotsTxt,
-  datasetLd, itemListLd, organizationLd, safeOrigin,
+  COORD_AS_OF, DATA_AS_OF, INDEXNOW_KEY, MAP_ICON_CSS, MAP_ICON_JS, REGISTRY_AS_OF,
+  breadcrumbLd, buildRobotsTxt, datasetLd, itemListLd, organizationLd, safeOrigin,
 } from "./geo";
+import { coordsForLot } from "../shared/parkingLots";
 
 const SITE = "台灣美髮平台";
 const SOURCE_NOTE = "資料來源：財政部全國營業（稅籍）登記資料・高雄市政府民政局門牌坐標";
@@ -112,6 +113,7 @@ footer.site{border-top:1px solid var(--line);margin-top:36px;padding:18px 0;colo
 .hubgrid a{border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--fg)}
 .hubgrid a:hover{border-color:var(--pri);text-decoration:none}
 .hubgrid .n{font-weight:600}.hubgrid .c{font-size:13px;color:var(--mut)}
+${o.leaflet ? MAP_ICON_CSS : ""}
 </style>
 </head>
 <body>
@@ -165,9 +167,21 @@ function salonPage(req: Request, s: SalonRow, nearby: { taxId: string; name: str
     { name: s.name, path: `/salon/${encodeURIComponent(s.taxId)}` },
   ]);
 
+  // 표시 계층 전용: parkingJson 에 좌표가 없으므로 명칭으로 되찾는다(DB 무변경).
+  const parkingPins = s.parking
+    .map((p) => {
+      const c = coordsForLot(p.name);
+      return c ? { n: p.name, la: c[0], ln: c[1], d: p.distance, f: p.fee, mo: p.moto, k: p.kind } : null;
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
+
   const mapBlock = hasGeo ? `
 <section>
   <h2>位置</h2>
+  <div class="map-legend">
+    <span class="k"><span class="sw" style="background:#e11d48"></span>美髮沙龍</span>
+    ${parkingPins.length ? `<span class="k"><span class="sw" style="background:#7c3aed"></span>停車場（${parkingPins.length}）</span>` : ""}
+  </div>
   <div class="map" id="map" data-lat="${esc(s.lat)}" data-lng="${esc(s.lng)}" data-name="${esc(s.name)}"></div>
 </section>` : "";
 
@@ -232,13 +246,28 @@ ${nearbyBlock}
     ld: [ld, crumbLd],
     body,
     leaflet: hasGeo,
-    script: hasGeo ? `
+    script: hasGeo ? `${MAP_ICON_JS}
 (function(){var el=document.getElementById('map');if(!el||!window.L)return;
 var la=parseFloat(el.dataset.lat),ln=parseFloat(el.dataset.lng);
-var m=L.map(el,{scrollWheelZoom:false}).setView([la,ln],17);
+var parks=${jsonLd(parkingPins)};
+var m=L.map(el,{scrollWheelZoom:false});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,
 attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(m);
-L.marker([la,ln]).addTo(m).bindPopup(el.dataset.name);})();` : undefined,
+var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+L.marker([la,ln],{icon:salonIcon(true,esc(el.dataset.name)),zIndexOffset:1000})
+  .addTo(m).bindPopup('<strong>'+esc(el.dataset.name)+'</strong>');
+var b=[[la,ln]];
+parks.forEach(function(p){
+  var html='<div style="min-width:170px"><strong>'+esc(p.n)+'</strong>'
+    +'<div style="font-size:12px;color:#475569;margin-top:2px">'+esc(p.k)+'・直線距離約 '+esc(p.d)+' 公尺</div>'
+    +(p.f?'<div style="font-size:12px;margin-top:4px">收費：'+esc(p.f)+'</div>':'')
+    +(p.mo?'<div style="font-size:12px;margin-top:2px">機車位：'+esc(p.mo)+'</div>':'')+'</div>';
+  L.marker([p.la,p.ln],{icon:parkingIcon()}).addTo(m).bindPopup(html);
+  b.push([p.la,p.ln]);});
+// 살롱 + P 마커가 모두 들어오게. P 가 없으면 살롱 중심 고정 줌.
+if(b.length>1){m.fitBounds(b,{padding:[46,46],maxZoom:18});}else{m.setView([la,ln],17);}
+})();` : undefined,
   });
 }
 
@@ -266,7 +295,8 @@ function areaPage(req: Request, district: string, list: SalonRow[]): string {
 <p class="meta">共 ${list.length} 家（其中 ${pts.length} 家有座標）</p>
 
 <div class="sticky-map">
-  ${pts.length ? `<div class="map" id="map"></div>` : `<p class="meta">此區尚無可顯示的座標資料。</p>`}
+  ${pts.length ? `<div class="map-legend"><span class="k"><span class="sw" style="background:#e11d48"></span>美髮沙龍（${pts.length}）</span></div>
+  <div class="map" id="map"></div>` : `<p class="meta">此區尚無可顯示的座標資料。</p>`}
 </div>
 
 <h2>全部沙龍</h2>
@@ -304,14 +334,15 @@ ${adjacent.length ? `<h2>鄰近行政區</h2><p>${adjacent.map((a) => `<a href="
     ],
     body,
     leaflet: pts.length > 0,
-    script: pts.length ? `
+    script: pts.length ? `${MAP_ICON_JS}
 (function(){var el=document.getElementById('map');if(!el||!window.L)return;
 var pts=${jsonLd(pts)};
 var m=L.map(el,{scrollWheelZoom:false});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,
 attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(m);
+// 허브는 마커가 수백 개라 라벨 없는 소형 가위 핀으로 통일한다(살롱 페이지와 같은 위계).
 var b=[];pts.forEach(function(p){
-  var mk=L.marker([p.la,p.ln]).addTo(m).bindPopup(p.n);
+  var mk=L.marker([p.la,p.ln],{icon:salonIcon(false,'')}).addTo(m).bindPopup(p.n);
   mk.on('click',function(){
     var card=document.getElementById('s-'+p.t);
     if(card){card.scrollIntoView({behavior:'smooth',block:'center'});card.style.borderColor='#e11d48';}
