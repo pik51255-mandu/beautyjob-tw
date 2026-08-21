@@ -1,0 +1,17 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 520' width='480' height='520'>
+<rect width='480' height='520' fill='#fbf8f5'/>
+<line x1='168' y1='218' x2='312' y2='218' stroke='#b92846' stroke-width='4' stroke-dasharray='3 7'/>
+<circle cx='168' cy='218' r='60' fill='#ffcfd1' stroke='#b92846' stroke-width='4'/>
+<circle cx='312' cy='218' r='60' fill='#d6eef0' stroke='#00a9b3' stroke-width='4'/>
+<circle cx='155.0' cy='214.0' r='5.5' fill='#0f1216'/><circle cx='195.0' cy='214.0' r='5.5' fill='#0f1216'/><path d='M 156.0 234.0 Q 168 244.0 180.0 234.0' stroke='#0f1216' stroke-width='3.0' fill='none' stroke-linecap='round'/>
+<circle cx='299.0' cy='214.0' r='5.5' fill='#0f1216'/><circle cx='339.0' cy='214.0' r='5.5' fill='#0f1216'/><path d='M 300.0 240.0 Q 312 230.0 324.0 240.0' stroke='#0f1216' stroke-width='3.0' fill='none' stroke-linecap='round'/>
+<circle cx='168' cy='140' r='17' fill='#b92846'/><text x='168' y='147' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='700' fill='#fbf8f5' text-anchor='middle'>＋</text>
+<circle cx='312' cy='140' r='17' fill='#00a9b3'/><text x='312' y='147' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='700' fill='#fbf8f5' text-anchor='middle'>－</text>
+<rect x='408' y='150' width='44' height='132' rx='8' fill='#fbf8f5' stroke='#ddd6d1' stroke-width='3'/>
+<rect x='416' y='160' width='28' height='32' rx='4' fill='#b92846'/>
+<rect x='416' y='200' width='28' height='32' rx='4' fill='#f6e8de'/>
+<rect x='416' y='240' width='28' height='32' rx='4' fill='#00a9b3'/>
+<text x='430' y='322' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='700' fill='#6b727e' text-anchor='middle'>pH</text>
+<text x='240' y='432' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='46' font-weight='700' fill='#0f1216' text-anchor='middle'>鹽鍵</text>
+<text x='240' y='480' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='500' fill='#6b727e' text-anchor='middle'>看pH臉色</text>
+</svg>

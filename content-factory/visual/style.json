@@ -1,0 +1,48 @@
+{
+  "source": "client/src/index.css @theme (oklch → sRGB hex)",
+  "synced": "2026-08-21",
+  "font": {
+    "family": "Noto Sans TC",
+    "fallback": [
+      "PingFang TC",
+      "Microsoft JhengHei",
+      "sans-serif"
+    ]
+  },
+  "palette": {
+    "primary": {
+      "hex": "#b92846",
+      "name": "玫瑰金 Rose",
+      "use": "주색 — 강조·雙硫鍵·타이틀"
+    },
+    "ink": {
+      "hex": "#0f1216",
+      "name": "深炭 Charcoal",
+      "use": "본문 텍스트·胜肽鍵(대들보)·외곽선"
+    },
+    "paper": {
+      "hex": "#fbf8f5",
+      "name": "米白 Cream",
+      "use": "배경"
+    },
+    "aqua": {
+      "hex": "#00a9b3",
+      "name": "水藍 Aqua",
+      "use": "보조색 — 물·氫鍵·습기 표현"
+    }
+  },
+  "derived_tints": {
+    "primary_soft": "#ffcfd1",
+    "primary_deep": "#641f29",
+    "ink_muted": "#6b727e",
+    "line_soft": "#ddd6d1",
+    "paper_alt": "#f6e8de",
+    "aqua_soft": "#d6eef0"
+  },
+  "rules": [
+    "주 팔레트 4색 이내 (primary/ink/paper/aqua)",
+    "틴트는 위 4색 계열 파생만 허용",
+    "폰트 Noto Sans TC 고정",
+    "간체자 사용 금지 (번체 전용)"
+  ]
+}

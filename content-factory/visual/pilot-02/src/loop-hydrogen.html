@@ -1,0 +1,116 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  :root{ --p:#b92846; --ink:#0f1216; --paper:#fbf8f5; --aqua:#00a9b3;
+         --rose-deep:#641f29; --muted:#6b727e; --line:#ddd6d1; --alt:#f6e8de; --aqua-soft:#d6eef0; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:1080px;height:1350px;background:var(--paper);overflow:hidden;
+       font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;color:var(--ink);
+       display:flex;flex-direction:column;align-items:center;padding:70px 60px 64px}
+  .chip{border:3px solid var(--p);color:var(--p);border-radius:999px;padding:10px 30px;font-size:26px;font-weight:700;letter-spacing:2px}
+  h1{font-size:56px;font-weight:900;margin-top:30px}
+  .scene{flex:1;display:flex;align-items:center}
+  #stage{overflow:hidden}
+  .caps{position:relative;height:110px;width:100%}
+  .cap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+       font-size:44px;font-weight:700;opacity:0}
+  .cap b{color:var(--p);margin:0 6px}
+  .cap .aq{color:var(--aqua);margin:0 6px;font-weight:700}
+</style>
+<body>
+  <div class="chip">氫鍵小劇場・無限循環</div>
+  <h1>捲度為什麼怕水？</h1>
+  <div class="scene">
+    <svg id="stage" viewBox="0 0 960 620" width="960">
+      <g id="curlHappy"><path d="M 415 96 q 30 -66 66 -18 q 26 36 -8 48 q -30 12 -36 -18 m 48 30 q 40 18 70 -14" stroke="#b92846" stroke-width="11" fill="none" stroke-linecap="round"/></g>
+      <g id="curlDroop"><path d="M 420 78 Q 480 140 540 156" stroke="#6b727e" stroke-width="10" fill="none" stroke-linecap="round"/></g>
+      <g id="drops"></g>
+      <line id="linkFull" x1="336" y1="380" x2="624" y2="380" stroke="#00a9b3" stroke-width="8" stroke-dasharray="14 12"/>
+      <g id="stubs">
+        <line x1="336" y1="380" x2="404" y2="380" stroke="#00a9b3" stroke-width="8" stroke-dasharray="10 10"/>
+        <line x1="556" y1="380" x2="624" y2="380" stroke="#00a9b3" stroke-width="8" stroke-dasharray="10 10"/>
+      </g>
+      <g id="beadL">
+        <circle cx="0" cy="0" r="120" fill="#d6eef0" stroke="#00a9b3" stroke-width="8"/>
+        <g class="fHappy"><circle cx="-40" cy="-14" r="11" fill="#0f1216"/><circle cx="40" cy="-14" r="11" fill="#0f1216"/>
+          <path d="M -24 34 Q 0 54 24 34" stroke="#0f1216" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+        <g class="fShock"><circle cx="-40" cy="-14" r="11" fill="#0f1216"/><circle cx="40" cy="-14" r="11" fill="#0f1216"/>
+          <ellipse cx="0" cy="38" rx="12" ry="16" fill="#0f1216"/></g>
+        <path class="armIn" d="M 80 44 Q 128 88 140 72" stroke="#00a9b3" stroke-width="12" fill="none" stroke-linecap="round"/>
+      </g>
+      <g id="beadR">
+        <circle cx="0" cy="0" r="120" fill="#d6eef0" stroke="#00a9b3" stroke-width="8"/>
+        <g class="fHappy"><circle cx="-40" cy="-14" r="11" fill="#0f1216"/><circle cx="40" cy="-14" r="11" fill="#0f1216"/>
+          <path d="M -24 34 Q 0 54 24 34" stroke="#0f1216" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+        <g class="fShock"><circle cx="-40" cy="-14" r="11" fill="#0f1216"/><circle cx="40" cy="-14" r="11" fill="#0f1216"/>
+          <ellipse cx="0" cy="38" rx="12" ry="16" fill="#0f1216"/></g>
+        <path class="armIn" d="M -80 44 Q -128 88 -140 72" stroke="#00a9b3" stroke-width="12" fill="none" stroke-linecap="round"/>
+      </g>
+      <circle id="hands" cx="480" cy="452" r="22" fill="#00a9b3"/>
+      <g id="dryer">
+        <rect x="0" y="0" width="150" height="96" rx="26" fill="#0f1216"/>
+        <rect x="-54" y="26" width="60" height="44" rx="12" fill="#0f1216"/>
+        <rect x="36" y="96" width="34" height="60" rx="10" fill="#0f1216"/>
+        <g id="air" stroke="#00a9b3" stroke-width="8" fill="none" stroke-linecap="round">
+          <path d="M -70 34 q -30 8 -60 0"/><path d="M -70 62 q -36 10 -72 0"/>
+        </g>
+      </g>
+    </svg>
+  </div>
+  <div class="caps">
+    <div class="cap" id="cap1"><span>乾燥：氫鍵</span><b>相連</b><span>，捲度在</span></div>
+    <div class="cap" id="cap2"><span>遇水：</span><span class="aq">放手！</span><span>捲度散了</span></div>
+    <div class="cap" id="cap3"><span>吹乾：</span><b>重新牽手</b><span>，捲度回來</span></div>
+  </div>
+<script>
+const $ = id => document.getElementById(id);
+const DUR = 8;
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+const ss = x => { x = clamp(x,0,1); return x*x*(3-2*x); };           // smoothstep
+const win = (t,a,b,f=0.3) => ss((t-a)/f) * (1 - ss((t-(b-f))/f));    // fade-in/out window
+const dropsG = $('drops');
+const DROPS = [ {x:430,d:1.2}, {x:520,d:1.55}, {x:365,d:1.9}, {x:585,d:2.25} ];
+DROPS.forEach(o => {
+  const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d','M 0 -26 C 19 0 18 15 0 22 C -18 15 -19 0 0 -26 Z');
+  p.setAttribute('fill','#00a9b3');
+  dropsG.appendChild(p); o.el = p;
+});
+function setT(t){
+  t = ((t % DUR) + DUR) % DUR;
+  // 분리도 k: 0(잡음)→1(놓음). 2.4~3.2 분리, 5.6~6.4 재접합. t=0과 t=8에서 0.
+  const k = ss((t-2.4)/0.8) * (1 - ss((t-5.6)/0.8));
+  const sep = 90 * k;
+  $('beadL').setAttribute('transform', `translate(${336-sep},380)`);
+  $('beadR').setAttribute('transform', `translate(${624+sep},380)`);
+  $('linkFull').style.opacity = 1-k;
+  $('stubs').style.opacity = k;
+  $('hands').style.opacity = 1-k;
+  document.querySelectorAll('.armIn').forEach(a => a.style.opacity = 1-k);
+  document.querySelectorAll('.fHappy').forEach(f => f.style.opacity = 1-k);
+  document.querySelectorAll('.fShock').forEach(f => f.style.opacity = k);
+  $('curlHappy').style.opacity = 1-k;
+  $('curlDroop').style.opacity = k;
+  // 물방울: 1.2~3.4 사이 낙하
+  DROPS.forEach(o => {
+    const u = (t - o.d) / 1.15;
+    if (u > 0 && u < 1) {
+      o.el.style.opacity = u < 0.82 ? 1 : (1-u)/0.18;
+      const y = -40 + 360 * (u*u*0.6 + u*0.4);
+      o.el.setAttribute('transform', `translate(${o.x},${y}) scale(1.6)`);
+    } else o.el.style.opacity = 0;
+  });
+  // 드라이어: 4.4 슬라이드 인 → 6.6 아웃
+  const dIn = ss((t-4.4)/0.6), dOut = ss((t-6.6)/0.6);
+  const dx = 1120 - 360*dIn + 520*dOut;
+  $('dryer').setAttribute('transform', `translate(${dx},120)`);
+  $('air').style.opacity = (dIn >= 1 && dOut <= 0) ? (0.55 + 0.45*Math.sin(t*22)) : 0;
+  // 캡션
+  $('cap1').style.opacity = clamp(win(t,-0.4,1.4) + win(t,7.0,8.4), 0, 1);
+  $('cap2').style.opacity = win(t,1.4,4.6);
+  $('cap3').style.opacity = win(t,4.6,7.0);
+}
+window.setT = setT;
+setT(0);
+</script>
+</body>

@@ -1,0 +1,37 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1080 720' width='1080' height='720'>
+<rect width='1080' height='720' fill='#fbf8f5'/>
+<text x='540' y='76' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='42' font-weight='700' fill='#0f1216' text-anchor='middle'>氫鍵：遇水就放手，吹乾再牽手</text>
+<g transform='translate(40,130)'>
+<rect x='0' y='0' width='320' height='440' rx='18' fill='#f6e8de' stroke='#ddd6d1' stroke-width='2'/>
+<text x='160' y='52' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='700' fill='#641f29' text-anchor='middle'>① 乾燥・相連</text>
+<g transform='translate(0,80)'><line x1='100' y1='190' x2='220' y2='190' stroke='#00a9b3' stroke-width='4'/>
+<circle cx='100' cy='190' r='42' fill='#d6eef0' stroke='#00a9b3' stroke-width='3.5'/>
+<circle cx='85.6' cy='185.68' r='3.96' fill='#0f1216'/><circle cx='114.4' cy='185.68' r='3.96' fill='#0f1216'/><path d='M 91.36 201.52 Q 100 208.72 108.64 201.52' stroke='#0f1216' stroke-width='2.16' fill='none' stroke-linecap='round'/>
+<circle cx='220' cy='190' r='42' fill='#d6eef0' stroke='#00a9b3' stroke-width='3.5'/>
+<circle cx='205.6' cy='185.68' r='3.96' fill='#0f1216'/><circle cx='234.4' cy='185.68' r='3.96' fill='#0f1216'/><path d='M 211.36 201.52 Q 220 208.72 228.64 201.52' stroke='#0f1216' stroke-width='2.16' fill='none' stroke-linecap='round'/><path d='M 131.2 96 q 12.6 -27.0 27.0 -7.2 q 10.8 14.4 -3.6 19.8 q -12.6 4.5 -14.4 -7.2 m 19.8 12.6 q 16.2 7.2 28.8 -5.4' stroke='#b92846' stroke-width='4.5' fill='none' stroke-linecap='round'/></g>
+<text x='160' y='402' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='500' fill='#6b727e' text-anchor='middle'>氫鍵手拉手，捲度在</text>
+</g>
+<g transform='translate(380,130)'>
+<rect x='0' y='0' width='320' height='440' rx='18' fill='#f6e8de' stroke='#ddd6d1' stroke-width='2'/>
+<text x='160' y='52' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='700' fill='#641f29' text-anchor='middle'>② 遇水・放手</text>
+<g transform='translate(0,80)'><line x1='74' y1='190' x2='108' y2='190' stroke='#00a9b3' stroke-width='4' stroke-dasharray='5 5'/>
+<line x1='212' y1='190' x2='246' y2='190' stroke='#00a9b3' stroke-width='4' stroke-dasharray='5 5'/>
+<circle cx='74' cy='190' r='42' fill='#d6eef0' stroke='#00a9b3' stroke-width='3.5'/>
+<circle cx='59.6' cy='185.68' r='3.96' fill='#0f1216'/><circle cx='88.4' cy='185.68' r='3.96' fill='#0f1216'/><ellipse cx='74' cy='201.52' rx='4.32' ry='5.76' fill='#0f1216'/>
+<circle cx='246' cy='190' r='42' fill='#d6eef0' stroke='#00a9b3' stroke-width='3.5'/>
+<circle cx='231.6' cy='185.68' r='3.96' fill='#0f1216'/><circle cx='260.4' cy='185.68' r='3.96' fill='#0f1216'/><ellipse cx='246' cy='201.52' rx='4.32' ry='5.76' fill='#0f1216'/><path d='M 160 50.8 C 174.4 70 173.2 82.0 160 86.8 C 146.8 82.0 145.6 70 160 50.8 Z' fill='#00a9b3'/><path d='M 90 93.6 C 100.8 108 99.9 117.0 90 120.6 C 80.1 117.0 79.2 108 90 93.6 Z' fill='#00a9b3'/><path d='M 232 89.6 C 242.8 104 241.9 113.0 232 116.6 C 222.1 113.0 221.2 104 232 89.6 Z' fill='#00a9b3'/><path d='M 133.0 87.0 Q 160 119.4 187.0 126.6' stroke='#6b727e' stroke-width='4.5' fill='none' stroke-linecap='round'/></g>
+<text x='160' y='402' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='500' fill='#6b727e' text-anchor='middle'>濕氣一來，鍵結斷開</text>
+</g>
+<g transform='translate(720,130)'>
+<rect x='0' y='0' width='320' height='440' rx='18' fill='#f6e8de' stroke='#ddd6d1' stroke-width='2'/>
+<text x='160' y='52' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='700' fill='#641f29' text-anchor='middle'>③ 吹乾・重新連結</text>
+<g transform='translate(0,80)'><line x1='100' y1='190' x2='220' y2='190' stroke='#00a9b3' stroke-width='4'/>
+<circle cx='100' cy='190' r='42' fill='#d6eef0' stroke='#00a9b3' stroke-width='3.5'/>
+<circle cx='85.6' cy='185.68' r='3.96' fill='#0f1216'/><circle cx='114.4' cy='185.68' r='3.96' fill='#0f1216'/><path d='M 91.36 201.52 Q 100 208.72 108.64 201.52' stroke='#0f1216' stroke-width='2.16' fill='none' stroke-linecap='round'/>
+<circle cx='220' cy='190' r='42' fill='#d6eef0' stroke='#00a9b3' stroke-width='3.5'/>
+<circle cx='205.6' cy='185.68' r='3.96' fill='#0f1216'/><circle cx='234.4' cy='185.68' r='3.96' fill='#0f1216'/><path d='M 211.36 201.52 Q 220 208.72 228.64 201.52' stroke='#0f1216' stroke-width='2.16' fill='none' stroke-linecap='round'/><path d='M 131.2 96 q 12.6 -27.0 27.0 -7.2 q 10.8 14.4 -3.6 19.8 q -12.6 4.5 -14.4 -7.2 m 19.8 12.6 q 16.2 7.2 28.8 -5.4' stroke='#b92846' stroke-width='4.5' fill='none' stroke-linecap='round'/><path d='M 250 60 q 16 8 0 16 m 16 -22 q 16 8 0 16' stroke='#6b727e' stroke-width='3' fill='none' stroke-linecap='round'/></g>
+<text x='160' y='402' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='500' fill='#6b727e' text-anchor='middle'>定型完成，捲度回來</text>
+</g>
+<text x='540' y='640' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='700' fill='#0f1216' text-anchor='middle'>濕氣＝放手 → 捲度消失｜吹乾定型＝再牽手</text>
+<text x='540' y='684' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='22' font-weight='500' fill='#6b727e' text-anchor='middle'>這就是「吹的捲」撐不過下雨天的原因</text>
+</svg>

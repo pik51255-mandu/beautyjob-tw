@@ -1,0 +1,44 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  :root{ --p:#b92846; --ink:#0f1216; --paper:#fbf8f5; --aqua:#00a9b3;
+         --rose-soft:#ffcfd1; --rose-deep:#641f29; --muted:#6b727e; --line:#ddd6d1; --alt:#f6e8de; --aqua-soft:#d6eef0; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:1080px;height:1350px;background:var(--paper);
+       font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;color:var(--ink);
+       display:flex;flex-direction:column;padding:72px 80px 56px}
+  .chip{align-self:flex-start;border:3px solid var(--p);color:var(--p);border-radius:999px;
+        padding:10px 28px;font-size:26px;font-weight:700;letter-spacing:2px}
+  h1{font-size:88px;line-height:1.22;font-weight:900;margin-top:44px}
+  h1 em{font-style:normal;color:var(--p)}
+  .scene{flex:1;display:flex;align-items:center;justify-content:center}
+  .answer{background:var(--alt);border-left:10px solid var(--aqua);border-radius:14px;
+          padding:34px 38px;font-size:33px;line-height:1.5;font-weight:500}
+  .answer b{color:var(--rose-deep)}
+  .foot{margin-top:36px;display:flex;justify-content:space-between;align-items:center;
+        color:var(--muted);font-size:24px}
+  .foot .tag{color:var(--p);font-weight:700}
+</style>
+<body>
+  <div class="chip">美髮丙級・觀念卡</div>
+  <h1>吹的捲，<br>為什麼<em>隔天就沒了</em>？</h1>
+  <div class="scene">
+    <svg viewBox="0 0 480 340" width="760">
+      <line x1="168" y1="218" x2="312" y2="218" stroke="#00a9b3" stroke-width="4" stroke-dasharray="7 6"/>
+      <circle cx="168" cy="218" r="60" fill="#d6eef0" stroke="#00a9b3" stroke-width="4"/>
+      <circle cx="312" cy="218" r="60" fill="#d6eef0" stroke="#00a9b3" stroke-width="4"/>
+      <circle cx="152" cy="211" r="5.5" fill="#0f1216"/><circle cx="192" cy="211" r="5.5" fill="#0f1216"/>
+      <path d="M 156 240 Q 168 230 180 240" stroke="#0f1216" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="294" cy="210" r="5.5" fill="#0f1216"/><circle cx="334" cy="210" r="5.5" fill="#0f1216"/>
+      <path d="M 300 240 Q 312 230 324 240" stroke="#0f1216" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M 208 240 Q 228 262 234 252" stroke="#00a9b3" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M 272 240 Q 252 262 246 252" stroke="#00a9b3" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <circle cx="240" cy="252" r="11" fill="#00a9b3"/>
+      <path d="M 366 76 C 384 100 382 115 366 121 C 350 115 348 100 366 76 Z" fill="#00a9b3"/>
+      <path d="M 342 118 Q 330 128 320 132" stroke="#00a9b3" stroke-width="3" fill="none" stroke-dasharray="4 5"/>
+      <path d="M 205 118 q 15 -33 33 -9 q 13 18 -4 24 q -15 6 -18 -9 m 24 15 q 20 9 35 -7" stroke="#b92846" stroke-width="6" fill="none" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="answer">因為<b>「氫鍵」遇水就放手</b>——濕氣一來，撐住捲度的鍵結斷開，捲度就散了。吹乾定型，其實是讓氫鍵在新位置重新牽手。</div>
+  <div class="foot"><span>下雨天捲度消失的元兇，就是它</span><span class="tag">#2 四大鍵結 01</span></div>
+</body>

@@ -1,0 +1,15 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 520' width='480' height='520'>
+<rect width='480' height='520' fill='#fbf8f5'/>
+<rect x='118' y='252' width='60' height='96' fill='#ddd6d1' stroke='#0f1216' stroke-width='4'/>
+<rect x='302' y='252' width='60' height='96' fill='#ddd6d1' stroke='#0f1216' stroke-width='4'/>
+<rect x='58' y='168' width='364' height='84' rx='10' fill='#0f1216'/>
+<circle cx='84' cy='188' r='6' fill='#fbf8f5'/>
+<circle cx='84' cy='232' r='6' fill='#fbf8f5'/>
+<circle cx='396' cy='188' r='6' fill='#fbf8f5'/>
+<circle cx='396' cy='232' r='6' fill='#fbf8f5'/>
+<circle cx='219.0' cy='197.7' r='5.775' fill='#fbf8f5'/><circle cx='261.0' cy='197.7' r='5.775' fill='#fbf8f5'/><line x1='227.4' y1='220.8' x2='252.6' y2='220.8' stroke='#fbf8f5' stroke-width='3.6750000000000003' stroke-linecap='round'/>
+<path d='M 402 96 L 434 148 L 370 148 Z' fill='#ffcfd1' stroke='#b92846' stroke-width='4' stroke-linejoin='round'/>
+<text x='402' y='140' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='700' fill='#b92846' text-anchor='middle'>！</text>
+<text x='240' y='432' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='46' font-weight='700' fill='#0f1216' text-anchor='middle'>胜肽鍵</text>
+<text x='240' y='480' font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif" font-size='26' font-weight='500' fill='#6b727e' text-anchor='middle'>主鏈大樑，動了就崩</text>
+</svg>
