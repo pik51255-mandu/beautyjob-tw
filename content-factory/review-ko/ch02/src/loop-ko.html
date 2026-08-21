@@ -1,0 +1,137 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  :root{ --p:#b92846; --ink:#0f1216; --paper:#fbf8f5; --aqua:#00a9b3;
+         --rose-deep:#641f29; --muted:#6b727e; --line:#ddd6d1; --alt:#f6e8de; --aqua-soft:#d6eef0; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:1080px;height:1350px;background:var(--paper);overflow:hidden;
+       font-family:'Noto Sans KR','Noto Sans TC','Apple SD Gothic Neo',sans-serif;color:var(--ink);
+       display:flex;flex-direction:column;align-items:center;padding:76px 60px 70px}
+  .chip{border:3px solid var(--p);color:var(--p);border-radius:999px;padding:10px 30px;
+        font-size:26px;font-weight:700;letter-spacing:1px}
+  h1{font-size:54px;font-weight:900;margin-top:30px;letter-spacing:-1px}
+  .scene{flex:1;display:flex;align-items:center}
+  #stage{overflow:hidden}
+  .caps{position:relative;height:116px;width:100%}
+  .cap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+       font-size:46px;font-weight:800;opacity:0;letter-spacing:-1px}
+  .cap b{color:var(--p);margin:0 4px}
+  .cap .aq{color:var(--aqua);margin:0 4px}
+</style>
+<body>
+  <div class="chip">수소결합 · 무한 반복</div>
+  <h1>컬은 왜 물에 약할까</h1>
+  <div class="scene">
+    <svg id="stage" viewBox="0 0 960 780" width="960">
+      <!-- 모발 가닥: k에 따라 컬 ↔ 직모로 실제 모핑 -->
+      <path id="strand" fill="none" stroke="#b92846" stroke-width="13" stroke-linecap="round"/>
+      <!-- 물방울 -->
+      <g id="drop" opacity="0">
+        <path d="M 0 -30 C 22 0 20 17 0 25 C -20 17 -22 0 0 -30 Z" fill="#00a9b3"/>
+      </g>
+      <!-- 착수 파문 -->
+      <circle id="ripple" cx="480" cy="560" r="10" fill="none" stroke="#00a9b3" stroke-width="6" opacity="0"/>
+      <!-- 결합선 -->
+      <line id="linkFull" x1="360" y1="560" x2="600" y2="560" stroke="#00a9b3" stroke-width="8" stroke-dasharray="14 12"/>
+      <g id="stubs">
+        <line x1="360" y1="560" x2="416" y2="560" stroke="#00a9b3" stroke-width="8" stroke-dasharray="10 10"/>
+        <line x1="544" y1="560" x2="600" y2="560" stroke="#00a9b3" stroke-width="8" stroke-dasharray="10 10"/>
+      </g>
+      <g id="beadL">
+        <circle r="104" fill="#d6eef0" stroke="#00a9b3" stroke-width="8"/>
+        <circle class="eye" cx="-34" cy="-12" r="10" fill="#0f1216"/><circle class="eye" cx="34" cy="-12" r="10" fill="#0f1216"/>
+        <path class="mouth" stroke="#0f1216" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path class="armIn" d="M 70 40 Q 112 78 122 64" stroke="#00a9b3" stroke-width="12" fill="none" stroke-linecap="round"/>
+      </g>
+      <g id="beadR">
+        <circle r="104" fill="#d6eef0" stroke="#00a9b3" stroke-width="8"/>
+        <circle class="eye" cx="-34" cy="-12" r="10" fill="#0f1216"/><circle class="eye" cx="34" cy="-12" r="10" fill="#0f1216"/>
+        <path class="mouth" stroke="#0f1216" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path class="armIn" d="M -70 40 Q -112 78 -122 64" stroke="#00a9b3" stroke-width="12" fill="none" stroke-linecap="round"/>
+      </g>
+      <circle id="hands" cx="480" cy="624" r="20" fill="#00a9b3"/>
+      <g id="dryer">
+        <rect x="0" y="0" width="150" height="96" rx="26" fill="#0f1216"/>
+        <rect x="-54" y="26" width="60" height="44" rx="12" fill="#0f1216"/>
+        <rect x="36" y="96" width="34" height="60" rx="10" fill="#0f1216"/>
+        <g id="air" stroke="#00a9b3" stroke-width="8" fill="none" stroke-linecap="round">
+          <path d="M -70 34 q -30 8 -60 0"/><path d="M -70 62 q -36 10 -72 0"/>
+        </g>
+      </g>
+    </svg>
+  </div>
+  <div class="caps">
+    <div class="cap" id="cap1"><span>물이 닿으면</span><span class="aq">손을 놓는다</span></div>
+    <div class="cap" id="cap2"><span>말리면</span><b>다시 잡는다</b></div>
+  </div>
+<script>
+const $ = id => document.getElementById(id);
+const DUR = 4.8;                       // 총 길이 4.8초 (30fps × 144프레임)
+const clamp = (x,a,b) => Math.max(a, Math.min(b, x));
+// ease-in-out (smoothstep) — 모든 전이에 공통 적용, 하드컷 없음
+const ease = x => { x = clamp(x,0,1); return x*x*(3-2*x); };
+const seg = (t,a,b) => ease((t-a)/(b-a));          // a→b 구간 ease-in-out 램프
+const FADE = 0.3;                                   // 캡션 페이드 0.3초 고정
+
+// 타임라인: 물방울 착수 1.4 → 그 순간부터 결합 해제 2.4 →
+//           드라이어 진입 2.7~3.4 → 재결합 3.4~4.2 → 드라이어 퇴장 4.2~4.8(=0)
+function setT(t){
+  t = ((t % DUR) + DUR) % DUR;
+  // k: 0=손 잡음, 1=손 놓음. 착수 순간(1.4)부터 상승 → 드라이 바람에 하강
+  const k = seg(t,1.4,2.4) * (1 - seg(t,3.4,4.2));
+
+  // 모발 가닥: 컬(진폭 큼) ↔ 직모(진폭 0·길이 늘어남) 실시간 모핑
+  const amp = 52 * (1-k), len = 232 + 74*k, x0 = 480, y0 = 44, N = 44;
+  let d = '';
+  for (let i = 0; i <= N; i++){
+    const s = i/N;
+    const x = x0 + amp * Math.sin(s * 2.6 * Math.PI) * (1 - 0.25*s);
+    const y = y0 + s * len;
+    d += (i ? ' L ' : 'M ') + x.toFixed(1) + ' ' + y.toFixed(1);
+  }
+  $('strand').setAttribute('d', d);
+  // 색도 k에 따라 연속 보간 — 임계값 점프(하드컷) 없음
+  const mix = (a,b,f) => a.map((v,i) => Math.round(v + (b[i]-v)*f));
+  const [cr,cg,cb] = mix([185,40,70],[107,114,126], k);   // 로즈 → 무채색
+  $('strand').setAttribute('stroke', `rgb(${cr},${cg},${cb})`);
+
+  // 결합 파트너 분리
+  const sep = 78 * k;
+  $('beadL').setAttribute('transform', `translate(${360-sep},560)`);
+  $('beadR').setAttribute('transform', `translate(${600+sep},560)`);
+  $('linkFull').style.opacity = 1-k;
+  $('stubs').style.opacity = k;
+  $('hands').style.opacity = 1-k;
+  document.querySelectorAll('.armIn').forEach(a => a.style.opacity = 1-k);
+  // 입: 제어점을 이동시켜 웃음↔당황을 하나의 경로로 모핑 (요소 교체·겹침 없음)
+  const my = 30 + 8*k, mc = 48 - 30*k;
+  const mouthD = `M -22 ${my.toFixed(1)} Q 0 ${mc.toFixed(1)} 22 ${my.toFixed(1)}`;
+  document.querySelectorAll('.mouth').forEach(m => m.setAttribute('d', mouthD));
+  document.querySelectorAll('.eye').forEach(e => e.setAttribute('r', (10 + 2.5*k).toFixed(1)));
+
+  // 물방울: 0.55 → 1.4 낙하해 결합점에 착수. 착수와 동시에 소멸 + 파문
+  const u = (t - 0.55) / 0.85;
+  if (u > 0 && u <= 1){
+    const y = -60 + (560+60) * (u*u*0.72 + u*0.28);   // 중력 가속
+    $('drop').setAttribute('transform', `translate(480,${y.toFixed(1)}) scale(1.5)`);
+    $('drop').style.opacity = u < 0.92 ? 1 : (1-u)/0.08;
+  } else $('drop').style.opacity = 0;
+  const r = (t - 1.4) / 0.5;
+  if (r > 0 && r < 1){
+    $('ripple').setAttribute('r', (10 + 92*ease(r)).toFixed(1));
+    $('ripple').style.opacity = 1 - r;
+  } else $('ripple').style.opacity = 0;
+
+  // 드라이어: 2.7~3.4 진입 → 4.2~4.8 퇴장 (t=4.8에서 t=0 위치와 동일)
+  const dIn = seg(t,2.7,3.4), dOut = seg(t,4.2,4.8);
+  $('dryer').setAttribute('transform', `translate(${(1180 - 400*dIn + 400*dOut).toFixed(1)},250)`);
+  $('air').style.opacity = (dIn - dOut) * (0.6 + 0.4*Math.sin(t*26));
+
+  // 캡션: 0.3초 페이드, 서로 겹치지 않게 교대 (t=4.8에서 cap1=1 → t=0과 일치)
+  $('cap1').style.opacity = clamp(1 - seg(t,2.1,2.1+FADE) + seg(t,4.5,4.5+FADE), 0, 1);
+  $('cap2').style.opacity = clamp(seg(t,2.7,2.7+FADE) - seg(t,4.2,4.2+FADE), 0, 1);
+}
+window.setT = setT;
+setT(0);
+</script>
+</body>

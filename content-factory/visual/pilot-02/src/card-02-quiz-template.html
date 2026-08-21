@@ -1,0 +1,41 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  :root{ --p:#b92846; --ink:#0f1216; --paper:#fbf8f5; --aqua:#00a9b3;
+         --rose-soft:#ffcfd1; --rose-deep:#641f29; --muted:#6b727e; --line:#ddd6d1; --alt:#f6e8de; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:1080px;height:1350px;background:var(--paper);
+       font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;color:var(--ink);
+       display:flex;flex-direction:column;padding:72px 80px 56px}
+  .top{display:flex;justify-content:space-between;align-items:center}
+  .chip{background:var(--p);color:var(--paper);border-radius:999px;padding:12px 30px;
+        font-size:26px;font-weight:700;letter-spacing:2px}
+  .qno{color:var(--muted);font-size:24px;font-weight:500}
+  .qbox{margin-top:52px;background:#fff;border:3px solid var(--line);border-radius:20px;padding:44px 46px;min-height:300px}
+  .qbox .label{color:var(--p);font-weight:900;font-size:30px;margin-bottom:20px}
+  .qbox .q{font-size:40px;line-height:1.55;font-weight:500;color:var(--muted)}
+  .opts{margin-top:44px;display:flex;flex-direction:column;gap:24px;flex:1}
+  .opt{display:flex;align-items:center;gap:26px;background:var(--alt);border-radius:16px;padding:26px 32px}
+  .opt .n{flex:none;width:58px;height:58px;border-radius:50%;border:4px solid var(--p);color:var(--p);
+          display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900}
+  .opt .t{font-size:32px;color:var(--muted);font-weight:500}
+  .foot{margin-top:40px;display:flex;justify-content:space-between;align-items:center;font-size:24px;color:var(--muted)}
+  .foot b{color:var(--rose-deep)}
+</style>
+<body>
+  <div class="top">
+    <div class="chip">丙級學科・題庫測驗</div>
+    <div class="qno">題庫 067003A13－（　）</div>
+  </div>
+  <div class="qbox">
+    <div class="label">【題目】</div>
+    <div class="q">在此填入題目文字，作答空格以（　）保留。</div>
+  </div>
+  <div class="opts">
+    <div class="opt"><span class="n">1</span><span class="t">選項文字一</span></div>
+    <div class="opt"><span class="n">2</span><span class="t">選項文字二</span></div>
+    <div class="opt"><span class="n">3</span><span class="t">選項文字三</span></div>
+    <div class="opt"><span class="n">4</span><span class="t">選項文字四</span></div>
+  </div>
+  <div class="foot"><span><b>留言作答</b>｜答案明天公布</span><span>#2 四大鍵結</span></div>
+</body>
