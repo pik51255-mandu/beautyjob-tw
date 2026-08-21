@@ -3,15 +3,32 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>챕터 #2 미리보기 — 머리카락의 네 가지 결합 (ko 검수판)</title>
 <style>
+/* 라이트가 기본 팔레트 — 사이트 테마(client/src/index.css)에서 파생 */
 :root{--p:#b92846;--ink:#0f1216;--paper:#fbf8f5;--aqua:#00a9b3;--rose-deep:#641f29;
-      --muted:#6b727e;--line:#ddd6d1;--alt:#f6e8de;}
+      --muted:#6b727e;--line:#ddd6d1;--alt:#f6e8de;--surface:#fff;
+      --banner-bg:#641f29;--banner-fg:#fff;}
+/* OS 다크 — 명시적으로 라이트를 고른 뷰어에게는 적용하지 않는다 */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --p:#ee6a83;--ink:#f2ece9;--paper:#161315;--aqua:#2fc6cf;--rose-deep:#f0a8b6;
+    --muted:#a79ea1;--line:#352d31;--alt:#241d20;--surface:#201b1e;
+    --banner-bg:#3d1620;--banner-fg:#ffe3e8;}
+}
+/* 토글로 다크를 고른 경우 — OS가 라이트여도 이김 */
+:root[data-theme="dark"]{
+  --p:#ee6a83;--ink:#f2ece9;--paper:#161315;--aqua:#2fc6cf;--rose-deep:#f0a8b6;
+  --muted:#a79ea1;--line:#352d31;--alt:#241d20;--surface:#201b1e;
+  --banner-bg:#3d1620;--banner-fg:#ffe3e8;}
+/* 비주얼 판(plate)은 테마와 무관하게 고정 — 이미지 자체가 米白 배경이라
+   판까지 어두워지면 그림만 종이처럼 떠 보인다 */
+:root{--plate:#fbf8f5;--plate-line:#e4dcd6;--plate-ink:#6b727e;--plate-tag:#b92846;}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--paper);color:var(--ink);
      font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',
                  'Malgun Gothic','Segoe UI',Roboto,sans-serif;
      line-height:1.75;font-size:17px;-webkit-text-size-adjust:100%}
 .wrap{max-width:720px;margin:0 auto;padding:22px 20px 80px}
-.banner{background:var(--rose-deep);color:#fff;font-size:13px;font-weight:700;
+.banner{background:var(--banner-bg);color:var(--banner-fg);font-size:13px;font-weight:700;
         padding:10px 20px;text-align:center;letter-spacing:.3px;position:sticky;top:0;z-index:9}
 h1{font-size:28px;line-height:1.35;font-weight:800;margin:26px 0 18px;letter-spacing:-.6px}
 h2{font-size:21px;font-weight:800;margin:44px 0 14px;letter-spacing:-.4px;
@@ -27,18 +44,20 @@ li{margin-bottom:9px}
 hr{border:0;border-top:1px solid var(--line);margin:34px 0 22px}
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 20px;
     border:1px solid var(--line);border-radius:10px}
-table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px}
+table{border-collapse:collapse;background:var(--surface);width:100%;min-width:660px;font-size:14px}
+/* 좁은 열이 세로로 쪼개지지 않게 — 표는 .tw 안에서 가로 스크롤된다 */
+td:nth-child(3),td:nth-child(4),th:nth-child(3),th:nth-child(4){white-space:nowrap}
 th{background:var(--alt);color:var(--rose-deep);font-weight:700;text-align:left;
    padding:11px 12px;white-space:nowrap}
 td{padding:11px 12px;border-top:1px solid var(--line);color:var(--muted)}
 td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
-.viz{margin:26px 0 30px;background:#fff;border:1px solid var(--line);border-radius:14px;
+.viz{margin:26px 0 30px;background:var(--plate);border:1px solid var(--plate-line);border-radius:14px;
      padding:0 0 4px;overflow:hidden}
 .viz img,.viz video{width:calc(100% - 24px);margin:8px 12px 0;height:auto;display:block;border-radius:8px}
 /* 태그는 이미지 위에 겹치지 않도록 상단 별도 줄에 배치 */
-.vtag{display:inline-block;background:var(--p);color:#fff;font-size:11px;
+.vtag{display:inline-block;background:var(--plate-tag);color:#fff;font-size:11px;
       font-weight:700;padding:5px 12px;border-radius:0 0 10px 0;letter-spacing:.5px}
-figcaption{font-size:13.5px;color:var(--muted);line-height:1.6;padding:10px 16px 12px}
+figcaption{font-size:13.5px;color:var(--plate-ink);line-height:1.6;padding:10px 16px 12px}
 .cards{margin-top:46px;padding-top:8px}
 .cards h2{margin-top:0}
 .note{font-size:13.5px;color:var(--muted);margin-bottom:6px}
