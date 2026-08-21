@@ -56,7 +56,10 @@
     max-width: 1280px;
   }
 
-  .flex {
+  /* Tailwind 유틸리티(.flex)를 재정의하면 안 된다 — 같은 명시도로 뒤에 출력되어
+     .min-h-screen 같은 다른 유틸리티를 덮어버린다(실측: min-h-screen 이 0px 이 되어
+     /login·/admin 등에서 화면 하단이 잘렸다). 필요한 곳에만 아래 클래스를 붙인다. */
+  .min-0 {
     min-width: 0;
     min-height: 0;
   }

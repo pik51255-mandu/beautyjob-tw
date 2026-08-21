@@ -21,7 +21,9 @@ export default function Onboarding() {
   const [city, setCity] = useState("");
   const [bio, setBio] = useState("");
   const [, navigate] = useLocation();
-  const { user, refresh } = useAuth();
+  // 눈검사 G: 비로그인 상태에서 끝까지 입력한 뒤 저장 시 401 로 전부 날아가던 문제.
+  // 미인증이면 아예 로그인으로 보낸다.
+  const { user, refresh, loading, isAuthenticated } = useAuth({ redirectOnUnauthenticated: true });
   const utils = trpc.useUtils();
 
   const updateProfile = trpc.users.updateProfile.useMutation({
@@ -152,6 +154,23 @@ export default function Onboarding() {
             </Button>
           </div>
         </div>
+      </div>
+    );
+  }
+
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground text-sm">載入中…</p>
+      </div>
+    );
+  }
+  if (!isAuthenticated) {
+    // useAuth 가 이미 로그인 페이지로 보내는 중이다. 그동안 폼을 노출하지 않는다.
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground text-sm">請先登入…</p>
       </div>
     );
   }
