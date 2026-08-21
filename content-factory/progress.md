@@ -460,3 +460,46 @@ Manus 플랫폼이 자기 앱 인증으로 튕기는 것이다. `/manus-oauth/ca
 지시서가 지목한 `content-factory/ch01/src/__pycache__/strings.cpython-311.pyc` 는 존재하지 않는다.
 실제 추적 중이던 pyc 는 `content-factory/scripts/__pycache__/parse_exam_bank.cpython-314.pyc` 하나이며
 이쪽을 인덱스에서 제거했다.
+
+---
+
+## v16 실행 기록 (2026-08-22)
+
+### 0. 접속 차단 — DNS 원인 재확인 (갈래 A 확정 유지)
+
+진단 3종 재실행. v15 와 동일:
+
+| 항목 | 결과 |
+|---|---|
+| `dig beautyjob.tw A` | `15.197.225.128` / `3.33.251.168` |
+| `dig www.beautyjob.tw CNAME` | `cname.manus.space.` |
+| `dig beautyjob.tw NS` | `ns52/ns51.domaincontrol.com.` → **GoDaddy 확정** |
+| Render 원본 | **200 / 리다이렉트 0** (`x-render-origin-server: Render`) |
+| `beautyjob.tw` | 301 → www → 302 → `manus.im/app-auth` (`server: cloudflare`) |
+
+`DNS_CUTOVER.md` 갱신: GoDaddy 는 apex 에 CNAME 을 못 넣는다(ALIAS/ANAME 미지원)는
+제약을 명시하고 **apex=A레코드 / www=CNAME** 으로 처리 방법을 분리했다. Render 공식 문서
+(<https://render.com/docs/configure-other-dns>) 기준 apex A = `216.24.57.1`, 단 대시보드 값이
+다르면 대시보드 우선이라고 못 박았다. 롤백용 원 레코드 보존 블록과 GoDaddy 포워딩 해제
+지시도 추가.
+
+### 0-8. ManusDialog / manusTypes 사용처 확인
+
+| 대상 | 사용처 | 조치 |
+|---|---|---|
+| `client/src/components/ManusDialog.tsx` | **0건** (자기 정의만) | **제거.** "Please login with Manus to continue" + "Login with Manus" 버튼을 렌더하는 컴포넌트였다 — 정확히 다시 뜨면 안 되는 UI |
+| `server/_core/types/manusTypes.ts` | **1건** — `server/_core/sdk.ts:16` | **제거하지 않음.** 화면에 렌더되지 않는 타입 전용 파일이고, 이걸 쓰는 sdk 는 현행 이메일·LINE 로그인의 JWT 세션 발급(`routers.ts:701,738`)과 전 요청 인증(`context.ts:17`)을 담당한다. 지우면 인증이 통째로 깨진다 |
+
+### 0-9. vite-plugin-manus-runtime 제거
+
+`package.json` devDependency 삭제 + `pnpm install --lockfile-only` 로 락파일 정리.
+`vite.config.ts:152` 에 이미 "플러그인 배열에서 제거 확정(2026-08-20)" 주석이 있어
+실사용은 없던 상태였다. **빌드 1회 통과 확인**: `npm run build` → vite ✓ built in 1.85s,
+esbuild `dist/index.js 210.5kb`.
+
+### V1~V4
+
+V1 홈 200/0 · V2 `/salon/00147378` 200/0, `/supply-map` 200/0 · V3 robots.txt
+User-agent 블록 10개, `Disallow: /` 전면차단 **0건**(단 페이지 meta 는 아직 noindex) ·
+V4 잔존 6건 — 전부 사유 있음(dev 전용 디버그 수집기 2, localStorage 잔재 **정리** 코드 1,
+휴면 OAuth 분기 1, 문서 1, 위 manusTypes 1).
