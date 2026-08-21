@@ -1,0 +1,22 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1080 720' width='1080' height='720'>
+<rect width='1080' height='720' fill='#fbf8f5'/>
+<text x='540' y='76' font-family="'Noto Sans KR','Noto Sans TC','Apple SD Gothic Neo',sans-serif" font-size='42' font-weight='700' fill='#0f1216' text-anchor='middle'>머리카락 네 가지 결합 · 강도 비교</text>
+<rect x='40' y='140' width='196' height='58' rx='29' fill='#0f1216'/>
+<text x='138' y='179' font-family="'Noto Sans KR','Noto Sans TC','Apple SD Gothic Neo',sans-serif" font-size='26' font-weight='700' fill='#fbf8f5' text-anchor='middle'>펩타이드결합</text>
+<rect x='262' y='149' width='690' height='40' rx='20' fill='#0f1216'/>
+<text x='262' y='230' font-family="'Noto Sans KR','Noto Sans TC','Apple SD Gothic Neo',sans-serif" font-size='22' font-weight='500' fill='#6b727e' text-anchor='start'>주쇄(세로) · 가장 강함 · 끊기면 절모</text>
+<rect x='40' y='268' width='196' height='58' rx='29' fill='#b92846'/>
+<text x='138' y='307' font-family="'Noto Sans KR','Noto Sans TC','Apple SD Gothic Neo',sans-serif" font-size='26' font-weight='700' fill='#fbf8f5' text-anchor='middle'>이황화결합</text>
+<rect x='262' y='277' width='520' height='40' rx='20' fill='#b92846'/>
+<text x='262' y='358' font-family="'Noto Sans KR','Noto Sans TC','Apple SD Gothic Neo',sans-serif" font-size='22' font-weight='500' fill='#6b727e' text-anchor='start'>측쇄 · 화학 약제로만 · 펌의 대상</text>
+<rect x='40' y='396' width='196' height='58' rx='29' fill='#ffcfd1'/>
+<text x='138' y='435' font-family="'Noto Sans KR','Noto Sans TC','Apple SD Gothic Neo',sans-serif" font-size='26' font-weight='700' fill='#641f29' text-anchor='middle'>염결합</text>
+<rect x='262' y='405' width='330' height='40' rx='20' fill='#ffcfd1' stroke='#b92846' stroke-width='3'/>
+<text x='262' y='486' font-family="'Noto Sans KR','Noto Sans TC','Apple SD Gothic Neo',sans-serif" font-size='22' font-weight='500' fill='#6b727e' text-anchor='start'>측쇄 · pH에 따라 열리고 닫힘</text>
+<rect x='40' y='524' width='196' height='58' rx='29' fill='#00a9b3'/>
+<text x='138' y='563' font-family="'Noto Sans KR','Noto Sans TC','Apple SD Gothic Neo',sans-serif" font-size='26' font-weight='700' fill='#fbf8f5' text-anchor='middle'>수소결합</text>
+<rect x='262' y='533' width='185' height='40' rx='20' fill='#00a9b3'/>
+<text x='262' y='614' font-family="'Noto Sans KR','Noto Sans TC','Apple SD Gothic Neo',sans-serif" font-size='22' font-weight='500' fill='#6b727e' text-anchor='start'>측쇄 · 물·열로 끊김 · 가장 약함</text>
+<line x1='40' y1='652' x2='1040' y2='652' stroke='#ddd6d1' stroke-width='2'/>
+<text x='540' y='692' font-family="'Noto Sans KR','Noto Sans TC','Apple SD Gothic Neo',sans-serif" font-size='24' font-weight='700' fill='#641f29' text-anchor='middle'>측쇄 세 가닥이 스타일을 정하고, 주쇄 한 가닥이 머리카락을 지탱한다</text>
+</svg>

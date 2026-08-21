@@ -1,0 +1,41 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  :root{ --p:#b92846; --ink:#0f1216; --paper:#fbf8f5; --aqua:#00a9b3;
+         --rose-deep:#641f29; --muted:#6b727e; --line:#ddd6d1; --alt:#f6e8de; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:1080px;height:1350px;background:var(--paper);
+       font-family:'Noto Sans KR','Noto Sans TC','Apple SD Gothic Neo',sans-serif;color:var(--ink);
+       display:flex;flex-direction:column;padding:72px 80px 56px}
+  .top{display:flex;justify-content:space-between;align-items:center}
+  .chip{background:var(--p);color:var(--paper);border-radius:999px;padding:12px 30px;
+        font-size:26px;font-weight:700}
+  .qno{color:var(--muted);font-size:23px;font-weight:500}
+  .qbox{margin-top:52px;background:#fff;border:3px solid var(--line);border-radius:20px;padding:44px 46px;min-height:300px}
+  .qbox .label{color:var(--p);font-weight:900;font-size:29px;margin-bottom:20px}
+  .qbox .q{font-size:38px;line-height:1.55;font-weight:500;color:var(--muted)}
+  .opts{margin-top:44px;display:flex;flex-direction:column;gap:24px;flex:1}
+  .opt{display:flex;align-items:center;gap:26px;background:var(--alt);border-radius:16px;padding:26px 32px}
+  .opt .n{flex:none;width:58px;height:58px;border-radius:50%;border:4px solid var(--p);color:var(--p);
+          display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900}
+  .opt .t{font-size:31px;color:var(--muted);font-weight:500}
+  .foot{margin-top:40px;display:flex;justify-content:space-between;align-items:center;font-size:23px;color:var(--muted)}
+  .foot b{color:var(--rose-deep)}
+</style>
+<body>
+  <div class="top">
+    <div class="chip">기능사 학과 · 기출 퀴즈</div>
+    <div class="qno">題庫 067003A13 － (　)</div>
+  </div>
+  <div class="qbox">
+    <div class="label">【문제】</div>
+    <div class="q">여기에 문제 텍스트가 들어갑니다. 답란은 (　)로 비워 둡니다.</div>
+  </div>
+  <div class="opts">
+    <div class="opt"><span class="n">1</span><span class="t">선택지 텍스트 1</span></div>
+    <div class="opt"><span class="n">2</span><span class="t">선택지 텍스트 2</span></div>
+    <div class="opt"><span class="n">3</span><span class="t">선택지 텍스트 3</span></div>
+    <div class="opt"><span class="n">4</span><span class="t">선택지 텍스트 4</span></div>
+  </div>
+  <div class="foot"><span><b>댓글로 정답</b> ｜ 해설은 내일 공개</span><span>#2 네 가지 결합</span></div>
+</body>
