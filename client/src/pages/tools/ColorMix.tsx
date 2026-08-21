@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { detectToolLang, makeT } from "@/lib/toolStrings";
 import {
-  DEVELOPERS, GREY_OPTIONS, SELECTABLE_VOLS, TONE_FAMILIES,
-  calcMix, diagnoseLift, railForVol, resolveVol, safetyRails, undertoneAt,
+  DEVELOPERS, GREY_OPTIONS, SELECTABLE_PERCENTS, TONE_FAMILIES,
+  calcMix, diagnoseLift, percentToVol, railForPercent, resolvePercent, safetyRails, undertoneAt,
   type GreyRatio, type HairLength, type HairVolume, type ToneFamily,
 } from "@/lib/colorMixCalc";
 
@@ -28,13 +28,13 @@ type State = {
   volume: HairVolume;
   ratio: number;
   tubeG: number;
-  /** null = 진단 권장값 사용. 사용자가 直接 고르면 그 度數를 쓴다. */
-  volOverride: number | null;
+  /** null = 진단 권장값 사용. 사용자가 直接 고르면 그 濃度(%)를 쓴다. */
+  percentOverride: number | null;
 };
 
 const DEFAULTS: State = {
   base: 6, target: 8, tone: "自然", grey: "0",
-  length: "中", volume: "中", ratio: 1, tubeG: 60, volOverride: null,
+  length: "中", volume: "中", ratio: 1, tubeG: 60, percentOverride: null,
 };
 
 function load(): State {
@@ -114,10 +114,13 @@ export default function ColorMix() {
     () => safetyRails(verdict, s.grey, s.tone, s.target),
     [verdict, s.grey, s.tone, s.target]
   );
-  // 40vol(過氧化氫 12%)은 대만 합법이라 고를 수 있다. 대신 고르면 두피 이격 경고가 붙는다.
-  const usedVol = useMemo(() => resolveVol(verdict, s.volOverride), [verdict, s.volOverride]);
-  const volRail = usedVol != null ? railForVol(usedVol) : null;
-  const allRails = volRail ? [...rails, volRail] : rails;
+  // 판정은 濃度(%)로만 한다. vol 은 아래에서 라벨로만 쓰인다.
+  const usedPercent = useMemo(
+    () => resolvePercent(verdict, s.percentOverride),
+    [verdict, s.percentOverride]
+  );
+  const pctRail = usedPercent != null ? railForPercent(usedPercent) : null;
+  const allRails = pctRail ? [...rails, pctRail] : rails;
 
   const greyLabels = Object.fromEntries(GREY_OPTIONS.map((g) => [g.value, g.labelZh]));
 
@@ -215,7 +218,7 @@ export default function ColorMix() {
               <tr>
                 <th className="text-left py-2 font-medium">{t("cmRecommendVol")}</th>
                 <td className="py-2 text-right tabular-nums font-semibold text-primary">
-                  {verdict.vol}vol（{verdict.percent}%）
+                  {verdict.percent}%（{percentToVol(verdict.percent)}vol）
                 </td>
               </tr>
             </tbody>
@@ -225,33 +228,35 @@ export default function ColorMix() {
           {DEVELOPERS.map((d) => `${d.percent}%=${d.vol}vol`).join("　")}
         </p>
 
-        {/* 권장값을 따르지 않고 直接 고를 수 있다 — 40vol 포함 */}
+        {/* 권장값을 따르지 않고 直接 고를 수 있다 — 최고 濃度 12% 포함 */}
         <div className="space-y-2 mt-4 pt-4 border-t border-border">
           <Label>{t("cmVolUsed")}</Label>
           <div className="flex flex-wrap gap-1.5">
             <button
               type="button"
-              onClick={() => set("volOverride", null)}
+              onClick={() => set("percentOverride", null)}
               className={`px-3 min-h-[38px] rounded-lg border text-sm transition-colors ${
-                s.volOverride === null
+                s.percentOverride === null
                   ? "border-primary bg-primary/10 text-primary font-semibold"
                   : "border-border hover:bg-muted"
               }`}
             >
               {t("cmVolAuto")}
             </button>
-            {SELECTABLE_VOLS.map((v) => (
+            {SELECTABLE_PERCENTS.map((pct) => (
               <button
-                key={v}
+                key={pct}
                 type="button"
-                onClick={() => set("volOverride", v)}
+                onClick={() => set("percentOverride", pct)}
                 className={`px-3 min-h-[38px] rounded-lg border text-sm transition-colors ${
-                  s.volOverride === v
+                  s.percentOverride === pct
                     ? "border-primary bg-primary/10 text-primary font-semibold"
                     : "border-border hover:bg-muted"
                 }`}
               >
-                {v}vol
+                {pct}%
+                {/* vol 은 보조 라벨 — 표시만이고 로직 진입점이 아니다 */}
+                <span className="ml-1 text-xs opacity-60">({percentToVol(pct)}vol)</span>
               </button>
             ))}
           </div>

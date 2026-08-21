@@ -5,7 +5,9 @@
  * 브랜드마다 1:1 / 1:1.5 / 1:2 가 다르므로 사용자가 제품 튜브 표기를 보고 입력한다.
  * 이 도구가 하는 일은 "리프트 진단 · 底色 예측 · 분량 환산"이지 배합비 추천이 아니다.
  *
- * % ↔ vol 대응은 02 바이블 1-3 고정: 3%=10 / 6%=20 / 9%=30 / 12%=40
+ * **기준 단위는 % 다.** 대만 현장 표준이 % 이므로 상태·비교·분기·레일 판정은 전부 percent 로 한다.
+ * vol 은 DEVELOPERS 환산표를 통해 만들어지는 **표시용 파생값**이며 로직 진입점이 아니다.
+ * 환산 고정: 3%=10vol / 6%=20vol / 9%=30vol / 12%=40vol (02 바이블 1-3)
  */
 
 // ─── 雙氧乳 度數 ──────────────────────────────────────────────────────────────
@@ -18,30 +20,31 @@ export const DEVELOPERS: Developer[] = [
   { percent: 12, vol: 40 },
 ];
 
-/** UI 에서 직접 고를 수 있는 度數. DEVELOPERS 와 같은 집합을 유지한다. */
-export const SELECTABLE_VOLS: number[] = DEVELOPERS.map((d) => d.vol);
+/** UI 에서 직접 고를 수 있는 濃度(%). 환산표와 같은 집합을 유지한다 — 도달 불가 항목이 생기지 않게. */
+export const SELECTABLE_PERCENTS: number[] = DEVELOPERS.map((d) => d.percent);
 
-export function volToPercent(vol: number): number {
-  return (vol * 3) / 10;
+/** 표시 전용 파생값. 이 함수의 반환값으로 분기하지 말 것. */
+export function percentToVol(percent: number): number | null {
+  return DEVELOPERS.find((d) => d.percent === percent)?.vol ?? null;
 }
 
 // ─── 리프트 진단 (2-d) ────────────────────────────────────────────────────────
 export type LiftVerdict =
-  | { kind: "ok"; lift: number; vol: number; percent: number }
+  | { kind: "ok"; lift: number; percent: number }
   | { kind: "bleach"; lift: number };
 
 /**
  * 필요 리프트 = 目標度 - 底色度
- * 0度 → 10vol / 1~2度 → 20vol / 2~3度 → 30vol / 3度 초과 → 漂髮 안내
+ * 0度 → 3% / 1~2度 → 6% / 2~3度 → 9% / 3度 초과 → 漂髮 안내
  *
  * 어둡게 가는 경우(리프트 음수)도 0度 구간으로 본다 — 리프트가 필요 없다.
  */
 export function diagnoseLift(baseLevel: number, targetLevel: number): LiftVerdict {
   const lift = targetLevel - baseLevel;
   if (lift > 3) return { kind: "bleach", lift };
-  if (lift <= 0) return { kind: "ok", lift, vol: 10, percent: 3 };
-  if (lift <= 2) return { kind: "ok", lift, vol: 20, percent: 6 };
-  return { kind: "ok", lift, vol: 30, percent: 9 };
+  if (lift <= 0) return { kind: "ok", lift, percent: 3 };
+  if (lift <= 2) return { kind: "ok", lift, percent: 6 };
+  return { kind: "ok", lift, percent: 9 };
 }
 
 // ─── 底色 예측 (2-e) ─────────────────────────────────────────────────────────
@@ -145,7 +148,7 @@ export function safetyRails(
     });
   }
 
-  // 40vol 두피 이격 경고는 railForVol() 이 실제 사용 度數를 받아 판정한다.
+  // 12% 두피 이격 경고는 railForPercent() 가 실제 사용 濃度를 받아 판정한다.
 
   if (needsNaturalBase(grey)) {
     rails.push({
@@ -167,21 +170,21 @@ export function safetyRails(
 }
 
 /**
- * 실제로 쓸 雙氧乳 度數.
+ * 실제로 쓸 雙氧乳 濃度(%).
  *
- * 過氧化氫 12% 는 대만에서 합법이다 — 燙髮劑二劑 항목에 12%(40 volumes) 상한이 있다.
- * 그래서 선택지에서 빼지 않는다. (근거 표의 현행 여부는 content-factory/legal_citations.md 참조)
- * 다만 고르면 두피 이격 경고(railForVol)가 붙는다.
+ * 12% 는 선택지에서 빼지 않는다. 다만 고르면 두피 이격 경고(railForPercent)가 붙는다.
+ * 12% 가 대만 법정 상한인지는 **미확인** — content-factory/legal_citations.md 참조.
+ * 확인 전까지 어떤 문구에서도 "법정 상한"이라고 쓰지 않는다.
  *
  * override 가 null 이면 진단 권장값을 쓴다. 漂髮 판정에는 권장값이 없으므로 null 이 될 수 있다.
  */
-export function resolveVol(verdict: LiftVerdict, override: number | null): number | null {
-  if (override != null && SELECTABLE_VOLS.includes(override)) return override;
-  return verdict.kind === "ok" ? verdict.vol : null;
+export function resolvePercent(verdict: LiftVerdict, override: number | null): number | null {
+  if (override != null && SELECTABLE_PERCENTS.includes(override)) return override;
+  return verdict.kind === "ok" ? verdict.percent : null;
 }
 
-/** 40vol 을 직접 선택했을 때의 레일 (UI 에서 度數를 바꿀 수 있게 열어둔 경우). */
-export function railForVol(vol: number): Rail | null {
-  if (vol >= 40) return { id: "vol40", textZh: "使用 40vol 時，請與頭皮保持距離塗抹。" };
+/** 최고 濃度를 직접 선택했을 때의 레일. 판정은 percent 로만 한다. */
+export function railForPercent(percent: number): Rail | null {
+  if (percent >= 12) return { id: "pct12", textZh: "使用 12% 時，請與頭皮保持距離塗抹。" };
   return null;
 }

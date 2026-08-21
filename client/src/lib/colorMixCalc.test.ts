@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  DEVELOPERS, SELECTABLE_VOLS, calcMix, diagnoseLift, isUndertoneRisky, needsNaturalBase,
-  railForVol, resolveVol, safetyRails, undertoneAt, volToPercent,
+  DEVELOPERS, SELECTABLE_PERCENTS, calcMix, diagnoseLift, isUndertoneRisky, needsNaturalBase,
+  percentToVol, railForPercent, resolvePercent, safetyRails, undertoneAt,
 } from "./colorMixCalc";
 
 describe("雙氧乳 %↔vol 대응 (02 바이블 1-3)", () => {
@@ -12,44 +12,53 @@ describe("雙氧乳 %↔vol 대응 (02 바이블 1-3)", () => {
     ]);
   });
 
-  it("vol → % 환산이 표와 일치한다", () => {
-    expect(volToPercent(10)).toBe(3);
-    expect(volToPercent(20)).toBe(6);
-    expect(volToPercent(30)).toBe(9);
-    expect(volToPercent(40)).toBe(12);
+  it("% → vol 환산이 표와 일치한다 (vol 은 표시용 파생값)", () => {
+    expect(percentToVol(3)).toBe(10);
+    expect(percentToVol(6)).toBe(20);
+    expect(percentToVol(9)).toBe(30);
+    expect(percentToVol(12)).toBe(40);
+  });
+
+  it("환산표에 없는 %는 vol 을 만들지 않는다", () => {
+    expect(percentToVol(7)).toBeNull();
+    expect(percentToVol(0)).toBeNull();
   });
 });
 
 describe("리프트 진단 (2-d)", () => {
-  it("리프트 0度면 10vol", () => {
-    expect(diagnoseLift(6, 6)).toEqual({ kind: "ok", lift: 0, vol: 10, percent: 3 });
+  it("리프트 0度면 3%", () => {
+    expect(diagnoseLift(6, 6)).toEqual({ kind: "ok", lift: 0, percent: 3 });
   });
 
-  it("어둡게 가는 경우도 10vol (리프트 불필요)", () => {
+  it("어둡게 가는 경우도 3% (리프트 불필요)", () => {
     const v = diagnoseLift(8, 6);
     expect(v.kind).toBe("ok");
-    if (v.kind === "ok") expect(v.vol).toBe(10);
+    if (v.kind === "ok") expect(v.percent).toBe(3);
   });
 
-  it("1~2度는 20vol", () => {
+  it("1~2度는 6%", () => {
     for (const [b, t] of [[6, 7], [6, 8], [3, 5]] as const) {
       const v = diagnoseLift(b, t);
       expect(v.kind).toBe("ok");
-      if (v.kind === "ok") expect(v.vol).toBe(20);
+      if (v.kind === "ok") expect(v.percent).toBe(6);
     }
   });
 
-  it("2~3度는 30vol", () => {
+  it("2~3度는 9%", () => {
     const v = diagnoseLift(5, 8);
     expect(v.kind).toBe("ok");
-    if (v.kind === "ok") expect(v.vol).toBe(30);
+    if (v.kind === "ok") expect(v.percent).toBe(9);
   });
 
-  it("3度 초과는 vol 추천 대신 漂髮 안내", () => {
+  it("3度 초과는 濃度 추천 대신 漂髮 안내", () => {
     const v = diagnoseLift(3, 9);
     expect(v.kind).toBe("bleach");
     if (v.kind === "bleach") expect(v.lift).toBe(6);
-    expect(v).not.toHaveProperty("vol");
+    expect(v).not.toHaveProperty("percent");
+  });
+
+  it("진단 결과에 vol 필드가 남아 있지 않다 (기준 단위는 %)", () => {
+    expect(diagnoseLift(6, 8)).not.toHaveProperty("vol");
   });
 
   it("경계값 3度는 아직 염색 범위", () => {
@@ -141,9 +150,9 @@ describe("안전 레일 (2-g)", () => {
     expect(u?.textZh).toContain("底色不足");
   });
 
-  it("40vol 선택 시 두피 이격 권고", () => {
-    expect(railForVol(40)?.textZh).toContain("頭皮保持距離");
-    expect(railForVol(30)).toBeNull();
+  it("12% 선택 시 두피 이격 권고", () => {
+    expect(railForPercent(12)?.textZh).toContain("頭皮保持距離");
+    expect(railForPercent(9)).toBeNull();
   });
 
   it("조건이 겹치면 레일이 함께 뜬다", () => {
@@ -152,56 +161,95 @@ describe("안전 레일 (2-g)", () => {
   });
 });
 
-describe("雙氧乳 度數 직접 선택 (40vol 대만 합법)", () => {
-  it("40vol 은 선택지에 남아 있다 — 過氧化氫 12% 는 대만 합법 상한", () => {
-    expect(SELECTABLE_VOLS).toEqual([10, 20, 30, 40]);
-    expect(DEVELOPERS.some((d) => d.vol === 40 && d.percent === 12)).toBe(true);
+describe("雙氧乳 濃度 직접 선택 (% 기준)", () => {
+  it("선택지는 환산표의 % 집합과 완전히 같다 — 도달 불가 항목 0", () => {
+    expect(SELECTABLE_PERCENTS).toEqual([3, 6, 9, 12]);
+    expect(SELECTABLE_PERCENTS).toEqual(DEVELOPERS.map((d) => d.percent));
   });
 
   it("override 가 없으면 진단 권장값을 쓴다", () => {
-    expect(resolveVol(diagnoseLift(6, 8), null)).toBe(20);
-    expect(resolveVol(diagnoseLift(6, 6), null)).toBe(10);
+    expect(resolvePercent(diagnoseLift(6, 8), null)).toBe(6);
+    expect(resolvePercent(diagnoseLift(6, 6), null)).toBe(3);
   });
 
   it("漂髮 판정이면 권장값이 없다", () => {
-    expect(resolveVol(diagnoseLift(3, 9), null)).toBeNull();
+    expect(resolvePercent(diagnoseLift(3, 9), null)).toBeNull();
   });
 
-  it("漂髮 판정에서도 直接 고른 度數는 살아 있다", () => {
-    expect(resolveVol(diagnoseLift(3, 9), 40)).toBe(40);
+  it("漂髮 판정에서도 直接 고른 濃度는 살아 있다", () => {
+    expect(resolvePercent(diagnoseLift(3, 9), 12)).toBe(12);
   });
 
   it("override 는 권장값을 덮어쓴다", () => {
-    expect(resolveVol(diagnoseLift(6, 8), 40)).toBe(40);
-    expect(resolveVol(diagnoseLift(6, 8), 10)).toBe(10);
+    expect(resolvePercent(diagnoseLift(6, 8), 12)).toBe(12);
+    expect(resolvePercent(diagnoseLift(6, 8), 3)).toBe(3);
   });
 
-  it("목록에 없는 度數는 무시하고 권장값으로 되돌린다", () => {
-    expect(resolveVol(diagnoseLift(6, 8), 35)).toBe(20);
-    expect(resolveVol(diagnoseLift(6, 8), 0)).toBe(20);
-    expect(resolveVol(diagnoseLift(6, 8), NaN)).toBe(20);
+  it("환산표에 없는 濃度는 무시하고 권장값으로 되돌린다", () => {
+    expect(resolvePercent(diagnoseLift(6, 8), 7)).toBe(6);
+    expect(resolvePercent(diagnoseLift(6, 8), 0)).toBe(6);
+    expect(resolvePercent(diagnoseLift(6, 8), NaN)).toBe(6);
+    expect(resolvePercent(diagnoseLift(6, 8), 40)).toBe(6); // vol 값을 넣어도 진입 불가
   });
 
-  it("40vol 을 고르면 두피 이격 경고가 붙는다", () => {
-    const vol = resolveVol(diagnoseLift(6, 8), 40);
-    expect(vol).toBe(40);
-    expect(railForVol(vol ?? 0)?.textZh).toContain("頭皮保持距離");
+  it("12% 를 고르면 두피 이격 경고가 붙는다", () => {
+    const pct = resolvePercent(diagnoseLift(6, 8), 12);
+    expect(pct).toBe(12);
+    expect(railForPercent(pct ?? 0)?.textZh).toContain("頭皮保持距離");
   });
 
-  it("40vol 미만에서는 경고가 붙지 않는다", () => {
-    for (const v of [10, 20, 30]) expect(railForVol(v)).toBeNull();
+  it("12% 미만에서는 경고가 붙지 않는다", () => {
+    for (const p of [3, 6, 9]) expect(railForPercent(p)).toBeNull();
   });
 
-  it("safetyRails 는 40vol 레일을 만들지 않는다 — railForVol 이 단독 담당(중복 방지)", () => {
+  it("safetyRails 는 濃度 레일을 만들지 않는다 — railForPercent 단독 담당(중복 방지)", () => {
     const rails = safetyRails(diagnoseLift(3, 9), "50+", "灰霧", 9);
-    expect(rails.map((r) => r.id)).not.toContain("vol40");
+    expect(rails.map((r) => r.id)).not.toContain("pct12");
+  });
+});
+
+describe("도달 불가 분기 점검 (환산표 ↔ 진단 ↔ 레일 3자 대조)", () => {
+  it("환산표의 모든 %는 어떤 경로로든 실제로 도달할 수 있다", () => {
+    const reachable = new Set<number>();
+    // 경로 1: 진단 권장값
+    for (let base = 1; base <= 10; base++) {
+      for (let target = 1; target <= 10; target++) {
+        const p = resolvePercent(diagnoseLift(base, target), null);
+        if (p != null) reachable.add(p);
+      }
+    }
+    // 경로 2: 사용자 직접 선택
+    for (const p of SELECTABLE_PERCENTS) {
+      const r = resolvePercent(diagnoseLift(6, 8), p);
+      if (r != null) reachable.add(r);
+    }
+    expect([...reachable].sort((a, b) => a - b)).toEqual(DEVELOPERS.map((d) => d.percent));
+  });
+
+  it("진단이 스스로 추천하는 범위는 3~9% — 12%는 사용자가 직접 골라야만 나온다", () => {
+    const byDiagnosis = new Set<number>();
+    for (let base = 1; base <= 10; base++) {
+      for (let target = 1; target <= 10; target++) {
+        const v = diagnoseLift(base, target);
+        if (v.kind === "ok") byDiagnosis.add(v.percent);
+      }
+    }
+    expect([...byDiagnosis].sort((a, b) => a - b)).toEqual([3, 6, 9]);
+    expect(byDiagnosis.has(12)).toBe(false);
+    expect(resolvePercent(diagnoseLift(6, 8), 12)).toBe(12);
+  });
+
+  it("레일이 반응하는 값도 도달 가능한 값 안에 있다", () => {
+    const railTriggers = SELECTABLE_PERCENTS.filter((p) => railForPercent(p) !== null);
+    expect(railTriggers).toEqual([12]);
+    expect(SELECTABLE_PERCENTS).toContain(12);
   });
 });
 
 describe("v12 지정 테스트 케이스 3종", () => {
   it("① 底色6 → 目標8 自然", () => {
     const v = diagnoseLift(6, 8);
-    expect(v).toEqual({ kind: "ok", lift: 2, vol: 20, percent: 6 });
+    expect(v).toEqual({ kind: "ok", lift: 2, percent: 6 });
     expect(safetyRails(v, "0", "自然", 8)).toEqual([]);
   });
 
@@ -216,7 +264,7 @@ describe("v12 지정 테스트 케이스 3종", () => {
 
   it("③ 白髮60% 底色5 → 目標6", () => {
     const v = diagnoseLift(5, 6);
-    expect(v).toEqual({ kind: "ok", lift: 1, vol: 20, percent: 6 });
+    expect(v).toEqual({ kind: "ok", lift: 1, percent: 6 });
     const rails = safetyRails(v, "50+", "自然", 6);
     expect(rails.map((r) => r.id)).toEqual(["grey"]);
   });

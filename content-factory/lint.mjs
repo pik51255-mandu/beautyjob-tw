@@ -16,6 +16,40 @@ function knownSlugs() {
 }
 const SLUGS = knownSlugs();
 
+// 4-3: 법규명이 본문에 등장하면 legal_citations.md 에 (파일, 법규명) 행이 있어야 한다.
+// #13 이 폐지된 표를 현행처럼 인용한 사고의 재발 방지 장치다 — 대장에 없으면 아무도 안 본 것이다.
+const LAW_NAMES = [
+  "特定用途化粧品成分名稱及使用限制表",  // 폐지 — 긴 이름을 먼저 둬야 부분일치로 삼켜지지 않는다
+  "化粧品成分使用限制表",
+  "化粧品衛生安全管理法",
+  "特定用途化粧品",
+  "技術士技能檢定及發證辦法",
+];
+
+function legalLedger() {
+  try {
+    const md = fs.readFileSync("content-factory/legal_citations.md", "utf8");
+    // | `경로` | 법규명 | … 형태의 표 행만 읽는다.
+    const rows = [...md.matchAll(/^\|\s*`([^`]+)`\s*\|\s*([^|]+?)\s*\|/gm)];
+    return rows.map(([, file, law]) => ({ file: path.basename(file), law }));
+  } catch { return null; }
+}
+const LEDGER = legalLedger();
+
+/** 이 파일이 인용한 법규 중 대장에 없는 것. 대장 파일 자체가 없으면 검사하지 않는다. */
+function unregisteredLaws(file, body) {
+  if (LEDGER === null) return [];
+  const base = path.basename(file);
+  const cited = [];
+  let rest = body;
+  for (const law of LAW_NAMES) {
+    if (!rest.includes(law)) continue;
+    cited.push(law);
+    rest = rest.split(law).join("");   // 긴 이름부터 지워 부분일치 중복 집계를 막는다
+  }
+  return cited.filter((law) => !LEDGER.some((r) => r.file === base && r.law.includes(law)));
+}
+
 // R2 규제 금지어 — 대만 화장품 광고규제(化粧品衛生安全管理法)
 // v8 개정: 단독 刺激·醫療 는 금지가 아니다(刺激嗅覺 은 화장품 정의문에 나온다).
 // 諮詢醫師·就醫 같은 의료인 안내 표현은 허용·권장이다.
@@ -154,6 +188,8 @@ function analyze(file, kind) {
   // 인용한 문항 수 — `07-048` 같은 qid 앵커로 센다.
   const examQids = [...new Set([...body.matchAll(/^###\s*(\d{2}-\d{3})\b/gm)].map((m) => m[1]))];
 
+  const unregistered = unregisteredLaws(file, body);
+
   const fmKeys = ["title", "slug", "level", "series", "keywords", "description", "sources"];
   const fmMissing = fmKeys.filter((k) => !new RegExp(`^${k}:`, "m").test(fm));
   const byline = /20年資歷韓國髮型設計師\s*Jacob/.test(raw);
@@ -166,7 +202,7 @@ function analyze(file, kind) {
     bannedHits, mainlandHits, simplifiedHits, fmMissing, byline, descLen,
     hasFieldSection, fieldSectionFilled, questionLines, badQuestions, unknownSlugs, volErrors,
     badSectionName, hasAnswerSlot, answerFilled, status,
-    growthExceptions, hasSourceLine, examQids,
+    growthExceptions, hasSourceLine, examQids, unregistered,
     quotedBanned: bannedHits.filter((h) => h.count === 0).map((h) => h.word),
     twTerms: TW_TERMS.filter((t) => body.includes(t)),
   };
@@ -184,6 +220,7 @@ function verdict(a, kind) {
   if (a.unknownSlugs.length) fails.push(`미확정 slug 링크: ${a.unknownSlugs.join(",")}`);
   if (a.volErrors.length) fails.push(`雙氧乳 %↔vol 불일치: ${a.volErrors[0]}`);
   if (a.badSectionName.length) fails.push(`섹션명 변형 금지: ${a.badSectionName.join(",")}`);
+  if (a.unregistered.length) fails.push(`법규 인용 미등재(4-3): ${a.unregistered.join(",")} → legal_citations.md`);
   if (kind === "exam") {
     if (!a.hasSourceLine) fails.push("題目來源 고정 문구 없음(B3)");
     if (a.examQids.length < 20 || a.examQids.length > 40) {
@@ -265,6 +302,7 @@ for (const f of files) {
     detail.push(`- 유도 질문(R8): ${a.questionLines.length}개${a.badQuestions.length ? ` — 질문문 아님 ${a.badQuestions.length}건` : ""}`);
     a.questionLines.forEach((q, i) => detail.push(`    ${i + 1}. ${q}`));
   }
+  detail.push(`- 법규 인용 등재(4-3): ${a.unregistered.length ? "미등재 " + a.unregistered.join(",") : "이상 없음"}`);
   detail.push(`- 내부링크 slug 검증(R10): ${a.unknownSlugs.length ? "미확정 " + a.unknownSlugs.join(", ") : "전부 확정 목록 내"}`);
   const gx = Object.entries(a.growthExceptions).filter(([, c]) => c > 0);
   detail.push(`- 生髮 화이트리스트 예외(1-b): ${gx.length ? gx.map(([w, c]) => `${w}×${c}`).join(", ") : "해당 없음"}`);

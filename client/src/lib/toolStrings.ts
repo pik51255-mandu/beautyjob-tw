@@ -411,8 +411,8 @@ export const toolStrings = {
   // ─── 染髮調配計算機 (/tools/color-mix) ─────────────────────────────────────
   cmPageTitle: { zh: "染髮調配計算機｜雙氧乳度數・底色・分量換算", ko: "염색 조제 계산기" },
   cmMetaDescription: {
-    zh: "輸入現在底色與目標色，計算需要的提升度數與雙氧乳 vol，預測會露出的底色，並換算染膏與雙氧乳分量。調配比例請依產品包裝標示輸入。",
-    ko: "현재 베이스와 목표색을 넣으면 필요 리프트·雙氧乳 vol·底色·분량을 계산합니다.",
+    zh: "輸入現在底色與目標色，計算需要的提升度數與雙氧乳濃度（%），預測會露出的底色，並換算染膏與雙氧乳分量。調配比例請依產品包裝標示輸入。",
+    ko: "현재 베이스와 목표색을 넣으면 필요 리프트·雙氧乳 농도(%)·底色·분량을 계산합니다.",
   },
   cmHeading: { zh: "染髮調配計算機", ko: "염색 조제 계산기" },
   cmSubheading: {
@@ -434,7 +434,7 @@ export const toolStrings = {
   cmRecommendVol: { zh: "建議雙氧乳", ko: "권장 雙氧乳" },
   cmDegree: { zh: "度", ko: "度" },
   cmBleachWarn: { zh: "單靠染髮不足，需先漂髮", ko: "염색만으로 부족 — 탈색 선행 필요" },
-  cmVolUsed: { zh: "實際使用的雙氧乳", ko: "실제 사용할 雙氧乳" },
+  cmVolUsed: { zh: "實際使用的雙氧乳濃度", ko: "실제 사용할 雙氧乳 농도" },
   cmVolAuto: { zh: "依建議", ko: "권장값" },
   cmSectionUndertone: { zh: "底色預測", ko: "底色 예측" },
   cmUndertoneAt: { zh: "此度數會露出的底色", ko: "이 도수에서 드러날 底色" },
@@ -454,7 +454,7 @@ export const toolStrings = {
   },
   cmEntryTitle: { zh: "染髮調配計算機", ko: "염색 조제 계산기" },
   cmEntryDesc: {
-    zh: "底色到目標色要幾度？雙氧乳選幾 vol？分量算給你",
+    zh: "底色到目標色要幾度？雙氧乳要選幾 %？分量算給你",
     ko: "리프트·雙氧乳·분량을 계산합니다",
   },
 
