@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  DEVELOPERS, calcMix, diagnoseLift, isUndertoneRisky, needsNaturalBase,
-  railForVol, safetyRails, undertoneAt, volToPercent,
+  DEVELOPERS, SELECTABLE_VOLS, calcMix, diagnoseLift, isUndertoneRisky, needsNaturalBase,
+  railForVol, resolveVol, safetyRails, undertoneAt, volToPercent,
 } from "./colorMixCalc";
 
 describe("雙氧乳 %↔vol 대응 (02 바이블 1-3)", () => {
@@ -149,6 +149,52 @@ describe("안전 레일 (2-g)", () => {
   it("조건이 겹치면 레일이 함께 뜬다", () => {
     const rails = safetyRails(diagnoseLift(3, 9), "50+", "灰霧", 9);
     expect(rails.map((r) => r.id).sort()).toEqual(["bleach", "grey"]);
+  });
+});
+
+describe("雙氧乳 度數 직접 선택 (40vol 대만 합법)", () => {
+  it("40vol 은 선택지에 남아 있다 — 過氧化氫 12% 는 대만 합법 상한", () => {
+    expect(SELECTABLE_VOLS).toEqual([10, 20, 30, 40]);
+    expect(DEVELOPERS.some((d) => d.vol === 40 && d.percent === 12)).toBe(true);
+  });
+
+  it("override 가 없으면 진단 권장값을 쓴다", () => {
+    expect(resolveVol(diagnoseLift(6, 8), null)).toBe(20);
+    expect(resolveVol(diagnoseLift(6, 6), null)).toBe(10);
+  });
+
+  it("漂髮 판정이면 권장값이 없다", () => {
+    expect(resolveVol(diagnoseLift(3, 9), null)).toBeNull();
+  });
+
+  it("漂髮 판정에서도 直接 고른 度數는 살아 있다", () => {
+    expect(resolveVol(diagnoseLift(3, 9), 40)).toBe(40);
+  });
+
+  it("override 는 권장값을 덮어쓴다", () => {
+    expect(resolveVol(diagnoseLift(6, 8), 40)).toBe(40);
+    expect(resolveVol(diagnoseLift(6, 8), 10)).toBe(10);
+  });
+
+  it("목록에 없는 度數는 무시하고 권장값으로 되돌린다", () => {
+    expect(resolveVol(diagnoseLift(6, 8), 35)).toBe(20);
+    expect(resolveVol(diagnoseLift(6, 8), 0)).toBe(20);
+    expect(resolveVol(diagnoseLift(6, 8), NaN)).toBe(20);
+  });
+
+  it("40vol 을 고르면 두피 이격 경고가 붙는다", () => {
+    const vol = resolveVol(diagnoseLift(6, 8), 40);
+    expect(vol).toBe(40);
+    expect(railForVol(vol ?? 0)?.textZh).toContain("頭皮保持距離");
+  });
+
+  it("40vol 미만에서는 경고가 붙지 않는다", () => {
+    for (const v of [10, 20, 30]) expect(railForVol(v)).toBeNull();
+  });
+
+  it("safetyRails 는 40vol 레일을 만들지 않는다 — railForVol 이 단독 담당(중복 방지)", () => {
+    const rails = safetyRails(diagnoseLift(3, 9), "50+", "灰霧", 9);
+    expect(rails.map((r) => r.id)).not.toContain("vol40");
   });
 });
 

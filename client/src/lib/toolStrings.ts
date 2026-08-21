@@ -434,6 +434,8 @@ export const toolStrings = {
   cmRecommendVol: { zh: "建議雙氧乳", ko: "권장 雙氧乳" },
   cmDegree: { zh: "度", ko: "度" },
   cmBleachWarn: { zh: "單靠染髮不足，需先漂髮", ko: "염색만으로 부족 — 탈색 선행 필요" },
+  cmVolUsed: { zh: "實際使用的雙氧乳", ko: "실제 사용할 雙氧乳" },
+  cmVolAuto: { zh: "依建議", ko: "권장값" },
   cmSectionUndertone: { zh: "底色預測", ko: "底色 예측" },
   cmUndertoneAt: { zh: "此度數會露出的底色", ko: "이 도수에서 드러날 底色" },
   cmSectionAmount: { zh: "分量換算", ko: "분량 환산" },

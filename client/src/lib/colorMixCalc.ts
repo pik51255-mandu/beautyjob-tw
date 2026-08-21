@@ -18,6 +18,9 @@ export const DEVELOPERS: Developer[] = [
   { percent: 12, vol: 40 },
 ];
 
+/** UI 에서 직접 고를 수 있는 度數. DEVELOPERS 와 같은 집합을 유지한다. */
+export const SELECTABLE_VOLS: number[] = DEVELOPERS.map((d) => d.vol);
+
 export function volToPercent(vol: number): number {
   return (vol * 3) / 10;
 }
@@ -140,10 +143,9 @@ export function safetyRails(
       textZh: `需要提升 ${verdict.lift} 度，單靠染髮不足，需先漂髮。`,
       linkSlug: "bleaching-science",
     });
-  } else if (verdict.vol === 40) {
-    // 현재 진단 로직상 40vol 은 나오지 않지만, 사용자가 직접 40vol 을 고른 경우를 위해 남긴다.
-    rails.push({ id: "vol40", textZh: "使用 40vol 時，請與頭皮保持距離塗抹。" });
   }
+
+  // 40vol 두피 이격 경고는 railForVol() 이 실제 사용 度數를 받아 판정한다.
 
   if (needsNaturalBase(grey)) {
     rails.push({
@@ -162,6 +164,20 @@ export function safetyRails(
   }
 
   return rails;
+}
+
+/**
+ * 실제로 쓸 雙氧乳 度數.
+ *
+ * 過氧化氫 12%(40vol) 은 대만에서 합법이다 — 〈特定用途化粧品成分名稱及使用限制表〉의
+ * 燙髮劑二劑 항목에 12%(40 volumes) 상한이 명시돼 있다. 그래서 선택지에서 빼지 않는다.
+ * 다만 고르면 두피 이격 경고(railForVol)가 붙는다.
+ *
+ * override 가 null 이면 진단 권장값을 쓴다. 漂髮 판정에는 권장값이 없으므로 null 이 될 수 있다.
+ */
+export function resolveVol(verdict: LiftVerdict, override: number | null): number | null {
+  if (override != null && SELECTABLE_VOLS.includes(override)) return override;
+  return verdict.kind === "ok" ? verdict.vol : null;
 }
 
 /** 40vol 을 직접 선택했을 때의 레일 (UI 에서 度數를 바꿀 수 있게 열어둔 경우). */

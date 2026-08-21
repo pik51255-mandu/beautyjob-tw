@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { detectToolLang, makeT } from "@/lib/toolStrings";
 import {
-  DEVELOPERS, GREY_OPTIONS, TONE_FAMILIES,
-  calcMix, diagnoseLift, railForVol, safetyRails, undertoneAt,
+  DEVELOPERS, GREY_OPTIONS, SELECTABLE_VOLS, TONE_FAMILIES,
+  calcMix, diagnoseLift, railForVol, resolveVol, safetyRails, undertoneAt,
   type GreyRatio, type HairLength, type HairVolume, type ToneFamily,
 } from "@/lib/colorMixCalc";
 
@@ -28,11 +28,13 @@ type State = {
   volume: HairVolume;
   ratio: number;
   tubeG: number;
+  /** null = 진단 권장값 사용. 사용자가 直接 고르면 그 度數를 쓴다. */
+  volOverride: number | null;
 };
 
 const DEFAULTS: State = {
   base: 6, target: 8, tone: "自然", grey: "0",
-  length: "中", volume: "中", ratio: 1, tubeG: 60,
+  length: "中", volume: "中", ratio: 1, tubeG: 60, volOverride: null,
 };
 
 function load(): State {
@@ -112,7 +114,9 @@ export default function ColorMix() {
     () => safetyRails(verdict, s.grey, s.tone, s.target),
     [verdict, s.grey, s.tone, s.target]
   );
-  const volRail = verdict.kind === "ok" ? railForVol(verdict.vol) : null;
+  // 40vol(過氧化氫 12%)은 대만 합법이라 고를 수 있다. 대신 고르면 두피 이격 경고가 붙는다.
+  const usedVol = useMemo(() => resolveVol(verdict, s.volOverride), [verdict, s.volOverride]);
+  const volRail = usedVol != null ? railForVol(usedVol) : null;
   const allRails = volRail ? [...rails, volRail] : rails;
 
   const greyLabels = Object.fromEntries(GREY_OPTIONS.map((g) => [g.value, g.labelZh]));
@@ -220,6 +224,38 @@ export default function ColorMix() {
         <p className="text-xs text-muted-foreground mt-3">
           {DEVELOPERS.map((d) => `${d.percent}%=${d.vol}vol`).join("　")}
         </p>
+
+        {/* 권장값을 따르지 않고 直接 고를 수 있다 — 40vol 포함 */}
+        <div className="space-y-2 mt-4 pt-4 border-t border-border">
+          <Label>{t("cmVolUsed")}</Label>
+          <div className="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              onClick={() => set("volOverride", null)}
+              className={`px-3 min-h-[38px] rounded-lg border text-sm transition-colors ${
+                s.volOverride === null
+                  ? "border-primary bg-primary/10 text-primary font-semibold"
+                  : "border-border hover:bg-muted"
+              }`}
+            >
+              {t("cmVolAuto")}
+            </button>
+            {SELECTABLE_VOLS.map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => set("volOverride", v)}
+                className={`px-3 min-h-[38px] rounded-lg border text-sm transition-colors ${
+                  s.volOverride === v
+                    ? "border-primary bg-primary/10 text-primary font-semibold"
+                    : "border-border hover:bg-muted"
+                }`}
+              >
+                {v}vol
+              </button>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* ── 底色 예측 ── */}
