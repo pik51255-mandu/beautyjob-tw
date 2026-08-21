@@ -95,14 +95,14 @@ SPA 정적 서빙보다 먼저 등록해 내보내는 패턴이 자리잡혀 있
 | 20 | 蓋白髮的科學：白髮為什麼特別難染 | `grey-coverage-science` | 中級 | **검증통과** |
 | 21 | 矯色與紫色洗髮精：原理與極限 | `toning-purple-shampoo` | 中級 | **검증통과** |
 | 22 | 熱損傷科學：幾度開始不可逆？ | `heat-damage-science` | 中級 | **검증통과** |
-| 23 | 結構式護髮的化學：Olaplex、K18差在哪 | `bond-builder-chemistry` | 高級 | 대기 |
-| 24 | 卡色與漂髮發熱的隱形兇手：金屬離子與硬水 | `metallic-salts-hard-water` | 高級 | 대기 |
-| 25 | 酸熱離子護的真相：乙二醛酸原理與安全爭議 | `glyoxylic-acid-truth` | 高級 | 대기 |
-| 26 | 設計師的職業安全：PPD、過硫酸鹽與你的手和肺 | `stylist-occupational-safety` | 高級 | 대기 |
-| 27 | 高溫潮濕與髮型：濕氣、氫鍵、抗毛躁的科學 | `humidity-frizz-science` | 高級 | 대기 |
-| 28 | 為什麼台灣夏天褪色特別快：UV、汗水與護色設計 | `uv-color-fading` | 高級 | 대기 |
-| 29 | 受損髮三層次診斷：表面、內部、鍵結的護理設計 | `damaged-hair-three-layers` | 高級 | 대기 |
-| 30 | 設計師不能說的話：化粧品廣告法規完全指南 | `cosmetic-ad-regulations` | 高級 | 대기 |
+| 23 | 結構式護髮的化學：Olaplex、K18差在哪 | `bond-builder-chemistry` | 高級 | **검증통과** |
+| 24 | 卡色與漂髮發熱的隱形兇手：金屬離子與硬水 | `metallic-salts-hard-water` | 高級 | **검증통과** |
+| 25 | 酸熱離子護的真相：乙二醛酸原理與安全爭議 | `glyoxylic-acid-truth` | 高級 | **검증통과** |
+| 26 | 設計師的職業安全：PPD、過硫酸鹽與你的手和肺 | `stylist-occupational-safety` | 高級 | **검증통과** |
+| 27 | 高溫潮濕與髮型：濕氣、氫鍵、抗毛躁的科學 | `humidity-frizz-science` | 高級 | **검증통과** |
+| 28 | 為什麼台灣夏天褪色特別快：UV、汗水與護色設計 | `uv-color-fading` | 高級 | **검증통과** |
+| 29 | 受損髮三層次診斷：表面、內部、鍵結的護理設計 | `damaged-hair-three-layers` | 高級 | **검증통과** |
+| 30 | 設計師不能說的話：化粧品廣告法規完全指南 | `cosmetic-ad-regulations` | 高級 | **검증통과** |
 
 ### 라인 B — 기출 해설 (PDF 확보 후 확정)
 
@@ -139,6 +139,14 @@ SPA 정적 서빙보다 먼저 등록해 내보내는 패턴이 자리잡혀 있
 | A-20 | grey-coverage-science | `grey-coverage-science` | 검증통과 | 5,062 | 간체 0 / 금지어 0 | 2026-08-21 |
 | A-21 | toning-purple-shampoo | `toning-purple-shampoo` | 검증통과 | 4,031 | 간체 0 / 금지어 0 | 2026-08-21 |
 | A-22 | heat-damage-science | `heat-damage-science` | 검증통과 | 4,005 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-23 | bond-builder-chemistry | `bond-builder-chemistry` | 검증통과 | 5,564 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-24 | metallic-salts-hard-water | `metallic-salts-hard-water` | 검증통과 | 5,431 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-25 | glyoxylic-acid-truth | `glyoxylic-acid-truth` | 검증통과 | 4,948 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-26 | stylist-occupational-safety | `stylist-occupational-safety` | 검증통과 | 5,461 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-27 | humidity-frizz-science | `humidity-frizz-science` | 검증통과 | 4,467 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-28 | uv-color-fading | `uv-color-fading` | 검증통과 | 5,050 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-29 | damaged-hair-three-layers | `damaged-hair-three-layers` | 검증통과 | 5,629 | 간체 0 / 금지어 0 | 2026-08-21 |
+| A-30 | cosmetic-ad-regulations | `cosmetic-ad-regulations` | 검증통과 | 4,238 | 간체 0 / 금지어 0 | 2026-08-21 |
 | B-1 | 燙髮篇 제1편(軟化·試捲) | — | **차단** (PDF 미확보) | — | — | — |
 
 ---
@@ -165,6 +173,16 @@ SPA 정적 서빙보다 먼저 등록해 내보내는 패턴이 자리잡혀 있
    같은 이유로 `刺激`(단독)·`醫療`(단독)도 회피 대상이 됐다 — 원래 금지 대상은
    `刺激毛囊`·`醫療級` 뿐이다. **R2 를 완화할지(예외 목록 도입) 여부는 선후님 판단 사항**이라
    임의로 바꾸지 않았다.
+
+## 라인 A 이론 30편 — 전량 완료 (2026-08-21)
+
+전 30편 lint 통과. 간체자 0 / 규제 금지어 0 / 教科書沒說的 전편 빈칸 유지 /
+내부링크 전부 확정 slug 목록 내 / 雙氧乳 %↔vol 전 구간 일치.
+
+- 초급 10편 · 중급 12편 · 고급 8편
+- 총 中文 字數 약 122,000
+- #30 은 R9 예외 적용: 금지어 14종이 전부 「」 인용 안에만 등장(인용 91개).
+  인용 밖 `生髮` 2건은 화이트리스트 어휘(原生髮·新生髮)로 마스킹 후 잔존 0.
 
 ## 미결·후속
 
