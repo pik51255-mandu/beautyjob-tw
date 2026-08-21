@@ -13,13 +13,17 @@
  */
 import type { Express, Request, Response } from "express";
 import {
-  countSalons, countSalonsByDistrict, getSalonByTaxId,
-  listNearbySalons, listSalonsByDistrict, type SalonRow,
+  countSalons, countSalonsByDistrict, getSalonByTaxId, getSalonStats,
+  listNearbySalons, listSalonsByDistrict, type SalonRow, type SalonStats,
 } from "./db";
 import { ADJACENT_DISTRICTS, DISTRICT_SLUGS, districtForSlug, slugForDistrict } from "../shared/districts";
+import {
+  COORD_AS_OF, DATA_AS_OF, INDEXNOW_KEY, REGISTRY_AS_OF, breadcrumbLd, buildRobotsTxt,
+  datasetLd, itemListLd, organizationLd, safeOrigin,
+} from "./geo";
 
 const SITE = "台灣美髮平台";
-const SOURCE_NOTE = "資料來源：經濟部商工行政資料開放平臺・高雄市政府民政局門牌坐標";
+const SOURCE_NOTE = "資料來源：財政部全國營業（稅籍）登記資料・高雄市政府民政局門牌坐標";
 const CACHE = "public, max-age=3600";
 
 export function esc(s: unknown): string {
@@ -36,6 +40,8 @@ type LayoutOpts = {
   title: string;
   description: string;
   canonical: string;
+  /** 전역 스키마(Organization·Dataset)를 붙일 때 필요한 origin */
+  origin: string;
   breadcrumb: { name: string; url?: string }[];
   ld?: unknown[];
   body: string;
@@ -51,7 +57,9 @@ function layout(o: LayoutOpts): string {
       : `<span aria-current="page">${esc(c.name)}</span>`
   ).join('<span class="sep">›</span>');
 
-  const ldBlocks = (o.ld ?? []).map(
+  // 전역 스키마는 모든 서버 렌더 페이지에 공통으로 싣는다.
+  const allLd = [organizationLd(o.origin), datasetLd(o.origin), ...(o.ld ?? [])];
+  const ldBlocks = allLd.map(
     (l) => `<script type="application/ld+json">${jsonLd(l)}</script>`).join("\n");
 
   return `<!DOCTYPE html>
@@ -82,6 +90,12 @@ nav.crumb .sep{margin:0 6px;color:var(--line)}
 h1{font-size:26px;margin:6px 0 4px}
 h2{font-size:19px;margin:26px 0 10px}
 .meta{color:var(--mut);font-size:14px;margin:2px 0}
+.lead{font-size:16px;margin:10px 0 14px;max-width:70ch}
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:14px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+th{background:var(--soft);font-weight:600}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.bar{display:inline-block;height:9px;background:var(--pri);opacity:.75;border-radius:2px;vertical-align:middle}
 .card{border:1px solid var(--line);border-radius:12px;padding:14px;margin:8px 0;background:var(--bg)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
 .pill{display:inline-block;font-size:12px;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:2px 9px;margin-right:6px}
@@ -119,8 +133,8 @@ ${o.script ? `<script>${o.script}</script>` : ""}
 }
 
 function origin(req: Request): string {
-  const proto = (req.headers["x-forwarded-proto"] as string) || req.protocol || "https";
-  return `${proto}://${req.get("host")}`;
+  // M13: Host / X-Forwarded-Proto 를 그대로 믿지 않는다 (geo.safeOrigin 참고).
+  return safeOrigin(req.get("host"), (req.headers["x-forwarded-proto"] as string) || req.protocol);
 }
 
 // ─── /salon/:taxId ───────────────────────────────────────────────────────────
@@ -145,15 +159,11 @@ function salonPage(req: Request, s: SalonRow, nearby: { taxId: string; name: str
   if (hasGeo) ld.geo = { "@type": "GeoCoordinates", latitude: Number(s.lat), longitude: Number(s.lng) };
   if (s.foundedYear) ld.foundingDate = String(s.foundedYear);
 
-  const crumbLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "高雄市", item: `${origin(req)}/salons` },
-      { "@type": "ListItem", position: 2, name: s.district, item: slug ? `${origin(req)}/area/${slug}` : undefined },
-      { "@type": "ListItem", position: 3, name: s.name, item: url },
-    ],
-  };
+  const crumbLd = breadcrumbLd(origin(req), [
+    { name: "高雄市", path: "/salons" },
+    { name: s.district, path: slug ? `/area/${slug}` : undefined },
+    { name: s.name, path: `/salon/${encodeURIComponent(s.taxId)}` },
+  ]);
 
   const mapBlock = hasGeo ? `
 <section>
@@ -164,7 +174,7 @@ function salonPage(req: Request, s: SalonRow, nearby: { taxId: string; name: str
   const parkingBlock = s.parking.length ? `
 <section>
   <h2>附近停車</h2>
-  <p class="meta">以下距離為地圖上的<strong>直線距離</strong>，非實際步行路線。</p>
+  <p class="meta">以下距離為地圖上的<strong>直線距離</strong>，非實際步行路線。最多列出最近的 3 處。</p>
   <ul class="parking">
     ${s.parking.map((p) => `<li>
       <span class="pill">${esc(p.kind)}</span><strong>${esc(p.name)}</strong>
@@ -185,9 +195,16 @@ function salonPage(req: Request, s: SalonRow, nearby: { taxId: string; name: str
   ${slug ? `<p><a href="/area/${slug}">查看 ${esc(s.district)} 全部沙龍 →</a></p>` : ""}
 </section>` : "";
 
+  // 인용 최적화: 첫 문단만 읽어도 답이 되는 자기완결 1문장.
+  const lead = `${s.name}是位於高雄市${s.district}的美髮沙龍，地址為${s.address}` +
+    (s.foundedYear ? `，於${s.foundedYear}年設立` : "") +
+    (s.parking.length
+      ? `，直線距離 200 公尺內有 ${s.parking.length}${s.parking.length >= 3 ? " 處以上" : " 處"}停車場`
+      : "") + "。";
+
   const body = `
 <h1>${esc(s.name)}</h1>
-<p class="meta">${esc(s.address)}</p>
+<p class="lead">${esc(lead)}</p>
 <p class="meta">
   <span class="pill">${esc(s.district)}</span>
   ${s.foundedYear ? `<span class="pill">設立：${esc(s.foundedYear)}年</span>` : ""}
@@ -206,6 +223,7 @@ ${nearbyBlock}
     title: `${s.name}｜${s.district}美髮沙龍｜${SITE}`,
     description: `${s.name}（${s.district}）位於${s.address}。${s.parking.length ? "提供附近停車資訊。" : ""}資料來自政府公開資料。`,
     canonical: url,
+    origin: origin(req),
     breadcrumb: [
       { name: "高雄市", url: "/salons" },
       { name: s.district, url: slug ? `/area/${slug}` : undefined },
@@ -233,8 +251,18 @@ function areaPage(req: Request, district: string, list: SalonRow[]): string {
   const adjacent = (ADJACENT_DISTRICTS[district] ?? [])
     .map((d) => ({ d, s: slugForDistrict(d) })).filter((x) => x.s);
 
+  const withParking = list.filter((s) => s.parking.length).length;
+  const years = list.map((s) => s.foundedYear).filter((y): y is number => Boolean(y));
+  const oldest = years.length ? Math.min(...years) : null;
+  // 인용 최적화: 숫자를 포함한 자기완결 요약 (전부 DB 집계 — 하드코딩 없음)
+  const summary =
+    `高雄市${district}共有 ${list.length} 家美髮沙龍，其中 ${pts.length} 家已完成門牌坐標定位` +
+    (withParking ? `，${withParking} 家在直線距離 200 公尺內有停車場` : "") +
+    (oldest ? `。最早的一家設立於 ${oldest} 年` : "") + "。";
+
   const body = `
 <h1>${esc(district)}美髮沙龍</h1>
+<p class="lead">${esc(summary)}</p>
 <p class="meta">共 ${list.length} 家（其中 ${pts.length} 家有座標）</p>
 
 <div class="sticky-map">
@@ -256,14 +284,24 @@ ${adjacent.length ? `<h2>鄰近行政區</h2><p>${adjacent.map((a) => `<a href="
     title: `${district}美髮沙龍一覽（${list.length} 家）｜${SITE}`,
     description: `高雄市${district}的美髮沙龍共 ${list.length} 家，含地址與地圖位置。資料來自政府公開資料。`,
     canonical: url,
+    origin: origin(req),
     breadcrumb: [{ name: "高雄市", url: "/salons" }, { name: district }],
-    ld: [{
-      "@context": "https://schema.org",
-      "@type": "CollectionPage",
-      name: `${district}美髮沙龍一覽`,
-      url,
-      numberOfItems: list.length,
-    }],
+    ld: [
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: `${district}美髮沙龍一覽`,
+        url,
+      },
+      // 화면의 실제 목록과 1:1 대응 (상위 100건 — 스키마 비대화 방지)
+      itemListLd(origin(req), `${district}美髮沙龍`, list.slice(0, 100).map((s) => ({
+        name: s.name, path: `/salon/${encodeURIComponent(s.taxId)}`,
+      })), { total: list.length, order: "Ascending" }),
+      breadcrumbLd(origin(req), [
+        { name: "高雄市", path: "/salons" },
+        { name: district, path: `/area/${slug}` },
+      ]),
+    ],
     body,
     leaflet: pts.length > 0,
     script: pts.length ? `
@@ -286,9 +324,16 @@ if(b.length)m.fitBounds(b,{padding:[24,24]});})();` : undefined,
 // ─── /salons ─────────────────────────────────────────────────────────────────
 function indexPage(req: Request, counts: { district: string; count: number }[], total: number): string {
   const url = `${origin(req)}/salons`;
+  const top = counts[0];
+  const summary =
+    `本站整理高雄市 ${counts.length} 個行政區、共 ${total} 家美髮沙龍的公開登記資料` +
+    (top ? `，其中${top.district}最多，有 ${top.count} 家` : "") +
+    `。資料來自財政部全國營業（稅籍）登記資料與高雄市政府民政局門牌坐標，基準日為 ${DATA_AS_OF}。`;
+
   const body = `
 <h1>高雄市美髮沙龍</h1>
-<p class="meta">共 ${total} 家，涵蓋 ${counts.length} 個行政區。依家數排序。</p>
+<p class="lead">${esc(summary)}</p>
+<p class="meta">共 ${total} 家，涵蓋 ${counts.length} 個行政區。依家數排序。<a href="/stats">查看產業統計 →</a></p>
 <div class="hubgrid">
 ${counts.map((c) => {
   const slug = slugForDistrict(c.district);
@@ -305,14 +350,131 @@ ${counts.map((c) => {
     title: `高雄市美髮沙龍一覽（${total} 家）｜${SITE}`,
     description: `高雄市 ${counts.length} 個行政區、共 ${total} 家美髮沙龍的地址與位置資訊。資料來自政府公開資料。`,
     canonical: url,
+    origin: origin(req),
     breadcrumb: [{ name: "高雄市" }],
-    ld: [{
-      "@context": "https://schema.org",
-      "@type": "CollectionPage",
-      name: "高雄市美髮沙龍一覽",
-      url,
-      numberOfItems: total,
-    }],
+    ld: [
+      {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        name: "高雄市美髮沙龍一覽",
+        url,
+      },
+      itemListLd(origin(req), "高雄市各行政區美髮沙龍", counts
+        .filter((c) => slugForDistrict(c.district))
+        .map((c) => ({ name: c.district, path: `/area/${slugForDistrict(c.district)}` })),
+        { order: "Descending" }),
+      breadcrumbLd(origin(req), [{ name: "高雄市", path: "/salons" }]),
+    ],
+    body,
+  });
+}
+
+
+// ─── /stats ──────────────────────────────────────────────────────────────────
+// 수치는 전부 DB 집계다. 월간 갱신 시 자동으로 반영되며 하드코딩된 숫자가 없다.
+function statsPage(req: Request, st: SalonStats): string {
+  const o = origin(req);
+  const url = `${o}/stats`;
+  const top3 = st.districts.slice(0, 3);
+  const thisYear = new Date().getFullYear();
+  const newestYear = st.recentYears.find((r) => r.year === thisYear);
+  const decadePeak = st.decades.reduce(
+    (a, b) => (b.count > a.count ? b : a), st.decades[0] ?? { decade: 0, count: 0 });
+
+  // 상단 자기완결 요약 (40~70단어 상당)
+  // M8: 주차 커버리지의 분모는 "좌표가 있어 평가 가능한" 살롱이다.
+  //     좌표 없는 건은 "주차장 없음"이 아니라 "미평가"이므로 분모에서 뺀다.
+  const parkingRate = st.withCoord ? (st.withParking / st.withCoord) * 100 : 0;
+  // M5: 당해년은 아직 진행 중이라 완결 연도와 나란히 두면 오독된다 — 리드에서는 뺀다.
+  const lastFullYear = st.recentYears.filter((r) => r.year < thisYear).slice(-1)[0];
+  const summary =
+    `截至 ${DATA_AS_OF}，高雄市共有 ${st.total} 家美髮沙龍分布於 ${st.districts.length} 個行政區，` +
+    `其中 ${top3.map((d) => `${d.district} ${d.count} 家`).join("、")} 為前三名。` +
+    `${st.withCoord} 家已完成門牌坐標定位；在這些已定位的沙龍中，` +
+    `${st.withParking} 家（${parkingRate.toFixed(1)}%）於直線距離 200 公尺內有停車場。` +
+    `開業高峰為 ${decadePeak.decade} 年代（${decadePeak.count} 家）` +
+    `${lastFullYear ? `，最近一個完整年度 ${lastFullYear.year} 年新登記 ${lastFullYear.count} 家` : ""}。` +
+    `另收錄美材行 ${st.supplyStores} 家。`;
+
+  const maxDist = Math.max(...st.districts.map((d) => d.count), 1);
+  const maxDecade = Math.max(...st.decades.map((d) => d.count), 1);
+  const maxYear = Math.max(...st.recentYears.map((r) => r.count), 1);
+
+  const body = `
+<h1>高雄美髮產業統計</h1>
+<p class="lead">${esc(summary)}</p>
+
+<h2>高雄市有多少家美髮沙龍？</h2>
+<table>
+  <tbody>
+    <tr><th>美髮沙龍總數</th><td class="num">${st.total} 家</td></tr>
+    <tr><th>涵蓋行政區</th><td class="num">${st.districts.length} 區</td></tr>
+    <tr><th>已完成坐標定位</th><td class="num">${st.withCoord} 家（${(st.withCoord / st.total * 100).toFixed(1)}%）</td></tr>
+    <tr><th>直線距離 200 公尺內有停車場</th><td class="num">${st.withParking} 家<br><span class="meta">占已定位 ${st.withCoord} 家的 ${parkingRate.toFixed(1)}%</span></td></tr>
+    <tr><th>美材行</th><td class="num">${st.supplyStores} 家</td></tr>
+  </tbody>
+</table>
+
+<h2>哪一區的美髮沙龍最多？</h2>
+<table>
+  <thead><tr><th>行政區</th><th class="num">家數</th><th class="num">占比</th><th>分布</th></tr></thead>
+  <tbody>
+    ${st.districts.map((d) => {
+      const slug = slugForDistrict(d.district);
+      const label = slug ? `<a href="/area/${slug}">${esc(d.district)}</a>` : esc(d.district);
+      return `<tr><th>${label}</th><td class="num">${d.count}</td>` +
+        `<td class="num">${(d.count / st.total * 100).toFixed(1)}%</td>` +
+        `<td><span class="bar" style="width:${Math.round(d.count / maxDist * 160)}px"></span></td></tr>`;
+    }).join("")}
+  </tbody>
+</table>
+
+<h2>美髮沙龍是什麼時候開的？</h2>
+<p class="meta">依登記的設立年份分組。</p>
+<table>
+  <thead><tr><th>年代</th><th class="num">家數</th><th class="num">占比</th><th>分布</th></tr></thead>
+  <tbody>
+    ${st.decades.map((d) => `<tr><th>${d.decade} 年代</th><td class="num">${d.count}</td>` +
+      `<td class="num">${(d.count / st.total * 100).toFixed(1)}%</td>` +
+      `<td><span class="bar" style="width:${Math.round(d.count / maxDecade * 160)}px"></span></td></tr>`).join("")}
+  </tbody>
+</table>
+
+<h2>最近幾年的新登記趨勢如何？</h2>
+<p class="meta">公開資料的設立日期以年為單位彙整，因此以年度呈現最近十年。</p>
+<table>
+  <thead><tr><th>年份</th><th class="num">新登記家數</th><th>分布</th></tr></thead>
+  <tbody>
+    ${st.recentYears.map((r) => {
+      const partial = r.year === thisYear;
+      return `<tr><th>${r.year} 年${partial ? `<span class="meta">（截至 ${esc(DATA_AS_OF)}，未滿一年）</span>` : ""}</th>` +
+        `<td class="num">${r.count}</td>` +
+        `<td><span class="bar" style="width:${Math.round(r.count / maxYear * 160)}px"${partial ? ' data-partial="1"' : ""}></span></td></tr>`;
+    }).join("")}
+  </tbody>
+</table>
+
+<h2>這些資料從哪裡來？</h2>
+<table>
+  <tbody>
+    <tr><th>營業（稅籍）登記資料</th><td>財政部　<span class="meta">擷取日 ${esc(REGISTRY_AS_OF)}</span></td></tr>
+    <tr><th>門牌坐標</th><td>高雄市政府民政局　<span class="meta">資料版本 ${esc(COORD_AS_OF)}</span></td></tr>
+    <tr><th>停車場資料</th><td>高雄市政府交通局（公有路外・民營路外停車場一覽表）</td></tr>
+    <tr><th>更新頻率</th><td>每月更新一次</td></tr>
+  </tbody>
+</table>
+<p class="meta">本站僅呈現公開登記資訊，不含負責人姓名或聯絡電話。資料如有錯誤或需要下架，請至<a href="/data-request">資料更正／下架申請</a>。</p>`;
+
+  return layout({
+    title: `高雄美髮產業統計（${st.total} 家）｜${SITE}`,
+    description: `高雄市 ${st.total} 家美髮沙龍的行政區分布、開業年代與近十年新登記趨勢統計。資料基準日 ${DATA_AS_OF}。`,
+    canonical: url,
+    origin: o,
+    breadcrumb: [{ name: "高雄市", url: "/salons" }, { name: "產業統計" }],
+    // Dataset 은 layout 이 전역으로 이미 싣는다 — 같은 @id 중복을 피한다.
+    ld: [
+      breadcrumbLd(o, [{ name: "高雄市", path: "/salons" }, { name: "產業統計", path: "/stats" }]),
+    ],
     body,
   });
 }
@@ -337,7 +499,9 @@ function dataRequestPage(req: Request): string {
     title: `資料更正／下架申請｜${SITE}`,
     description: "沙龍資料更正或下架的申請方式。",
     canonical: `${origin(req)}/data-request`,
+    origin: origin(req),
     breadcrumb: [{ name: "資料更正／下架申請" }],
+    ld: [breadcrumbLd(origin(req), [{ name: "資料更正／下架申請", path: "/data-request" }])],
     body,
   });
 }
@@ -372,7 +536,29 @@ export function registerSalonPages(app: Express) {
     res.setHeader("Cache-Control", CACHE);
     res.type("html").send(dataRequestPage(req));
   });
+
+  app.get("/stats", async (req: Request, res: Response, next) => {
+    const st = await getSalonStats();
+    if (!st || !st.total) return next();
+    res.setHeader("Cache-Control", CACHE);
+    res.type("html").send(statsPage(req, st));
+  });
+
+  // robots.txt 는 요청 호스트 기준으로 만든다 — Sitemap 절대 URL 이 도메인을 따라간다.
+  app.get("/robots.txt", (req: Request, res: Response) => {
+    res.setHeader("Cache-Control", CACHE);
+    res.type("text/plain").send(buildRobotsTxt(origin(req)));
+  });
+
+  // IndexNow 키 검증 파일. 사양상 공개 서빙이 필수다(발사는 별도 플래그로 잠겨 있음).
+  app.get(`/${INDEXNOW_KEY}.txt`, (_req: Request, res: Response) => {
+    res.setHeader("Cache-Control", CACHE);
+    res.type("text/plain").send(INDEXNOW_KEY);
+  });
 }
 
-export const SALON_PAGE_PATHS = ["/salons", "/area/:slug", "/salon/:taxId", "/data-request"];
+export const SALON_PAGE_PATHS = [
+  "/salons", "/area/:slug", "/salon/:taxId", "/data-request", "/stats",
+  "/robots.txt", `/${INDEXNOW_KEY}.txt`,
+];
 export { DISTRICT_SLUGS };
