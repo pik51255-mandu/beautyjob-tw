@@ -13,6 +13,7 @@ import {
   normalizeShares,
   type ServiceRow,
 } from "./openingCostCalc";
+import { matchHealthBracket, matchInsuredBracket } from "./salaryCalc";
 
 // 다올살롱 실측 모델 기본 5행
 const DEFAULT_SERVICES: ServiceRow[] = [
@@ -267,5 +268,63 @@ describe("영업일수 입력 클램프", () => {
     for (const raw of [-5, 0, 1, 26, 99]) {
       expect(Number.isFinite(calcDailyCustomers(1_000_000, 1500, clamp(raw)))).toBe(true);
     }
+  });
+});
+
+// ─── v25: 고용주 부담 — 제도별 분급표 + 官方 분담금액표 ──────────────────────
+describe("calcEmployerBurden 경계값 (v25)", () => {
+  it("기존 케이스 회귀 불변 — 월급 32,000", () => {
+    const b = calcEmployerBurden(32_000);
+    expect(b.labor).toBe(2_914);   // 33,300 급距, 官方 분담금액표
+    expect(b.health).toBe(1_611);  // 33,300 × 5.17% × 60% × 1.56
+    expect(b.pension).toBe(1_920);
+    expect(b.total).toBe(6_445);
+  });
+
+  it("45,800 이하는 勞保·健保 표가 같아 결과가 갈리지 않는다", () => {
+    for (const salary of [29_000, 30_000, 33_300, 40_000, 45_000, 45_800]) {
+      expect(matchHealthBracket(salary)).toBe(matchInsuredBracket(salary));
+    }
+  });
+
+  it("45,800 초과: 健保만 계속 올라가고 勞保는 상한에서 멈춘다", () => {
+    const b = calcEmployerBurden(60_000);
+    // 勞保는 45,800 에서 캡 → 官方 분담금액표 4,008
+    expect(b.labor).toBe(4_008);
+    // 健保는 60,800 급距 → 60,800 × 5.17% × 60% × 1.56
+    expect(matchHealthBracket(60_000)).toBe(60_800);
+    expect(b.health).toBe(Math.round(60_800 * 0.0517 * 0.6 * 1.56)); // 2,942
+    // 고치기 전에는 45,800 기준 2,216 이었다 — 726 과소였다
+    expect(b.health).toBeGreaterThan(2_216);
+  });
+
+  it("健保 상한 313,000 을 넘겨도 상한에서 멈춘다", () => {
+    const b = calcEmployerBurden(500_000);
+    expect(matchHealthBracket(500_000)).toBe(313_000);
+    expect(b.health).toBe(Math.round(313_000 * 0.0517 * 0.6 * 1.56));
+  });
+
+  it("勞保 고용주분은 官方 분담금액표와 11급 전부 일치한다", () => {
+    const OFFICIAL_EMPLOYER: [number, number][] = [
+      [29_500, 2_582], [30_300, 2_651], [31_800, 2_783], [33_300, 2_914],
+      [34_800, 3_045], [36_300, 3_176], [38_200, 3_342], [40_100, 3_509],
+      [42_000, 3_675], [43_900, 3_841], [45_800, 4_008],
+    ];
+    for (const [bracket, expected] of OFFICIAL_EMPLOYER) {
+      expect(calcEmployerBurden(bracket).labor).toBe(expected);
+    }
+  });
+
+  it("단일 12.5% 산식이었으면 3곳이 어긋났다 — 표 조회로 바꾼 이유", () => {
+    for (const bracket of [29_500, 38_200, 45_800]) {
+      expect(Math.round(bracket * 0.125 * 0.7)).not.toBe(calcEmployerBurden(bracket).labor);
+    }
+  });
+
+  it("인원 배수는 그대로 곱해진다", () => {
+    const one = calcEmployerBurden(60_000);
+    const staff = calcStaffCost(3, 60_000);
+    expect(staff.perEmployee).toBe(60_000 + one.total);
+    expect(staff.total).toBe((60_000 + one.total) * 3);
   });
 });

@@ -2,15 +2,12 @@
 import {
   HEALTH_INSURANCE_AVG_DEPENDENTS_FACTOR,
   HEALTH_INSURANCE_EMPLOYER_SHARE,
-  HEALTH_INSURANCE_MAX,
   HEALTH_INSURANCE_RATE,
-  LABOR_INSURANCE_EMPLOYER_SHARE,
   LABOR_INSURANCE_MAX,
-  LABOR_INSURANCE_RATE,
   PENSION_EMPLOYER_MAX_BASE,
   PENSION_EMPLOYER_RATE,
 } from "./rates2026";
-import { matchInsuredBracket } from "./salaryCalc";
+import { laborEmployerPremium, matchHealthBracket, matchInsuredBracket } from "./salaryCalc";
 
 // ─── 월급제 직원 1인당 고용주 부담 ────────────────────────────────────────────
 export type EmployerBurden = {
@@ -21,17 +18,25 @@ export type EmployerBurden = {
 };
 
 export function calcEmployerBurden(monthlySalary: number): EmployerBurden {
-  const bracket = matchInsuredBracket(monthlySalary);
-  const labor = Math.round(
-    Math.min(bracket, LABOR_INSURANCE_MAX) * LABOR_INSURANCE_RATE * LABOR_INSURANCE_EMPLOYER_SHARE
-  );
+  // 勞保 — 官方 분담금액표 조회가 정본. 단일 12.5% 산식은 29,500·38,200·45,800 에서
+  // 1원씩 어긋난다(官方은 11.5% 와 1% 를 각각 반올림해 더한다). v25 판정 참조.
+  const laborBracket = Math.min(matchInsuredBracket(monthlySalary), LABOR_INSURANCE_MAX);
+  const labor = laborEmployerPremium(laborBracket);
+
+  // 健保 — 勞保 급距가 아니라 健保 자체 분급표(58급, 상한 313,000)로 잡는다.
+  // 45,800 이하에서는 두 표가 같아 기존 결과가 그대로다. 초과 구간만 달라진다.
+  // 계수 1.56 = 본인 1 + 平均眷口數 0.56 (官方 負擔金額表 58급 역산으로 확정).
   const health = Math.round(
-    Math.min(bracket, HEALTH_INSURANCE_MAX) *
+    matchHealthBracket(monthlySalary) *
       HEALTH_INSURANCE_RATE *
       HEALTH_INSURANCE_EMPLOYER_SHARE *
       HEALTH_INSURANCE_AVG_DEPENDENTS_FACTOR
   );
-  // 勞退 제교는 실급여 기준 (상한 150,000)
+
+  // 勞退 제교는 실급여 기준 (상한 150,000).
+  // ⚠️ 官方은 月提繳分級表의 급距로 잡는다(32,000 → 33,300). 여기는 아직 실급여
+  //    그대로라 급距에 못 미치는 만큼 과소 계산된다. 신규 발견분이라 v25 에서는
+  //    보고만 하고 고치지 않았다 — content-factory/legal_citations.md 참조.
   const pension = Math.round(Math.min(monthlySalary, PENSION_EMPLOYER_MAX_BASE) * PENSION_EMPLOYER_RATE);
   return { labor, health, pension, total: labor + health + pension };
 }
