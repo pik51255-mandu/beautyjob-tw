@@ -1,7 +1,15 @@
 # -*- coding: utf-8 -*-
-"""제1편 ko 풀버전 생성기 — 문항 원문은 JSON 에서만 인용한다(재타이핑 금지)."""
-import json, sys
-sys.path.insert(0, "/tmp/v21")
+"""제1편 ko 풀버전 생성기 — 문항 원문은 JSON 에서만 인용한다(재타이핑 금지).
+
+해설 원고는 같은 폴더의 commentary.py 에 있고, 이 스크립트는 그 원고에
+JSON 원문을 끼워 넣기만 한다. 사람이 문항을 다시 치는 경로가 없어야
+「원문과 다른 문항」이 구조적으로 불가능하다.
+
+    ~/.venvs/beautyjob-exam/bin/python content-factory/scripts/build_tangfa01.py
+    (리포 루트에서 실행)
+"""
+import json, os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from commentary import GROUPS, C
 
 BANK = json.load(open("content-factory/sources/05_067003A13.json", encoding="utf-8"))
