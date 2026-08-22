@@ -149,6 +149,13 @@ export default function SalaryCalculator() {
   const insuredBracket = state.insuredManual ?? autoBracket;
   const underReported = insuredBracket < Math.min(autoBracket, gross);
 
+  // 트리거에 그대로 찍을 글자. Radix 포털 복제를 쓰지 않고 state 에서 직접 만든다.
+  const insuredLabelText = state.insuredManual === null ? t("insuredAuto") : "";
+  const insuredAmountText =
+    state.insuredManual === null
+      ? `（${autoBracket.toLocaleString("zh-TW")}）`
+      : insuredBracket.toLocaleString("zh-TW");
+
   const deductions = useMemo(
     () =>
       calcDeductions({
@@ -336,14 +343,33 @@ export default function SalaryCalculator() {
             value={state.insuredManual === null ? "auto" : String(state.insuredManual)}
             onValueChange={(v) => set("insuredManual", v === "auto" ? null : Number(v))}
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            {/* SelectValue 에 children 을 준다 — Radix 기본 동작(선택된 SelectItem 의 텍스트를
+                트리거로 포털 복제)을 끄기 위해서다. 기본 동작이면 트리거의 글자가 React 가
+                직접 소유하지 않는 복제 노드라, 번역기가 그 노드를 래퍼로 감싸는 순간
+                낡은 사본이 남아 가로로 증식하고 값도 낡은 급距에 머문다(실측 2026-08-22).
+                여기서 children 을 주면 트리거 글자는 state 에서 파생된 평범한 텍스트가 되어
+                항상 하나이고 항상 최신이다. */}
+            <SelectTrigger>
+              {/* 숫자만 translate="no" — 라벨은 번역되게 둔다. 중국어를 못 읽는 방문자의
+                  접근성은 지키면서, 번역기가 금액 노드를 갈아끼우는 것만 막는다. */}
+              <SelectValue>
+                <span>{insuredLabelText}</span>
+                <span translate="no">{insuredAmountText}</span>
+              </SelectValue>
+            </SelectTrigger>
             <SelectContent>
-              <SelectItem value="auto">{t("insuredAuto")}（{autoBracket.toLocaleString("zh-TW")}）</SelectItem>
+              {/* 항목 텍스트에는 변하는 숫자를 넣지 않는다 — 열려 있는 동안 값이 바뀌면
+                  같은 문제의 씨앗이 된다. 실제 적용 급距는 아래 줄에 따로 보여준다. */}
+              <SelectItem value="auto">{t("insuredAuto")}</SelectItem>
               {INSURED_SALARY_BRACKETS.map((b) => (
                 <SelectItem key={b} value={String(b)}>{b.toLocaleString("zh-TW")}</SelectItem>
               ))}
             </SelectContent>
           </Select>
+          <p className="text-xs text-muted-foreground" data-testid="insured-applied">
+            {t("insuredApplied")}{" "}
+            <strong translate="no">{insuredBracket.toLocaleString("zh-TW")}</strong>
+          </p>
           {underReported && (
             <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-700 leading-relaxed">
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />

@@ -50,6 +50,9 @@ export const toolStrings = {
   // 投保薪資
   insuredLabel: { zh: "投保薪資（自動對應級距，可手動調整）", ko: "투보급여 (자동 매칭, 수동 조정 가능)" },
   insuredAuto: { zh: "自動對應", ko: "자동 매칭" },
+  // 실제 적용되는 급距를 셀렉트 밖에 따로 보여준다 — 트리거 글자와 계산 기준이
+  // 어긋나 보이던 문제(2026-08-22)를 눈으로 대조할 수 있게 하는 줄이다.
+  insuredApplied: { zh: "實際套用投保薪資：", ko: "실제 적용 투보급여:" },
   insuredWarning: {
     zh: "投保薪資低於實際薪資屬高薪低報，將影響您的勞保給付與退休金",
     ko: "투보급여를 실제 급여보다 낮게 신고하는 것은 고신저보(高薪低報)로, 노보 급여와 퇴직금에 불이익이 생깁니다",
@@ -99,10 +102,10 @@ export const toolStrings = {
   // 출력 카드 (C-2.3)
   ocDepositRefundNote: {
     zh: "其中押金 NT$ {amount} 為可退還項目",
-    ko: "이 중 押金 NT$ {amount}은 반환 가능 항목입니다",
+    ko: "이 중 보증금 NT$ {amount}은 반환 가능 항목입니다",
   },
   ocNonRefundable: { zh: "非退還性投資", ko: "소멸성 투자" },
-  ocRefundable: { zh: "可退還（押金）", ko: "반환성 (押金)" },
+  ocRefundable: { zh: "可退還（押金）", ko: "반환성 (보증금)" },
   ocPrepFundTitle: { zh: "建議準備資金", ko: "권장 준비 자금" },
   ocWorkingCapMonths: { zh: "週轉金月數", ko: "운전자금 개월수" },
   ocPrepFundNote: {
@@ -186,7 +189,7 @@ export const toolStrings = {
   // 섹션 D: 캐파 체크
   ocSectionCapacity: { zh: "D. 產能檢查（人力・座位）", ko: "D. 캐파 체크 (인력·좌석)" },
   ocDesigners: { zh: "設計師人數", ko: "디자이너 수" },
-  ocSeats: { zh: "席位（座位）數", ko: "席位(의자) 수" },
+  ocSeats: { zh: "席位（座位）數", ko: "좌석 수" },
   ocDailyHours: { zh: "每日營業時間（小時）", ko: "일 영업시간 (시간)" },
   ocUtilization: { zh: "稼動率（%）", ko: "가동률 (%)" },
   ocMaxDaily: { zh: "每日最大可服務來客數", ko: "일 최대 처리 객수" },
@@ -198,7 +201,7 @@ export const toolStrings = {
   ocScenarioCapacity: { zh: "產能占用", ko: "캐파 대비" },
   ocPaybackNote: {
     zh: "※ 回本計算不含押金（押金為可退還資產）",
-    ko: "※ 회수 계산은 押金 제외 (押金은 반환 자산)",
+    ko: "※ 회수 계산은 보증금 제외 (보증금은 반환 자산)",
   },
 
   // 결과
@@ -291,7 +294,7 @@ export const toolStrings = {
   pcSectionChemicals: { zh: "A. 藥劑清單", ko: "A. 약제 목록" },
   pcChemName: { zh: "藥劑名稱", ko: "약제명" },
   pcChemPrice: { zh: "購入價（NT$）", ko: "구매가 (NT$)" },
-  pcChemTotal: { zh: "總容量（g／ml／支）", ko: "총용량 (g/ml/支)" },
+  pcChemTotal: { zh: "總容量（g／ml／支）", ko: "총용량 (g/ml/개)" },
   pcChemUsage: { zh: "每次用量", ko: "1회 사용량" },
   pcChemCostPerUse: { zh: "每次成本", ko: "1회당 원가" },
   pcChemAdd: { zh: "＋新增藥劑", ko: "＋약제 추가" },
