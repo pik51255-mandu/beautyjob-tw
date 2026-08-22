@@ -1,3 +1,6 @@
+// ⚠️ 이름은 Manus지만 현행 인증의 코어다. 삭제 금지.
+// sdk.ts가 이 타입에 의존하며, 이메일·LINE JWT 발급(routers.ts:701,738)과
+// 전 요청 인증(context.ts:17)이 여기서 나온다. 파일명 변경은 별도 작업.
 // WebDev Auth TypeScript types
 // Auto-generated from protobuf definitions
 // Generated on: 2025-09-24T05:57:57.338Z

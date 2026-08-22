@@ -38,8 +38,9 @@ describe("robots.txt", () => {
     expect(buildRobotsTxt("https://b.tw")).toContain("Sitemap: https://b.tw/sitemap.xml");
   });
 
-  it("크롤 허용과 색인 차단이 공존하는 의도를 문서화한다", () => {
-    expect(txt).toContain("noindex");
+  it("색인이 개시됐음을 문서화한다 — noindex 안내가 남아 있으면 안 된다 (v18 1-2)", () => {
+    expect(txt).not.toContain("noindex");
+    expect(txt).toContain("索引已開放");
   });
 });
 

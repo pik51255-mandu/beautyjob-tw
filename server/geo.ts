@@ -4,10 +4,9 @@
  * 원칙: 실제 페이지에 존재하는 콘텐츠만 스키마로 선언한다.
  * FAQPage 처럼 실물 Q&A 가 없는 타입은 넣지 않는다.
  *
- * 색인 정책: 도메인 연결 전이므로 전 페이지 noindex 를 유지한다.
- * robots.txt 는 "크롤 허용 + 색인 차단" 조합이며, 이는 의도된 상태다 —
- * AI 검색 봇이 크롤 규칙 때문에 막히지 않도록 미리 열어두되,
- * 실제 색인은 meta robots 로 차단한다. 해제는 도메인 연결 블록에서 일괄.
+ * 색인 정책: 2026-08-22 도메인(www.beautyjob.tw) 연결 완료로 **색인 개시**.
+ * robots.txt 는 종전대로 크롤 전면 허용이고, meta robots 의 noindex 는 해제됐다.
+ * 관리 경로(DISALLOWED_PATHS)만 계속 막는다.
  */
 
 // M10: 원천이 둘이고 vintage 가 다르므로 따로 둔다. 월간 갱신 시 둘 다 갱신한다.
@@ -61,7 +60,7 @@ export function buildRobotsTxt(origin: string): string {
   const general = ["User-agent: *", "Allow: /", disallow].join("\n");
 
   return `# 檢索與 AI 檢索爬蟲：全面允許
-# 個別頁面的索引與否由各頁 meta robots 決定（目前為 noindex，網域接上後統一解除）
+# 個別頁面的索引與否由各頁 meta robots 決定（網域已接上，索引已開放）
 ${aiBlocks}
 
 ${general}
@@ -230,10 +229,17 @@ export async function pingIndexNow(
  * 없으면 호스트 형식을 검증한 뒤 프로토콜을 https 로 고정한다(로컬 개발 제외).
  */
 /** 운영 기본 호스트. SITE_BASE_URL 이 없고 Host 가 미허용일 때의 안전한 귀착점. */
-export const DEFAULT_ORIGIN = "https://beautyjob-tw.onrender.com";
+export const DEFAULT_ORIGIN = "https://www.beautyjob.tw";
 
 /** 허용 호스트. 도메인 연결 시 여기(또는 SITE_BASE_URL)에 새 도메인을 추가한다. */
-export const ALLOWED_HOSTS = ["beautyjob-tw.onrender.com"];
+export const ALLOWED_HOSTS = [
+  "www.beautyjob.tw",
+  // apex 는 Render 가 edge 에서 www 로 301 하지만, 직접 도달하는 경로가 생겨도
+  // 안전한 귀착점을 갖도록 남겨둔다.
+  "beautyjob.tw",
+  // Render 원본. 도메인 장애 시 우회 점검 경로로 계속 쓴다.
+  "beautyjob-tw.onrender.com",
+];
 
 const LOCAL_RE = /^(localhost|127\.0\.0\.1)(:\d{1,5})?$/i;
 

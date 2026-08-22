@@ -8,7 +8,7 @@
  *  - 시각 breadcrumb 와 BreadcrumbList 가 일치하는가
  *  - ItemList 의 numberOfItems 가 실제 항목 수와 맞는가
  *  - Dataset 의 출처 필드(creator/sourceOrganization/isBasedOn/dateModified)가 채워졌는가
- *  - 전 페이지 noindex 유지
+ *  - 전 페이지 색인 개시(noindex 아님)
  *  - 실콘텐츠 없는 스키마(FAQPage 등)가 섞이지 않았는가
  */
 const BASE = process.env.BASE || "http://localhost:5288";
@@ -104,7 +104,7 @@ for (const page of PAGES) {
     ok("Dataset→Organization 참조 유효", ds.publisher?.["@id"] === org["@id"], `${ds.publisher?.["@id"]} vs ${org["@id"]}`);
   }
 
-  ok("noindex 유지", /name="robots" content="noindex/.test(html));
+  ok("색인 개시(noindex 아님)", !/name="robots" content="noindex/.test(html));
 }
 
 // robots.txt

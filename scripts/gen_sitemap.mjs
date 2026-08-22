@@ -1,15 +1,14 @@
 /**
  * sitemap.xml 생성 (생성만 — 어디에도 제출하지 않는다)
  *
- * 신규 살롱 페이지는 전부 noindex 상태라 색인되지 않는다. 이 파일은 도메인 연결
- * 블록에서 noindex 를 일괄 해제한 뒤 제출하기 위한 준비물이다.
+ * 2026-08-22 도메인 연결 + noindex 해제 완료(v18 1-2). 이 파일은 그대로 제출 가능하다.
  */
 import fs from "node:fs";
 import path from "node:path";
 import mysql from "mysql2/promise";
 import { DISTRICT_SLUGS } from "../shared/districts.ts";
 
-const BASE = process.env.SITE_BASE_URL || "https://beautyjob-tw.onrender.com";
+const BASE = process.env.SITE_BASE_URL || "https://www.beautyjob.tw";
 const OUT = path.resolve("client/public/sitemap.xml");
 
 const raw = process.env.DATABASE_URL;
@@ -52,4 +51,4 @@ ${urls.map((x) => `  <url>
 fs.writeFileSync(OUT, xml);
 console.log(`[sitemap] ${urls.length} URL → ${OUT}`);
 console.log(`[sitemap] 내역: 고정 3 + 행정구 ${districtRows.length} + 살롱 ${salonRows.length}`);
-console.log("[sitemap] 주의: 신규 페이지는 noindex 상태이며 이 파일은 제출하지 않는다.");
+console.log("[sitemap] 색인 개시 완료 — 이 파일은 검색엔진에 제출 가능하다.");
