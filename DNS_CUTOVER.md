@@ -103,9 +103,52 @@ canonical·sitemap·origin 은 전부 www 로 통일한다. 열린 질문이 아
 
 ## 7. 아직 남은 것
 
-- **IndexNow** — `server/geo.ts` `INDEXNOW_ENABLED = false` 유지 중.
-  켜면 외부(api.indexnow.org)로 핑을 보내므로 선후 승인 후 켠다.
+- ~~**IndexNow**~~ — 2026-08-22(v19) **활성화 완료.** `INDEXNOW_ENABLED = true`.
+  키 검증 파일 `/{KEY}.txt` 가 라이브 200 이고 페이지가 `index, follow` 라 전제 조건 충족.
 - **LINE 로그인** — `shared/const.ts` 에서 잠겨 있다. LINE 콘솔 콜백 URL 등록이 필요하다.
 - **애널리틱스 엔드포인트** — 미설정. umami 인스턴스 선정·비용은 선후 결정 사항.
 - **Manus 계정·프로젝트·OAuth 앱** — 손대지 않았다. 도메인이 넘어왔으므로
   `beautyjob.tw` 방문자에게는 더 이상 보이지 않는다. 정리는 선후가 직접 한다.
+
+---
+
+## 8. Google Search Console 등록 (v19 1번) — 절차
+
+> 등록 자체는 **선후 + Cowork** 담당. 여기 적은 건 코드 쪽 몫이다.
+
+### 8-1. 소유권 확인 방식 — **HTML 메타 태그**를 쓴다
+
+| 방식 | 이 프로젝트에 맞나 |
+|---|---|
+| **HTML 메타 태그** | ✅ **권장.** `client/index.html` `<head>` 에 한 줄 넣고 배포하면 끝. SPA 홈이 정적 `index.html` 을 그대로 내려주므로 GSC 크롤러가 바로 읽는다 |
+| HTML 파일 업로드 | △ 가능하지만 번거롭다. `client/public/` 에 파일을 넣어야 하고, 그 폴더는 지금 `sitemap.xml` 하나만 두는 규율로 관리 중이다 |
+| DNS TXT | ✗ 후순위. GoDaddy 재접근이 필요하고, 도메인 전환이 막 끝난 직후라 레코드를 또 건드릴 이유가 없다 |
+
+### 8-2. 태그를 받으면 하는 일 (Code 몫)
+
+1. 선후가 GSC 「소유권 확인 → HTML 태그」에서 받은 한 줄을 전달한다. 형태:
+   ```html
+   <meta name="google-site-verification" content="…" />
+   ```
+2. `client/index.html` 의 `<head>` 안, `<link rel="canonical">` **바로 위**에 넣는다.
+3. `npm run build` → 커밋 → `main` 푸시 (= Render 자동배포).
+4. 배포 반영 확인 — **코드 grep 이 아니라 라이브 응답으로**:
+   ```bash
+   curl -sS https://www.beautyjob.tw/ | grep google-site-verification
+   ```
+5. 선후가 GSC 에서 「확인」을 누른다.
+6. 확인이 끝나면 사이트맵 제출: GSC → Sitemaps → `sitemap.xml`
+
+### 8-3. 사이트맵 제출 준비 상태 (실측)
+
+```
+$ curl -sSI https://www.beautyjob.tw/sitemap.xml
+→ 200 · application/xml · 588,556 bytes
+
+<loc> 개수: 3,422
+구도메인(onrender) 잔존: 0
+첫 항목: <loc>https://www.beautyjob.tw/</loc>
+```
+
+**제출 준비 완료.** 페이지는 `index, follow` 이고 robots.txt 도 전면 허용이라
+사이트맵을 넣는 즉시 크롤이 걸린다.

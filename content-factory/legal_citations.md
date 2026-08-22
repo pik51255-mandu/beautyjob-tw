@@ -21,13 +21,14 @@
 
 | 파일 | 인용 법규명 | 인용 수치 | 최종확인일 | 상태 | 근거 |
 |---|---|---|---|---|---|
-| `drafts/theory/13-reducing-agents-compared.md` | 化粧品成分使用限制表 | TGA 燙髮產品 8%(一般)·11%(專業), pH 7.0～9.5 / 沖洗之髮用產品 2% / 硫醇乙酸酯類 8%·11%, pH 6.0～9.5 / 「含Thioglycolate」 표시 | 2026-08-21 | **현행** | 지시서 v14 제공 원문 (Thioglycolic acid CAS 68-11-1, 표 편번 167) |
+| `drafts/theory/13-reducing-agents-compared.md` | 化粧品成分使用限制表 **編號33·168** | TGA(編號33) 燙髮產品 8%(一般)·11%(專業), pH 7.0～9.5 / **立即**沖洗之髮用產品 2%, pH 7.0～9.5 / 硫醇乙酸酯類(編號**168**) 8%·11%, pH 6.0～9.5 / 「含Thioglycolate」 표시 | 2026-08-22 | **현행** | 官方 원문 대조 완료(v19). CAS 68-11-1. **編號은 33(TGA)·168(esters)이다 — 지시서 v14~v18 의 「esters 編號167」은 오기이고, 167은 過氧化氫이다.** 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=199 (食藥署 開放資料 · 衛授食字第1131602014號) |
 | `drafts/theory/13-reducing-agents-compared.md` | 特定用途化粧品成分名稱及使用限制表 | — (각주에서 이관 사실만 언급) | 2026-08-21 | **폐지** | 113.05.30 폐지 衛授食字第1131602017號, 113.07.01 시행 → 〈化粧品成分使用限制表〉로 이관 |
 | `drafts/exam/exam-perm-01.md` | 化粧品成分使用限制表 | 燙髮產品 TGA pH 7.0～9.5 (一般·專業 공통) | 2026-08-21 | **현행** | 위와 같음 |
 | `drafts/exam-ko/exam-perm-01-ko.md` | 化粧品成分使用限制表 | 燙髮產品 TGA pH 7.0～9.5 (一般·專業 공통) | 2026-08-21 | **현행** | 위와 같음 |
-| `drafts/theory/10-patch-test-guide.md` | 化粧品成分使用限制表 編號65·66·166 | PPD **2%(以free base計)** ✅ / 阿摩尼亞 **6%(以NH3計)** ✅ / 對甲苯二胺(Toluene-2,5-diamine) **2%(free base)·3.6%(sulfate)** ⚠️ | 2026-08-22 | **현행(단 PTD 수치 불일치)** | 官方 원문 확인. **본문의 「對甲苯二胺 4%」는 현행 표와 다르다** — 지시 대기 중, 임의 수정 금지(v18 2-3). 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=199 (食藥署 開放資料 · 衛授食字第1131602014號 113.05.30 공고, 113.07.01 시행) |
+| `drafts/theory/10-patch-test-guide.md` | 化粧品成分使用限制表 編號65·66·166 | PPD **2%(以free base計)** / 阿摩尼亞 **6%(以NH3計)** / 對甲苯二胺 **2%(free base)·3.6%(sulfate salt)** | 2026-08-22 | **현행** | 官方 원문 일치(v19 수정 완료). 본문의 4% 를 「2% 以下（以 free base 計）／硫酸鹽 3.6% 以下」 병기로 정정 — 시판 라벨이 황산염 형태가 많아 단독 2% 표기는 현장 오독을 부른다. 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=199 (食藥署 開放資料 · 衛授食字第1131602014號) |
 | `drafts/theory/10-patch-test-guide.md` | 特定用途化粧品 / 產品資訊檔案(PIF) | 상장 전 제품등록·PIF 수립 | — | **미확인** | 未確認 |
-| `drafts/theory/26-stylist-occupational-safety.md` | 化粧品成分使用限制表 編號65·66·166 | PPD 2% ✅ / 阿摩尼亞 6% ✅ / 對甲苯二胺 4% ⚠️ / 間苯二胺 2009 금지 (미확인) | 2026-08-22 | **현행(단 PTD 불일치·間苯二胺 미확인)** | #10 과 동일 건. 間苯二胺(m-Phenylenediamine)의 금지 시점은 「化粧品禁止使用成分表」쪽이라 이 표에서는 확인되지 않는다 — 별도 확인 필요. 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=199 (食藥署 開放資料 · 衛授食字第1131602014號 113.05.30 공고, 113.07.01 시행) |
+| `drafts/theory/26-stylist-occupational-safety.md` | 化粧品成分使用限制表 編號65·66·166 | PPD 2% / 阿摩尼亞 6% / 對甲苯二胺 2%(free base)·3.6%(sulfate) | 2026-08-22 | **현행** | #10 과 동일 건, v19 에서 함께 정정. 間苯二胺 2009 금지는 이 표 소관이 아니라 별도 행으로 분리. 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=199 (食藥署 開放資料 · 衛授食字第1131602014號) |
+| `drafts/theory/30-cosmetic-ad-regulations.md` | 化粧品成分使用限制表 編號65·66·166 | PPD 2% / 阿摩尼亞 6% / 對甲苯二胺 2%(free base)·3.6%(sulfate) | 2026-08-22 | **현행** | **v19 지시서 목록에는 없었으나 같은 4% 오류가 있어 함께 정정했다.** 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=199 (食藥署 開放資料 · 衛授食字第1131602014號) |
 | `drafts/theory/26-stylist-occupational-safety.md` | 特定用途化粧品 | 染髮劑·燙髮劑의 분류 | — | **미확인** | 未確認. #23·#25·#30 과 같은 근거를 공유한다. 성분 한도 자체는 위 행에서 확인 완료 |
 | `drafts/theory/30-cosmetic-ad-regulations.md` | 化粧品衛生安全管理法 第20條 | 虛偽誇大 4萬～20萬 / 醫療效能 60萬～500萬 | 2026-08-22 | **현행** | 官方 조문 확인 — 본문 수치 일치 ✅ 「違反第十條第一項…處新臺幣四萬元以上二十萬元以下罰鍰」「違反同條第二項規定者，處新臺幣六十萬元以上五百萬元以下罰鍰」. 근거: https://law.moj.gov.tw/LawClass/LawSingle.aspx?Pcode=L0030013&FLNO=20 (全國法規資料庫 · 化粧品衛生安全管理法 第20條) |
 | `drafts/theory/30-cosmetic-ad-regulations.md` | 化粧品衛生安全管理法 | 2018 전면개정, 2019.07.01 시행 / 化粧品 정의 5가지 용도 | — | **미확인** | 未確認 |
@@ -52,14 +53,17 @@
 > 2026-08-22(v18) 6건 확인 완료 — ① 過氧化氫 12% ② PPD·PTD·阿摩尼亞(#10·#26)
 > ③ 第20條 罰鍰(#30·#23·#25). **확인 과정에서 불일치 2건이 나왔다(아래).**
 
-## ⚠️ 불일치 — 본문 수정 지시 대기 중
+## ✅ 불일치 — 2026-08-22(v19) 해소 완료
 
-| 대상 | 본문 | 현행 官方 원문 |
+| 대상 | 수정 전 | 수정 후 (官方 기준) |
 |---|---|---|
-| `#10`·`#26` 對甲苯二胺 | **4% 以下** | **2%(以free base計) / 3.6%(以sulfate salt計)** (編號66 Toluene-2,5-diamine) |
-| `#13` TGA 沖洗 행 用途名 | 沖洗之髮用產品 | **立即**沖洗之髮用產品 (編號33 (b)) — 수치·pH 는 일치 |
+| `#10`·`#26`·`#30` 對甲苯二胺 | 4% 以下 | **2% 以下（以 free base 計）／硫酸鹽 3.6% 以下** (編號66) |
+| `#13` TGA 沖洗 행 用途名 | 沖洗之髮用產品 | **立即**沖洗之髮用產品 (編號33 (b)) — 수치·pH 는 유지 |
 
-v18 2-3 에 따라 **임의 수정하지 않는다.** 지시를 받고 고친다.
+병기를 택한 이유: 시판 라벨은 **황산염 형태 표기가 흔해서** 단독 「2%」만 쓰면
+3.6% 라벨을 보고 "초과"라고 오독한다. 두 숫자를 같이 적어야 현장에서 안 틀린다.
+
+`#30` 은 v19 지시서 목록(#10·#26)에 없었지만 **같은 4% 오류가 있어 함께 고쳤다.**
 
 ## 확인이 필요한 것 (우선순위)
 
