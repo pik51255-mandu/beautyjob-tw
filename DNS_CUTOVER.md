@@ -89,8 +89,8 @@ www 는 CNAME(`beautyjob-tw.onrender.com`) 으로 갈렸다.
 
 | 항목 | 상태 |
 |---|---|
-| `meta robots` noindex 해제 | 완료 — `server/salonPages.ts:73` `index, follow` |
-| robots.txt 안내 문구 | 완료 — `server/geo.ts` 「網域已接上，索引已開放」 |
+| ~~`meta robots` noindex 해제~~ | **v27 에서 되돌렸다** — `SITE_PUBLIC=false` 로 전 페이지 `noindex, follow`. 재공개는 선후 승인 시 그 한 줄 |
+| robots.txt 안내 문구 | v27 에서 「索引已開放」 삭제. 크롤 허용은 **유지**(막으면 noindex 를 못 읽는다) |
 | `server/geo.ts` `DEFAULT_ORIGIN` | 완료 — `https://www.beautyjob.tw` |
 | `server/geo.ts` `ALLOWED_HOSTS` | 완료 — www / apex / onrender 3종 |
 | `client/index.html` canonical·og:url | 완료 — `https://www.beautyjob.tw/` |
@@ -104,7 +104,8 @@ canonical·sitemap·origin 은 전부 www 로 통일한다. 열린 질문이 아
 ## 7. 아직 남은 것
 
 - ~~**IndexNow**~~ — 2026-08-22(v19) **활성화 완료.** `INDEXNOW_ENABLED = true`.
-  키 검증 파일 `/{KEY}.txt` 가 라이브 200 이고 페이지가 `index, follow` 라 전제 조건 충족.
+  ⚠️ **v27 에서 비활성**(`INDEXNOW_ENABLED = SITE_PUBLIC`). 키 검증 파일은 계속 200 으로 서빙한다 —
+  재공개 때 검증을 다시 받지 않아도 되게. 핑은 재공개와 동시에 되살아난다.
 - **LINE 로그인** — `shared/const.ts` 에서 잠겨 있다. LINE 콘솔 콜백 URL 등록이 필요하다.
 - **애널리틱스 엔드포인트** — 미설정. umami 인스턴스 선정·비용은 선후 결정 사항.
 - **Manus 계정·프로젝트·OAuth 앱** — 손대지 않았다. 도메인이 넘어왔으므로
@@ -150,5 +151,13 @@ $ curl -sSI https://www.beautyjob.tw/sitemap.xml
 첫 항목: <loc>https://www.beautyjob.tw/</loc>
 ```
 
-**제출 준비 완료.** 페이지는 `index, follow` 이고 robots.txt 도 전면 허용이라
+⚠️ **v27: 제출 보류.** 현재 `SITE_PUBLIC=false` 라 페이지가 `noindex` 다.
+noindex 인 채로 sitemap 을 제출하면 「색인해달라」와 「하지 마라」를 동시에 보내는 꼴이다.
+**GSC 등록·sitemap 제출은 재공개 시점으로 이월한다.**
+
+<details><summary>재공개 후 적용할 절차 (당시 기록)</summary>
+
+페이지는 `index, follow` 이고 robots.txt 도 전면 허용이라
 사이트맵을 넣는 즉시 크롤이 걸린다.
+
+</details>

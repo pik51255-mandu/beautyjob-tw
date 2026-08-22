@@ -846,3 +846,74 @@ v26 변경을 5축(낡은 숫자·코드 정합성·官方 대조·동종 결함
   이 파일의 「문서용 상수」 관행이라 기각했다.
 - `toolStrings.ratesNote` 의 요율 숫자(29,500·12.5%·5.17%)는 여전히 리터럴이다.
   연도만 메타에서 파생된다.
+
+---
+
+## v27 — 사이트 재비공개 (2026-08-22)
+
+**판정: 재비공개 — 재공개는 선후 승인 시 SITE_PUBLIC=true 단일 변경으로만 실행. 세션 임의 공개 금지 (v27)**
+
+색인 개방은 철회됐다. **보완 완료 후 재공개**가 확정 방침이다.
+사이트 접속 자체는 유지한다(선후 검수·지인 확인용) — 닫는 것은 **검색 노출뿐**이다.
+
+### 스위치
+
+`shared/const.ts` 의 **`SITE_PUBLIC`** 한 줄이 전부를 제어한다.
+
+| 대상 | 파생 방식 |
+|---|---|
+| SPA `index.html` meta robots | `vite.config.ts` 의 `vitePluginSiteRobots` 가 **빌드 시** `<head>` 맨 앞에 주입 |
+| 서버 렌더 페이지 meta robots | `server/salonPages.ts` 가 `SITE_ROBOTS_CONTENT` 로 찍는다 |
+| 도구 페이지 6곳 | `client/src/lib/siteRobots.ts` 의 `applyRobotsMeta()` 경유 |
+| IndexNow | `server/geo.ts` 의 `INDEXNOW_ENABLED = SITE_PUBLIC` |
+| 테스트 기대값 | `server/geo.test.ts` 가 전부 플래그에서 파생 |
+
+**빌드 시 주입인 이유:** 크롤러가 처음 받는 건 원본 HTML 이다. JS 로 붙이면
+렌더링을 돌리는 봇만 보고 그마저 타이밍에 걸린다. 원본에 박혀 있으면 즉시 읽힌다.
+
+### 건드리지 않은 것 (의도적)
+
+| 대상 | 이유 |
+|---|---|
+| `robots.txt` 크롤 허용 | **막으면 봇이 각 페이지의 noindex 를 읽지 못해 오히려 색인이 남는다.** 크롤은 열고 색인만 닫는다 |
+| `sitemap.xml` | 재공개 시 그대로 재사용 |
+| IndexNow 키 파일 서빙 | 재공개 때 키 검증을 다시 받지 않아도 되게 |
+| `?lang=ko` 6곳 로직 | 지시대로 별개 유지. `SITE_PUBLIC=true` 로 돌리면 원래 동작 그대로 복귀 |
+| OG·트위터 카드·canonical | SNS 공유 카드용이라 색인과 무관 |
+
+### 함정 하나 — 도구 6곳이 메타를 벗겨냈다
+
+도구 페이지 6곳은 `?lang=ko` 가 아니면 robots 메타를 **`remove()`** 했다.
+전역 noindex 를 넣어도 그 remove 가 벗겨내, **색인을 닫았는데 도구 페이지만 열리는**
+상태가 됐을 것이다. 그래서 `siteRobots.ts` 로 모았다 —
+`SITE_PUBLIC=false` 면 페이지가 뭘 원하든 사이트 값을 유지하고,
+언마운트 정리도 「지우기」가 아니라 「사이트 기본값으로 되돌리기」다.
+
+### 재공개 절차 (승인 시)
+
+1. `shared/const.ts` 의 `SITE_PUBLIC` 을 `true` 로 — **이게 전부다**
+2. `npx vite build` → `dist/public/index.html` 에 `index, follow` 확인
+3. 배포 후 라이브 실측
+4. 그 다음에야 GSC 등록·sitemap 제출
+
+**실증(v27 감사):** 플래그만 뒤집고 아무것도 안 고쳤을 때 —
+`tsc` 0 errors · **328/328 통과(실패 0)** · 빌드 HTML `noindex, follow` → `index, follow` ·
+게이트 스크립트(`validate_jsonld.mjs`)도 자동 추종. 되돌리면 그대로 복귀한다.
+
+> **트립와이어를 두지 않은 이유.** 처음엔 `server/geo.test.ts` 에
+> `expect(SITE_PUBLIC).toBe(false)` 를 박아 임의 공개를 막으려 했다. 그런데 그러면
+> 재공개가 「한 줄」이 아니라 「두 줄」이 되어 v27 요구를 정면으로 어긴다.
+> **임의 공개를 막는 것은 테스트가 아니라 절차다** — 위 판정(선후 승인 필수)이 그 자리고,
+> 감사에서 이 모순이 blocker 로 잡혀 트립와이어를 걷어냈다.
+
+### 유의 — 이미 색인된 페이지
+
+noindex 는 「새로 넣지 마라」이자 「있던 것도 빼라」이지만, 봇이 다시 크롤해야 반영된다.
+**이미 색인된 페이지가 검색 결과에서 빠지는 데는 시간이 걸린다.** robots.txt 크롤을
+열어둔 이유가 이것이다 — 막으면 봇이 noindex 를 읽으러 오지도 못해 오히려 더 오래 남는다.
+
+### 이월 (v27 4번)
+
+- GSC 등록·sitemap 제출 → **재공개 시점으로 이월**
+- umami → 공개 여부와 무관. 선후 가입 시 진행 (계속 보류 가능)
+- Threads 발사·사이트 링크 노출 → 전부 선후 타이밍
