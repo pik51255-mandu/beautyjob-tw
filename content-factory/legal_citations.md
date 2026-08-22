@@ -26,32 +26,40 @@
 | `drafts/exam/exam-perm-01.md` | 化粧品成分使用限制表 | 燙髮產品 TGA pH 7.0～9.5 (一般·專業 공통) | 2026-08-21 | **현행** | 위와 같음 |
 | `drafts/exam-ko/exam-perm-01-ko.md` | 化粧品成分使用限制表 | 燙髮產品 TGA pH 7.0～9.5 (一般·專業 공통) | 2026-08-21 | **현행** | 위와 같음 |
 | `drafts/theory/10-patch-test-guide.md` | 化粧品成分使用限制表 編號65·66·166 | PPD **2%(以free base計)** / 阿摩尼亞 **6%(以NH3計)** / 對甲苯二胺 **2%(free base)·3.6%(sulfate salt)** | 2026-08-22 | **현행** | 官方 원문 일치(v19 수정 완료). 본문의 4% 를 「2% 以下（以 free base 計）／硫酸鹽 3.6% 以下」 병기로 정정 — 시판 라벨이 황산염 형태가 많아 단독 2% 표기는 현장 오독을 부른다. 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=199 (食藥署 開放資料 · 衛授食字第1131602014號) |
-| `drafts/theory/10-patch-test-guide.md` | 特定用途化粧品 / 產品資訊檔案(PIF) | 상장 전 제품등록·PIF 수립 | — | **미확인** | 未確認 |
+| `drafts/theory/10-patch-test-guide.md` | 特定用途化粧品 / 產品資訊檔案(PIF) | 상장 전 產品登錄 + PIF 수립 | 2026-08-22 | **현행** | 化粧品衛生安全管理法 第4條第1項 + PIF 공고. 染髮·燙髮은 **2024-07-01(1단계)** 부터 적용이라 현재 시점 서술로 정확. 근거: https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=L0030013 (全國法規資料庫, 修正日期 民國107年5月2日) / https://www.fda.gov.tw/tc/newsContent.aspx?cid=3&id=30614 (衛授食字第1131604608號, 113.07.01 생효) |
 | `drafts/theory/26-stylist-occupational-safety.md` | 化粧品成分使用限制表 編號65·66·166 | PPD 2% / 阿摩尼亞 6% / 對甲苯二胺 2%(free base)·3.6%(sulfate) | 2026-08-22 | **현행** | #10 과 동일 건, v19 에서 함께 정정. 間苯二胺 2009 금지는 이 표 소관이 아니라 별도 행으로 분리. 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=199 (食藥署 開放資料 · 衛授食字第1131602014號) |
+| `drafts/theory/26-stylist-occupational-safety.md`, `drafts/theory/10-patch-test-guide.md` | 化粧品禁止使用成分表 編號300 | 間苯二胺(m-Phenylenediamine and its salts) CAS 108-45-2/541-69-5/541-70-8 — **금지** | 2026-08-22 | **현행(단 「2009년부터」 시점은 미확인)** | 금지 사실은 官方 금지표 원문으로 확정. 다만 표에 시행 시점 필드가 없어 「2009 起」는 별도 근거가 필요하다. 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=203 (食藥署 開放資料 「化粧品禁止使用成分表」) |
 | `drafts/theory/30-cosmetic-ad-regulations.md` | 化粧品成分使用限制表 編號65·66·166 | PPD 2% / 阿摩尼亞 6% / 對甲苯二胺 2%(free base)·3.6%(sulfate) | 2026-08-22 | **현행** | **v19 지시서 목록에는 없었으나 같은 4% 오류가 있어 함께 정정했다.** 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=199 (食藥署 開放資料 · 衛授食字第1131602014號) |
-| `drafts/theory/26-stylist-occupational-safety.md` | 特定用途化粧品 | 染髮劑·燙髮劑의 분류 | — | **미확인** | 未確認. #23·#25·#30 과 같은 근거를 공유한다. 성분 한도 자체는 위 행에서 확인 완료 |
+| `drafts/theory/26-stylist-occupational-safety.md` | 特定用途化粧品 | 染髮劑·燙髮劑의 분류 | 2026-08-22 | **현행** | 官方 PIF 공고가 1단계 대상을 「防曬、染髮、燙髮、止汗制臭、居家牙齒美白」로 명시 — 染髮·燙髮이 特定用途化粧品 임이 확인된다. 근거: https://www.fda.gov.tw/tc/newsContent.aspx?cid=3&id=30614 (衛授食字第1131604608號, 113.07.01 생효) |
 | `drafts/theory/30-cosmetic-ad-regulations.md` | 化粧品衛生安全管理法 第20條 | 虛偽誇大 4萬～20萬 / 醫療效能 60萬～500萬 | 2026-08-22 | **현행** | 官方 조문 확인 — 본문 수치 일치 ✅ 「違反第十條第一項…處新臺幣四萬元以上二十萬元以下罰鍰」「違反同條第二項規定者，處新臺幣六十萬元以上五百萬元以下罰鍰」. 근거: https://law.moj.gov.tw/LawClass/LawSingle.aspx?Pcode=L0030013&FLNO=20 (全國法規資料庫 · 化粧品衛生安全管理法 第20條) |
-| `drafts/theory/30-cosmetic-ad-regulations.md` | 化粧品衛生安全管理法 | 2018 전면개정, 2019.07.01 시행 / 化粧品 정의 5가지 용도 | — | **미확인** | 未確認 |
-| `drafts/theory/30-cosmetic-ad-regulations.md` | PIF / GMP(ISO 22716) | 特定用途化粧品 3단계 시행 일정 | — | **미확인** | 未確認 |
-| `drafts/theory/30-cosmetic-ad-regulations.md` | 化粧品成分使用限制表 | 성분 한도 일반 언급 | — | **미확인** | 未確認 |
+| `drafts/theory/30-cosmetic-ad-regulations.md` | 化粧品衛生安全管理法 第3條 | 2018 전면개정 / 2019.07.01 시행 / 化粧品 정의 5가지 용도 | 2026-08-22 | **현행** | 세 가지 다 일치. 修正日期 **民國107年5月2日**(=2018-05-02). 施行 **108年7月1日**(=2019-07-01, 標示 규정만 110.07.01). 第3條 「潤澤髮膚、刺激嗅覺、改善體味、修飾容貌或清潔身體」 = **5가지**. 근거: https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=L0030013 (全國法規資料庫, 修正日期 民國107年5月2日) / https://www.mohw.gov.tw/cp-4256-48109-1.html (衛福部 「108年7月1日正式上路」) |
+| `drafts/theory/30-cosmetic-ad-regulations.md` | PIF / GMP(ISO 22716) | 3단계 — 2024/7/1 防曬·染髮·燙髮·止汗制臭·居家牙齒美白 / 2025/7/1 嬰兒用·唇用·眼部用·非藥用牙膏·漱口水 / 2026/7/1 其餘(手工皂 제외) | 2026-08-22 | **현행** | **본문 표 3행이 공고와 자구까지 일치.** 근거: https://www.fda.gov.tw/tc/newsContent.aspx?cid=3&id=30614 (衛授食字第1131604608號, 113.07.01 생효) |
+| `drafts/theory/30-cosmetic-ad-regulations.md` | 化粧品成分使用限制表 編號65·66·166 | PPD 2% / 對甲苯二胺 2%·3.6% / 阿摩尼亞 6% | 2026-08-22 | **현행** | v19 에서 對甲苯二胺 4% → 병기로 정정 완료. 근거: 食藥署 開放資料 InfoId=199 |
 | `drafts/theory/23-bond-builder-chemistry.md` | 化粧品衛生安全管理法 第20條 | 4萬～20萬 / 60萬～500萬 | 2026-08-22 | **현행** | 官方 조문 확인 — 본문 수치 일치 ✅ 「違反第十條第一項…處新臺幣四萬元以上二十萬元以下罰鍰」「違反同條第二項規定者，處新臺幣六十萬元以上五百萬元以下罰鍰」. 근거: https://law.moj.gov.tw/LawClass/LawSingle.aspx?Pcode=L0030013&FLNO=20 (全國法規資料庫 · 化粧品衛生安全管理法 第20條) |
-| `drafts/theory/25-glyoxylic-acid-truth.md` | 化粧品衛生安全管理法 第20條 | 4萬～20萬 / 60萬～500萬 / 2024.07.01 이후 엄격 적용 | 2026-08-22 | **현행** | 官方 조문 확인 — 본문 수치 일치 ✅ (단 「2024.07.01 이후 엄격 적용」은 조문에 없는 서술 — 미확인) 「違反第十條第一項…處新臺幣四萬元以上二十萬元以下罰鍰」「違反同條第二項規定者，處新臺幣六十萬元以上五百萬元以下罰鍰」. 근거: https://law.moj.gov.tw/LawClass/LawSingle.aspx?Pcode=L0030013&FLNO=20 (全國法規資料庫 · 化粧品衛生安全管理法 第20條) |
-| `drafts/theory/23-bond-builder-chemistry.md` | 特定用途化粧品 | 染髮劑·燙髮劑의 분류 | — | **미확인** | 未確認. 분류 자체는 #30 과 같은 근거를 공유 |
-| `drafts/theory/25-glyoxylic-acid-truth.md` | 特定用途化粧品 | 染髮劑·燙髮劑의 분류 | — | **미확인** | 未確認 |
-| `drafts/theory/30-cosmetic-ad-regulations.md` | 特定用途化粧品 | 染髮劑·燙髮劑의 분류 (구 含藥化粧品) | — | **미확인** | 未確認 |
+| `drafts/theory/25-glyoxylic-acid-truth.md` | 化粧品衛生安全管理法 第20條 | 4萬～20萬 / 60萬～500萬 / 2024.07.01 이후 엄격 적용 | 2026-08-22 | **현행** | 官方 조문 확인 — 본문 수치 일치 ✅ **⚠️ 「2024.07.01 이후 從嚴適用」은 근거를 찾지 못했다.** 2024-07-01 에 바뀐 것은 ①〈化粧品成分使用限制表〉개정 시행 ②PIF 1단계 시행 ③第5條 特定用途化粧品 查驗登記 停止適用(施行 5년 경과)이고, **罰則이 강화됐다는 官方 근거는 없다.** 수정 지시 대기 「違反第十條第一項…處新臺幣四萬元以上二十萬元以下罰鍰」「違反同條第二項規定者，處新臺幣六十萬元以上五百萬元以下罰鍰」. 근거: https://law.moj.gov.tw/LawClass/LawSingle.aspx?Pcode=L0030013&FLNO=20 (全國法規資料庫 · 化粧品衛生安全管理法 第20條) |
+| `drafts/theory/23-bond-builder-chemistry.md` | 特定用途化粧品 | 染髮劑·燙髮劑의 분류 | 2026-08-22 | **현행** | 官方 PIF 공고가 1단계 대상을 「防曬、染髮、燙髮、止汗制臭、居家牙齒美白」로 명시 — 染髮·燙髮이 特定用途化粧品 임이 확인된다. 근거: https://www.fda.gov.tw/tc/newsContent.aspx?cid=3&id=30614 (衛授食字第1131604608號, 113.07.01 생효) |
+| `drafts/theory/25-glyoxylic-acid-truth.md` | 特定用途化粧品 | 染髮劑·燙髮劑의 분류 | 2026-08-22 | **현행** | 官方 PIF 공고가 1단계 대상을 「防曬、染髮、燙髮、止汗制臭、居家牙齒美白」로 명시 — 染髮·燙髮이 特定用途化粧品 임이 확인된다. 근거: https://www.fda.gov.tw/tc/newsContent.aspx?cid=3&id=30614 (衛授食字第1131604608號, 113.07.01 생효) |
+| `drafts/theory/30-cosmetic-ad-regulations.md` | 特定用途化粧品 | 染髮劑·燙髮劑의 분류 (구 含藥化粧品) | 2026-08-22 | **현행** | 본문의 5종 목록(染髮·燙髮·防曬·止汗制臭·居家牙齒美白)이 PIF 공고 1단계 자구와 일치. 근거: https://www.fda.gov.tw/tc/newsContent.aspx?cid=3&id=30614 (衛授食字第1131604608號, 113.07.01 생효) |
 | `client/src/lib/colorMixCalc.ts` (코드) | 化粧品成分使用限制表 編號167 Hydrogen peroxide (CAS 7722-84-1) | 染髮、燙髮產品 **12% (40 volumes)(含釋出之H2O2)** / 居家牙齒美白 6% | 2026-08-22 | **현행** | 食藥署 開放資料 원문(編號167). 「12% (40 volumes)」가 표에 그대로 적혀 있다 — **12% 는 법정 상한이 맞다.** 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=199 (食藥署 開放資料 · 衛授食字第1131602014號 113.05.30 공고, 113.07.01 시행) · 공고문: https://www.fda.gov.tw/tc/newsContent.aspx?cid=3&id=30575 |
 
 ## 집계
 
 | 상태 | 건수 |
 |---|---|
-| 현행 | 9 |
+| 현행 | 20 |
+| 조건부 | 1 |
 | 폐지 | 1 |
-| 미확인 | 7 |
-| **합계** | **17** |
+| **합계** | **22** |
 
-> 2026-08-22(v18) 6건 확인 완료 — ① 過氧化氫 12% ② PPD·PTD·阿摩尼亞(#10·#26)
-> ③ 第20條 罰鍰(#30·#23·#25). **확인 과정에서 불일치 2건이 나왔다(아래).**
+> 2026-08-22(v18) 6건 + (v19) 8건 확인 완료. 「조건부」는 **핵심 사실은 확정, 부속 정보만 미확인**인 건이다.
+> 남은 확인 대상은 아래 「⚠️ 근거 미발견」 절 참조.
+
+## ⚠️ 근거 미발견 — 수정 지시 대기
+
+| 대상 | 본문 서술 | 확인 결과 |
+|---|---|---|
+| `#25:163` | 第20條 罰鍰이 「**2024 年 7 月 1 日之後從嚴適用**」 | **근거 없음.** 罰則 자체는 2019-07-01 시행 이후 변동 없다. 2024-07-01 에 바뀐 것은 ①〈化粧品成分使用限制表〉개정 시행 ②PIF 1단계 시행 ③第5條 特定用途化粧品 查驗登記 停止適用(施行 5년 경과)이며, **罰則 강화는 아니다** |
+| `#26:198`·`#10:48` | 間苯二胺 「**2009 起**」 금지 | **금지 자체는 확정**(禁止使用成分表 編號300). 다만 금지표에 시행 시점 필드가 없어 「2009」의 근거를 못 찾았다 |
 
 ## ✅ 불일치 — 2026-08-22(v19) 해소 완료
 
