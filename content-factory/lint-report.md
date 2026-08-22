@@ -1,6 +1,6 @@
 # lint 상세 리포트
 
-생성: 2026-08-21
+생성: 2026-08-22
 
 ## 01-hair-structure-basics.md
 
