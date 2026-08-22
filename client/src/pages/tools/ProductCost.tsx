@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import OwnerGate from "@/components/OwnerGate";
 import { detectToolLang, makeT } from "@/lib/toolStrings";
+import { applyRobotsMeta } from "@/lib/siteRobots";
 import {
   DEFAULT_CHEMICALS,
   DEFAULT_TREATMENTS,
@@ -89,20 +90,9 @@ function ProductCostInner() {
     document.title = t("pcPageTitle");
     const meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     if (meta) meta.content = t("pcMetaDescription");
-    let robots = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
-    if (lang === "ko") {
-      if (!robots) {
-        robots = document.createElement("meta");
-        robots.name = "robots";
-        document.head.appendChild(robots);
-      }
-      robots.content = "noindex";
-    } else if (robots) {
-      robots.remove();
-    }
-    return () => {
-      document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.remove();
-    };
+    // 사이트 전체 색인 여부는 SITE_PUBLIC 이 정한다. 여기서는 「이 페이지가
+    // noindex 를 원하는가」만 넘긴다 — ?lang=ko(QA용)일 때다.
+    return applyRobotsMeta(lang === "ko");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 

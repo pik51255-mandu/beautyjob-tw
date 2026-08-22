@@ -8,10 +8,27 @@
  *  - 시각 breadcrumb 와 BreadcrumbList 가 일치하는가
  *  - ItemList 의 numberOfItems 가 실제 항목 수와 맞는가
  *  - Dataset 의 출처 필드(creator/sourceOrganization/isBasedOn/dateModified)가 채워졌는가
- *  - 전 페이지 색인 개시(noindex 아님)
+ *  - 전 페이지 meta robots 가 SITE_PUBLIC 과 일치하는가 (하드코딩하지 않는다)
  *  - 실콘텐츠 없는 스키마(FAQPage 등)가 섞이지 않았는가
  */
+import fs from "node:fs";
+import path from "node:path";
+
 const BASE = process.env.BASE || "http://localhost:5288";
+
+// 색인 기대치는 shared/const.ts 의 SITE_PUBLIC 하나에서 온다.
+// 이 파일은 .mjs 라 TS 를 import 할 수 없어 원문을 읽어 값을 뽑는다 —
+// 사본을 두면 재공개 때 여기만 낡는다(v27 감사에서 실제로 걸렸다).
+const CONST_SRC = fs.readFileSync(
+  path.resolve(import.meta.dirname, "../shared/const.ts"), "utf8"
+);
+const m = CONST_SRC.match(/export const SITE_PUBLIC\s*=\s*(true|false)\s*;/);
+if (!m) {
+  console.error("shared/const.ts 에서 SITE_PUBLIC 을 읽지 못했다 — 게이트를 진행할 수 없다");
+  process.exit(1);
+}
+const SITE_PUBLIC = m[1] === "true";
+console.log(`SITE_PUBLIC=${SITE_PUBLIC} — meta robots 기대치: ${SITE_PUBLIC ? "index" : "noindex"}`);
 
 const PAGES = [
   { path: "/salons", expect: ["Organization", "Dataset", "CollectionPage", "ItemList", "BreadcrumbList"] },
@@ -104,7 +121,12 @@ for (const page of PAGES) {
     ok("Dataset→Organization 참조 유효", ds.publisher?.["@id"] === org["@id"], `${ds.publisher?.["@id"]} vs ${org["@id"]}`);
   }
 
-  ok("색인 개시(noindex 아님)", !/name="robots" content="noindex/.test(html));
+  const isNoindex = /name="robots" content="noindex/.test(html);
+  ok(
+    SITE_PUBLIC ? "색인 개방 상태 (noindex 아님)" : "색인 차단 상태 (noindex 있음)",
+    SITE_PUBLIC ? !isNoindex : isNoindex,
+    `meta robots noindex=${isNoindex}`
+  );
 }
 
 // robots.txt

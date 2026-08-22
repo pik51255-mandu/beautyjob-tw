@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import { FEATURES } from "@shared/const";
 import { detectToolLang, makeT } from "@/lib/toolStrings";
+import { applyRobotsMeta } from "@/lib/siteRobots";
 import {
   calcInitialInvestment,
   calcPreparationFund,
@@ -95,20 +96,9 @@ export default function OpeningCostCalculator() {
     document.title = t("ocPageTitle");
     const meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     if (meta) meta.content = t("ocMetaDescription");
-    let robots = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
-    if (lang === "ko") {
-      if (!robots) {
-        robots = document.createElement("meta");
-        robots.name = "robots";
-        document.head.appendChild(robots);
-      }
-      robots.content = "noindex";
-    } else if (robots) {
-      robots.remove();
-    }
-    return () => {
-      document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.remove();
-    };
+    // 사이트 전체 색인 여부는 SITE_PUBLIC 이 정한다. 여기서는 「이 페이지가
+    // noindex 를 원하는가」만 넘긴다 — ?lang=ko(QA용)일 때다.
+    return applyRobotsMeta(lang === "ko");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 

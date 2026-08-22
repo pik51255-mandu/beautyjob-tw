@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react";
 import fs from "node:fs";
 import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
+import { SITE_ROBOTS_CONTENT } from "./shared/const";
 
 // =============================================================================
 // Dev Debug Collector - Vite Plugin (개발 전용)
@@ -163,9 +164,36 @@ function vitePluginDevDebugCollector(): Plugin {
   };
 }
 
+/**
+ * SPA 진입 HTML(index.html)에 meta robots 를 **빌드 시** 박는다.
+ *
+ * 왜 런타임(JS)이 아니라 빌드 시인가: 크롤러가 처음 받는 건 원본 HTML 이다.
+ * JS 로 붙이면 렌더링을 돌리는 봇만 보고, 그마저 타이밍에 걸린다.
+ * 원본에 박혀 있으면 JS 를 안 돌리는 봇도 즉시 읽는다.
+ *
+ * 값은 shared/const.ts 의 SITE_PUBLIC 하나에서 나온다. 재공개는 그 한 줄만 바꾸면 된다.
+ */
+function vitePluginSiteRobots(): Plugin {
+  return {
+    name: "site-robots",
+    transformIndexHtml(html) {
+      return {
+        html,
+        tags: [
+          {
+            tag: "meta",
+            attrs: { name: "robots", content: SITE_ROBOTS_CONTENT },
+            injectTo: "head-prepend",
+          },
+        ],
+      };
+    },
+  };
+}
+
 // vitePluginManusRuntime 제거 (2026-08-20 정찰 확정): Manus 비주얼 에디터 전용 브릿지로
 // 독립 배포에선 전 기능 도먼트. index.html 에 366KB 인라인 + 무인증 postMessage 채널만 남기므로 적출.
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginDevDebugCollector()];
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginDevDebugCollector(), vitePluginSiteRobots()];
 
 export default defineConfig({
   plugins,

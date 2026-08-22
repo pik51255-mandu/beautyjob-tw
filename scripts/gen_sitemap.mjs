@@ -1,7 +1,10 @@
 /**
  * sitemap.xml 생성 (생성만 — 어디에도 제출하지 않는다)
  *
- * 2026-08-22 도메인 연결 + noindex 해제 완료(v18 1-2). 이 파일은 그대로 제출 가능하다.
+ * ⚠️ 제출 시점은 shared/const.ts 의 SITE_PUBLIC 이 정한다.
+ * v27 현재 SITE_PUBLIC=false — 사이트가 noindex 다. **지금 제출하지 않는다.**
+ * (noindex 인 페이지의 sitemap 을 제출하면 색인 요청과 차단을 동시에 보내는 꼴이다)
+ * 생성 자체는 언제든 해도 된다. 재공개 승인 후 제출한다.
  */
 import fs from "node:fs";
 import path from "node:path";

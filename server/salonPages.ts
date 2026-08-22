@@ -9,9 +9,10 @@
  * (일반 <a> 링크). 나머지 사이트는 종전대로 SPA 가 담당하며, 서버 페이지에서
  * 사이트로 돌아가는 링크를 통해 SPA 로 진입한다.
  *
- * 색인: 2026-08-22 도메인 연결 완료로 noindex 를 해제했다(v18 1-2).
+ * 색인: shared/const.ts 의 SITE_PUBLIC 하나가 정한다. 여기서 하드코딩하지 않는다(v27).
  */
 import type { Express, Request, Response } from "express";
+import { SITE_ROBOTS_CONTENT } from "@shared/const";
 import {
   countSalons, countSalonsByDistrict, getSalonByTaxId, getSalonStats,
   listNearbySalons, listSalonsByDistrict, type SalonRow, type SalonStats,
@@ -70,7 +71,7 @@ function layout(o: LayoutOpts): string {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(o.title)}</title>
 <meta name="description" content="${esc(o.description)}">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="${SITE_ROBOTS_CONTENT}">
 <link rel="canonical" href="${esc(o.canonical)}">
 <meta property="og:title" content="${esc(o.title)}">
 <meta property="og:description" content="${esc(o.description)}">

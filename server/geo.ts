@@ -1,12 +1,17 @@
+import { SITE_PUBLIC } from "@shared/const";
+
 /**
  * GEO(생성형 엔진 최적화) 공통 재료 — 전역 스키마·robots·IndexNow.
  *
  * 원칙: 실제 페이지에 존재하는 콘텐츠만 스키마로 선언한다.
  * FAQPage 처럼 실물 Q&A 가 없는 타입은 넣지 않는다.
  *
- * 색인 정책: 2026-08-22 도메인(www.beautyjob.tw) 연결 완료로 **색인 개시**.
- * robots.txt 는 종전대로 크롤 전면 허용이고, meta robots 의 noindex 는 해제됐다.
+ * 색인 정책: **shared/const.ts 의 SITE_PUBLIC 하나가 정한다. 여기서 판단하지 않는다(v27).**
+ * robots.txt 는 SITE_PUBLIC 과 무관하게 **크롤을 전면 허용**한다 —
+ * 크롤을 막으면 봇이 각 페이지의 meta robots(noindex)를 읽지 못해 오히려 색인이 남는다.
  * 관리 경로(DISALLOWED_PATHS)만 계속 막는다.
+ *
+ * v27 현재 SITE_PUBLIC=false (재비공개). 재공개는 선후 승인 시 그 한 줄만 바꾼다.
  */
 
 // M10: 원천이 둘이고 vintage 가 다르므로 따로 둔다. 월간 갱신 시 둘 다 갱신한다.
@@ -59,8 +64,10 @@ export function buildRobotsTxt(origin: string): string {
 
   const general = ["User-agent: *", "Allow: /", disallow].join("\n");
 
+  // 크롤은 항상 허용한다. 여기서 막으면 봇이 각 페이지의 noindex 를 **읽지 못해**
+  // 오히려 색인이 남는다. 색인 여부는 meta robots 가 정한다 (SITE_PUBLIC).
   return `# 檢索與 AI 檢索爬蟲：全面允許
-# 個別頁面的索引與否由各頁 meta robots 決定（網域已接上，索引已開放）
+# 個別頁面的索引與否由各頁 meta robots 決定
 ${aiBlocks}
 
 ${general}
@@ -186,39 +193,48 @@ export function itemListLd(
 export const INDEXNOW_KEY = "9f2c4b7e8a1d40f3b6c5e2d7a8f14b03";
 
 /**
- * 활성화 스위치. 2026-08-22 도메인 연결 + noindex 해제 완료로 **켰다**(v19 4번).
- * 켜기 전 조건 두 가지가 모두 충족됐다 —
- *  ① 페이지가 index,follow 다 (noindex 상태에서 핑을 보내면 색인 요청과 차단이 모순된다)
- *  ② 키 검증 파일이 공개 서빙된다 (`/{INDEXNOW_KEY}.txt` → 200, salonPages.ts:622)
+ * 활성화 스위치 — **SITE_PUBLIC 에서 파생한다. 여기서 따로 켜지 않는다(v27).**
+ *
+ * noindex 인 채로 색인 핑을 보내면 「색인해달라」와 「색인하지 마라」를 동시에 보내는 꼴이라
+ * 두 신호가 모순된다. 그래서 사이트 공개 여부와 한 몸으로 묶었다.
+ * 키 검증 파일(`/{INDEXNOW_KEY}.txt`)은 비공개 상태에서도 계속 서빙한다 —
+ * 재공개 때 검증을 다시 받지 않아도 되게.
  */
-export const INDEXNOW_ENABLED = true;
+export const INDEXNOW_ENABLED = SITE_PUBLIC;
 
 export type IndexNowResult =
   | { sent: false; reason: string }
   | { sent: true; status: number; count: number };
 
 /**
- * 월간 갱신 배치에서 호출할 핑 함수. INDEXNOW_ENABLED 가 false 면 아무것도 보내지 않는다.
- * 도메인 연결 블록에서 플래그만 켜면 동작한다.
+ * 보낼 본문. 전송 게이트(INDEXNOW_ENABLED)와 분리해 둔 이유는 테스트다 —
+ * 비공개 상태에서도 페이로드 형태는 계속 검증되어야 재공개 때 안심하고 켤 수 있다.
+ */
+export function buildIndexNowPayload(origin: string, urls: string[]) {
+  return {
+    host: new URL(origin).host,
+    key: INDEXNOW_KEY,
+    keyLocation: `${origin}/${INDEXNOW_KEY}.txt`,
+    urlList: urls.slice(0, 10000),
+  };
+}
+
+/**
+ * 월간 갱신 배치에서 호출할 핑 함수.
+ * INDEXNOW_ENABLED(= SITE_PUBLIC) 가 false 면 네트워크를 건드리지 않는다.
  */
 export async function pingIndexNow(
   origin: string,
   urls: string[]
 ): Promise<IndexNowResult> {
   if (!INDEXNOW_ENABLED) {
-    return { sent: false, reason: "INDEXNOW_ENABLED=false (도메인 연결 후 활성화)" };
+    return { sent: false, reason: "SITE_PUBLIC=false — 재공개 승인 시 함께 켜진다" };
   }
   if (!urls.length) return { sent: false, reason: "URL 없음" };
-  const host = new URL(origin).host;
   const res = await fetch("https://api.indexnow.org/IndexNow", {
     method: "POST",
     headers: { "Content-Type": "application/json; charset=utf-8" },
-    body: JSON.stringify({
-      host,
-      key: INDEXNOW_KEY,
-      keyLocation: `${origin}/${INDEXNOW_KEY}.txt`,
-      urlList: urls.slice(0, 10000),
-    }),
+    body: JSON.stringify(buildIndexNowPayload(origin, urls)),
   });
   return { sent: true, status: res.status, count: Math.min(urls.length, 10000) };
 }

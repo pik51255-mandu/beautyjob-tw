@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   AI_BOTS, DATA_AS_OF, DISALLOWED_PATHS, INDEXNOW_ENABLED, INDEXNOW_KEY,
-  breadcrumbLd, buildRobotsTxt, datasetLd, itemListLd, organizationLd, pingIndexNow,
+  breadcrumbLd, buildIndexNowPayload, buildRobotsTxt, datasetLd, itemListLd, organizationLd, pingIndexNow,
 } from "./geo";
+import { ROBOTS_BLOCKED, ROBOTS_INDEXABLE, SITE_PUBLIC, SITE_ROBOTS_CONTENT } from "@shared/const";
 
 const ORIGIN = "https://example.tw";
 
@@ -38,9 +39,41 @@ describe("robots.txt", () => {
     expect(buildRobotsTxt("https://b.tw")).toContain("Sitemap: https://b.tw/sitemap.xml");
   });
 
-  it("색인이 개시됐음을 문서화한다 — noindex 안내가 남아 있으면 안 된다 (v18 1-2)", () => {
-    expect(txt).not.toContain("noindex");
-    expect(txt).toContain("索引已開放");
+  // v27: robots.txt 는 SITE_PUBLIC 과 무관하게 **항상 크롤을 허용한다.**
+  // 여기서 막으면 봇이 각 페이지의 noindex 를 읽지 못해 오히려 색인이 남는다.
+  it("비공개 상태여도 크롤은 막지 않는다 — noindex 를 읽게 해야 한다", () => {
+    expect(txt).toContain("User-agent: *\nAllow: /");
+    expect(txt).not.toContain("Disallow: /\n");
+  });
+
+  it("색인 여부를 robots.txt 에 하드코딩하지 않는다 — meta robots 소관이다", () => {
+    expect(txt).toContain("個別頁面的索引與否由各頁 meta robots 決定");
+    expect(txt).not.toContain("索引已開放");
+  });
+});
+
+// v27: 재공개는 SITE_PUBLIC 한 줄 변경으로 끝나야 한다.
+// 기대값을 하드코딩하면 플래그를 뒤집었을 때 테스트가 거짓으로 실패하거나,
+// 더 나쁘게는 거짓으로 통과한다. 전부 플래그에서 파생시킨다.
+describe("사이트 공개 스위치 (SITE_PUBLIC)", () => {
+  it("meta robots 값이 플래그에서 파생된다", () => {
+    expect(SITE_ROBOTS_CONTENT).toBe(SITE_PUBLIC ? "index, follow" : "noindex, follow");
+  });
+
+  it("noindex 여도 follow 는 남긴다 — 내부 링크는 계속 따라가게", () => {
+    expect(SITE_ROBOTS_CONTENT).toContain("follow");
+  });
+
+  it("IndexNow 는 공개 상태일 때만 켜진다 — 색인 핑과 noindex 가 모순되면 안 된다", () => {
+    expect(INDEXNOW_ENABLED).toBe(SITE_PUBLIC);
+  });
+
+  // 여기에 expect(SITE_PUBLIC).toBe(false) 를 두지 않는다.
+  // 두면 재공개가 「한 줄」이 아니라 「두 줄」이 되어 v27 요구를 어긴다.
+  // 임의 공개를 막는 것은 테스트가 아니라 절차다 —
+  // content-factory/progress.md 의 v27 판정(선후 승인 필수)이 그 자리다.
+  it("robots 값에 index/noindex 를 하드코딩한 곳이 없다", () => {
+    expect(SITE_ROBOTS_CONTENT).toBe(SITE_PUBLIC ? ROBOTS_INDEXABLE : ROBOTS_BLOCKED);
   });
 });
 
@@ -124,9 +157,9 @@ describe("ItemList", () => {
   });
 });
 
-describe("IndexNow — 2026-08-22 활성화(v19 4번)", () => {
-  it("활성 상태다 — 도메인 연결 + noindex 해제 후 켰다", () => {
-    expect(INDEXNOW_ENABLED).toBe(true);
+describe("IndexNow", () => {
+  it("SITE_PUBLIC 을 그대로 따른다 (v27)", () => {
+    expect(INDEXNOW_ENABLED).toBe(SITE_PUBLIC);
   });
 
   // M11: 테스트가 실제로 IndexNow 로 POST 하는 사고를 막는다.
@@ -139,24 +172,41 @@ describe("IndexNow — 2026-08-22 활성화(v19 4번)", () => {
       const r = await pingIndexNow(ORIGIN, []);
       expect(spy).not.toHaveBeenCalled();
       expect(r.sent).toBe(false);
-      if (!r.sent) expect(r.reason).toContain("URL 없음");
+      // 비공개면 게이트에서, 공개면 빈 목록에서 멈춘다. 어느 쪽이든 호출은 0 이다.
+      if (!r.sent) expect(r.reason).toContain(SITE_PUBLIC ? "URL 없음" : "SITE_PUBLIC=false");
     } finally {
       spy.mockRestore();
     }
   });
 
-  it("활성 상태에서는 keyLocation 과 host 를 담아 POST 한다", async () => {
+  // 페이로드 검증은 플래그와 무관하게 계속 돈다 — 비공개 기간에 형태가 썩으면
+  // 재공개 때 켜자마자 잘못된 본문을 보내게 된다.
+  it("페이로드에 host·key·keyLocation·urlList 가 담긴다", () => {
+    const body = buildIndexNowPayload(ORIGIN, ["https://example.tw/a"]);
+    expect(body.host).toBe(new URL(ORIGIN).host);
+    expect(body.key).toBe(INDEXNOW_KEY);
+    expect(body.keyLocation).toBe(`${ORIGIN}/${INDEXNOW_KEY}.txt`);
+    expect(body.urlList).toEqual(["https://example.tw/a"]);
+  });
+
+  it("URL 은 10,000 개에서 자른다 (사양 상한)", () => {
+    const many = Array.from({ length: 10_050 }, (_, i) => `https://example.tw/${i}`);
+    expect(buildIndexNowPayload(ORIGIN, many).urlList).toHaveLength(10_000);
+  });
+
+  it("공개 상태일 때만 실제로 POST 한다", async () => {
     const spy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(null, { status: 200 })
     );
     try {
       const r = await pingIndexNow(ORIGIN, ["https://example.tw/a"]);
-      expect(spy).toHaveBeenCalledOnce();
-      const body = JSON.parse(String(spy.mock.calls[0][1]?.body));
-      expect(body.host).toBe(new URL(ORIGIN).host);
-      expect(body.keyLocation).toBe(`${ORIGIN}/${INDEXNOW_KEY}.txt`);
-      expect(body.urlList).toEqual(["https://example.tw/a"]);
-      expect(r.sent).toBe(true);
+      if (SITE_PUBLIC) {
+        expect(spy).toHaveBeenCalledOnce();
+        expect(r.sent).toBe(true);
+      } else {
+        expect(spy).not.toHaveBeenCalled();
+        expect(r.sent).toBe(false);
+      }
     } finally {
       spy.mockRestore();
     }

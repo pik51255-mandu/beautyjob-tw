@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Wrench, Calculator, Store, Lock, FlaskConical, LineChart, Palette, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { detectToolLang, makeT, type ToolStringKey } from "@/lib/toolStrings";
+import { applyRobotsMeta } from "@/lib/siteRobots";
 
 // /tools 허브: 設計師工具(공개) + 老闆專區(잠금 안내)
 export default function ToolsHub() {
@@ -13,20 +14,9 @@ export default function ToolsHub() {
     document.title = t("hubPageTitle");
     const meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     if (meta) meta.content = t("hubMetaDescription");
-    let robots = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
-    if (lang === "ko") {
-      if (!robots) {
-        robots = document.createElement("meta");
-        robots.name = "robots";
-        document.head.appendChild(robots);
-      }
-      robots.content = "noindex";
-    } else if (robots) {
-      robots.remove();
-    }
-    return () => {
-      document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.remove();
-    };
+    // 사이트 전체 색인 여부는 SITE_PUBLIC 이 정한다. 여기서는 「이 페이지가
+    // noindex 를 원하는가」만 넘긴다 — ?lang=ko(QA용)일 때다.
+    return applyRobotsMeta(lang === "ko");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
