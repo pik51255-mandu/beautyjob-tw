@@ -25,28 +25,41 @@
 | `drafts/theory/13-reducing-agents-compared.md` | 特定用途化粧品成分名稱及使用限制表 | — (각주에서 이관 사실만 언급) | 2026-08-21 | **폐지** | 113.05.30 폐지 衛授食字第1131602017號, 113.07.01 시행 → 〈化粧品成分使用限制表〉로 이관 |
 | `drafts/exam/exam-perm-01.md` | 化粧品成分使用限制表 | 燙髮產品 TGA pH 7.0～9.5 (一般·專業 공통) | 2026-08-21 | **현행** | 위와 같음 |
 | `drafts/exam-ko/exam-perm-01-ko.md` | 化粧品成分使用限制表 | 燙髮產品 TGA pH 7.0～9.5 (一般·專業 공통) | 2026-08-21 | **현행** | 위와 같음 |
-| `drafts/theory/10-patch-test-guide.md` | 化粧品成分使用限制表 | PPD 2% 以下 / 對甲苯二胺 4% 以下 / 阿摩尼亞 6% 以下 | — | **미확인** | 未確認. 본문이 이미 "실제 수치는 식약서 최신판을 따르라"고 유보하고 있음 |
+| `drafts/theory/10-patch-test-guide.md` | 化粧品成分使用限制表 編號65·66·166 | PPD **2%(以free base計)** ✅ / 阿摩尼亞 **6%(以NH3計)** ✅ / 對甲苯二胺(Toluene-2,5-diamine) **2%(free base)·3.6%(sulfate)** ⚠️ | 2026-08-22 | **현행(단 PTD 수치 불일치)** | 官方 원문 확인. **본문의 「對甲苯二胺 4%」는 현행 표와 다르다** — 지시 대기 중, 임의 수정 금지(v18 2-3). 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=199 (食藥署 開放資料 · 衛授食字第1131602014號 113.05.30 공고, 113.07.01 시행) |
 | `drafts/theory/10-patch-test-guide.md` | 特定用途化粧品 / 產品資訊檔案(PIF) | 상장 전 제품등록·PIF 수립 | — | **미확인** | 未確認 |
-| `drafts/theory/26-stylist-occupational-safety.md` | 特定用途化粧品 | PPD 2% 以下 / 對甲苯二胺 4% 以下 / 阿摩尼亞 6% 以下 / 間苯二胺 2009 금지 | — | **미확인** | 未確認. #10 과 동일 수치이므로 같이 확인해야 함 |
-| `drafts/theory/30-cosmetic-ad-regulations.md` | 化粧品衛生安全管理法 第20條 | 虛偽誇大 4萬～20萬 / 醫療效能 60萬～500萬 | — | **미확인** | 未確認 |
+| `drafts/theory/26-stylist-occupational-safety.md` | 化粧品成分使用限制表 編號65·66·166 | PPD 2% ✅ / 阿摩尼亞 6% ✅ / 對甲苯二胺 4% ⚠️ / 間苯二胺 2009 금지 (미확인) | 2026-08-22 | **현행(단 PTD 불일치·間苯二胺 미확인)** | #10 과 동일 건. 間苯二胺(m-Phenylenediamine)의 금지 시점은 「化粧品禁止使用成分表」쪽이라 이 표에서는 확인되지 않는다 — 별도 확인 필요. 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=199 (食藥署 開放資料 · 衛授食字第1131602014號 113.05.30 공고, 113.07.01 시행) |
+| `drafts/theory/26-stylist-occupational-safety.md` | 特定用途化粧品 | 染髮劑·燙髮劑의 분류 | — | **미확인** | 未確認. #23·#25·#30 과 같은 근거를 공유한다. 성분 한도 자체는 위 행에서 확인 완료 |
+| `drafts/theory/30-cosmetic-ad-regulations.md` | 化粧品衛生安全管理法 第20條 | 虛偽誇大 4萬～20萬 / 醫療效能 60萬～500萬 | 2026-08-22 | **현행** | 官方 조문 확인 — 본문 수치 일치 ✅ 「違反第十條第一項…處新臺幣四萬元以上二十萬元以下罰鍰」「違反同條第二項規定者，處新臺幣六十萬元以上五百萬元以下罰鍰」. 근거: https://law.moj.gov.tw/LawClass/LawSingle.aspx?Pcode=L0030013&FLNO=20 (全國法規資料庫 · 化粧品衛生安全管理法 第20條) |
 | `drafts/theory/30-cosmetic-ad-regulations.md` | 化粧品衛生安全管理法 | 2018 전면개정, 2019.07.01 시행 / 化粧品 정의 5가지 용도 | — | **미확인** | 未確認 |
 | `drafts/theory/30-cosmetic-ad-regulations.md` | PIF / GMP(ISO 22716) | 特定用途化粧品 3단계 시행 일정 | — | **미확인** | 未確認 |
 | `drafts/theory/30-cosmetic-ad-regulations.md` | 化粧品成分使用限制表 | 성분 한도 일반 언급 | — | **미확인** | 未確認 |
-| `drafts/theory/23-bond-builder-chemistry.md` | 化粧品衛生安全管理法 第20條 | 4萬～20萬 / 60萬～500萬 | — | **미확인** | 未確認. #30 과 동일 수치 |
-| `drafts/theory/25-glyoxylic-acid-truth.md` | 化粧品衛生安全管理法 第20條 | 4萬～20萬 / 60萬～500萬 / 2024.07.01 이후 엄격 적용 | — | **미확인** | 未確認. #30 과 동일 수치 |
+| `drafts/theory/23-bond-builder-chemistry.md` | 化粧品衛生安全管理法 第20條 | 4萬～20萬 / 60萬～500萬 | 2026-08-22 | **현행** | 官方 조문 확인 — 본문 수치 일치 ✅ 「違反第十條第一項…處新臺幣四萬元以上二十萬元以下罰鍰」「違反同條第二項規定者，處新臺幣六十萬元以上五百萬元以下罰鍰」. 근거: https://law.moj.gov.tw/LawClass/LawSingle.aspx?Pcode=L0030013&FLNO=20 (全國法規資料庫 · 化粧品衛生安全管理法 第20條) |
+| `drafts/theory/25-glyoxylic-acid-truth.md` | 化粧品衛生安全管理法 第20條 | 4萬～20萬 / 60萬～500萬 / 2024.07.01 이후 엄격 적용 | 2026-08-22 | **현행** | 官方 조문 확인 — 본문 수치 일치 ✅ (단 「2024.07.01 이후 엄격 적용」은 조문에 없는 서술 — 미확인) 「違反第十條第一項…處新臺幣四萬元以上二十萬元以下罰鍰」「違反同條第二項規定者，處新臺幣六十萬元以上五百萬元以下罰鍰」. 근거: https://law.moj.gov.tw/LawClass/LawSingle.aspx?Pcode=L0030013&FLNO=20 (全國法規資料庫 · 化粧品衛生安全管理法 第20條) |
 | `drafts/theory/23-bond-builder-chemistry.md` | 特定用途化粧品 | 染髮劑·燙髮劑의 분류 | — | **미확인** | 未確認. 분류 자체는 #30 과 같은 근거를 공유 |
 | `drafts/theory/25-glyoxylic-acid-truth.md` | 特定用途化粧品 | 染髮劑·燙髮劑의 분류 | — | **미확인** | 未確認 |
 | `drafts/theory/30-cosmetic-ad-regulations.md` | 特定用途化粧品 | 染髮劑·燙髮劑의 분류 (구 含藥化粧品) | — | **미확인** | 未確認 |
-| `client/src/lib/colorMixCalc.ts` (코드) | (법규명 없음) | 過氧化氫 12% = 40vol 을 선택지에 유지 | — | **미확인** | **12% 가 대만 모발용 過氧化氫 법정 상한인지 미확인.** 확인 전까지 코드·UI·본문 어디에도 「법정 상한」이라고 쓰지 않는다 (v14 2-5) |
+| `client/src/lib/colorMixCalc.ts` (코드) | 化粧品成分使用限制表 編號167 Hydrogen peroxide (CAS 7722-84-1) | 染髮、燙髮產品 **12% (40 volumes)(含釋出之H2O2)** / 居家牙齒美白 6% | 2026-08-22 | **현행** | 食藥署 開放資料 원문(編號167). 「12% (40 volumes)」가 표에 그대로 적혀 있다 — **12% 는 법정 상한이 맞다.** 근거: https://data.fda.gov.tw/opendata/exportDataList.do?method=ExportData&InfoId=199 (食藥署 開放資料 · 衛授食字第1131602014號 113.05.30 공고, 113.07.01 시행) · 공고문: https://www.fda.gov.tw/tc/newsContent.aspx?cid=3&id=30575 |
 
 ## 집계
 
 | 상태 | 건수 |
 |---|---|
-| 현행 | 3 |
+| 현행 | 9 |
 | 폐지 | 1 |
-| 미확인 | 12 |
-| **합계** | **16** |
+| 미확인 | 7 |
+| **합계** | **17** |
+
+> 2026-08-22(v18) 6건 확인 완료 — ① 過氧化氫 12% ② PPD·PTD·阿摩尼亞(#10·#26)
+> ③ 第20條 罰鍰(#30·#23·#25). **확인 과정에서 불일치 2건이 나왔다(아래).**
+
+## ⚠️ 불일치 — 본문 수정 지시 대기 중
+
+| 대상 | 본문 | 현행 官方 원문 |
+|---|---|---|
+| `#10`·`#26` 對甲苯二胺 | **4% 以下** | **2%(以free base計) / 3.6%(以sulfate salt計)** (編號66 Toluene-2,5-diamine) |
+| `#13` TGA 沖洗 행 用途名 | 沖洗之髮用產品 | **立即**沖洗之髮用產品 (編號33 (b)) — 수치·pH 는 일치 |
+
+v18 2-3 에 따라 **임의 수정하지 않는다.** 지시를 받고 고친다.
 
 ## 확인이 필요한 것 (우선순위)
 
