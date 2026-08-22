@@ -196,8 +196,23 @@ describe("분급표 분리 (v24)", () => {
     expect(RATE_ROC_YEAR).toBe(115);
   });
 
-  it("세 표 모두 오름차순이고 중복이 없다", () => {
+  // v26 감사에서 官方 표 배열이 오염됐는데 315개 테스트가 전부 통과했다 —
+  // 아무도 LABOR_INSURANCE_TABLE.amounts 를 읽지 않았기 때문이다.
+  // 이제 INSURED_SALARY_BRACKETS 가 그 배열의 파생이라 여기서 함께 지켜진다.
+  it("勞保 급距는 官方 표에서 파생된다 — 사본이 아니다", () => {
+    expect(INSURED_SALARY_BRACKETS).toBe(LABOR_INSURANCE_TABLE.amounts);
+  });
+
+  it("官方 勞保 표 11급이 원문 값 그대로다 (오염 감지)", () => {
+    expect([...LABOR_INSURANCE_TABLE.amounts]).toEqual([
+      29_500, 30_300, 31_800, 33_300, 34_800, 36_300,
+      38_200, 40_100, 42_000, 43_900, 45_800,
+    ]);
+  });
+
+  it("네 표 모두 오름차순이고 중복이 없다", () => {
     for (const amounts of [
+      LABOR_INSURANCE_TABLE.amounts,
       INSURED_SALARY_BRACKETS,
       HEALTH_INSURANCE_TABLE.amounts,
       PENSION_TABLE.amounts,

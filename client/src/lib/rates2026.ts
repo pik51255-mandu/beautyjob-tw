@@ -1,3 +1,5 @@
+import { LABOR_INSURANCE_TABLE } from "./insuranceTables2026";
+
 // 2026년(민국115년) 공고 기준 요율 상수 — 2026-08-10 웹 검증 완료값 (선후 제공).
 // 요율·급距 변경 시 이 파일만 수정하면 시산기 전체에 반영된다.
 
@@ -30,22 +32,17 @@ export const PENSION_SELF_RATE_MAX = 0.06;
 export const LABOR_INSURANCE_EMPLOYER_SHARE = 0.7;   // 勞保 고용주부담 70%
 export const HEALTH_INSURANCE_EMPLOYER_SHARE = 0.6;  // 健保 고용주부담 60%
 export const HEALTH_INSURANCE_AVG_DEPENDENTS_FACTOR = 1.56; // 평균 권속 0.56인 포함 계수
-export const PENSION_EMPLOYER_RATE = 0.06;           // 勞退 고용주 제교 6% (실급여 기준)
-export const PENSION_EMPLOYER_MAX_BASE = 150_000;    // 제교 기준 상한
+// 勞退 고용주 제교 6%. **곱하는 대상은 실급여가 아니라 月提繳分級表의 급距**다
+// (勞工退休金條例 第14條第5項 — 「每月工資」를 분급표로 정한다). v26 에서 교정.
+export const PENSION_EMPLOYER_RATE = 0.06;
+// 제교 기준 상한. 실제 상한 적용은 勞退 月提繳分級表(62급, 최고 150,000)가 맡는다 —
+// 급距 조회로 바뀐 뒤로 이 상수는 문서용이다.
+export const PENSION_EMPLOYER_MAX_BASE = 150_000;
 // 職災保險은 업종별 요율이 상이하여 미포함 — 시산기 면책에 명시
 
-// 勞保 투보급距 분급표 (2026, 최저 29,500 ~ 최고 45,800).
-// 급距 사이의 실급여는 "상위 급距"를 적용한다 (예: 35,000 → 36,300).
-export const INSURED_SALARY_BRACKETS: number[] = [
-  29_500,
-  30_300,
-  31_800,
-  33_300,
-  34_800,
-  36_300,
-  38_200,
-  40_100,
-  42_000,
-  43_900,
-  45_800,
-];
+// 勞保 투보급距 분급표 — **官方 표(insuranceTables2026)에서 파생한다.**
+// 예전에는 여기에 11개 값을 손으로 복사해 뒀는데, 그러면 官方 표를 고쳐도 계산은
+// 안 따라오고(계산은 이쪽만 봤다) 官方 표가 망가져도 테스트가 못 잡는다.
+// 실제로 v26 감사 중 官方 표 배열이 잘못된 값으로 오염됐는데 315개 테스트가 전부
+// 통과했다 — 아무도 그 배열을 읽지 않았기 때문이다. 사본을 없애 그 구멍을 막는다.
+export const INSURED_SALARY_BRACKETS: readonly number[] = LABOR_INSURANCE_TABLE.amounts;

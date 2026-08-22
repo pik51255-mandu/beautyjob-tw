@@ -13,7 +13,7 @@ import {
   normalizeShares,
   type ServiceRow,
 } from "./openingCostCalc";
-import { matchHealthBracket, matchInsuredBracket } from "./salaryCalc";
+import { matchHealthBracket, matchInsuredBracket, matchPensionBracket } from "./salaryCalc";
 
 // 다올살롱 실측 모델 기본 5행
 const DEFAULT_SERVICES: ServiceRow[] = [
@@ -24,11 +24,16 @@ const DEFAULT_SERVICES: ServiceRow[] = [
   { name: "其他", price: 800, materialPct: 10, sharePct: 5, minutes: 40 },
 ];
 
-// ─── 고용주 부담 (기존 유지) ──────────────────────────────────────────────────
+// ─── 고용주 부담 ──────────────────────────────────────────────────────────────
+// v26: 勞退 제교가 실급여(1,920)에서 月提繳分級表 급距(33,300×6%=1,998)로 바뀌어
+// 합계가 6,445 → 6,523 이 됐다. 6,445 는 실측 검증값이 아니라 종전 산식의 출력값이었다.
 describe("calcEmployerBurden", () => {
-  it("월급 32,000: 勞保 2,914 + 健保 1,611 + 勞退 1,920 = 6,445", () => {
+  it("월급 32,000: 勞保 2,914 + 健保 1,611 + 勞退 1,998 = 6,523", () => {
     const b = calcEmployerBurden(32_000);
-    expect(b.total).toBe(6_445);
+    expect(b.labor).toBe(2_914);
+    expect(b.health).toBe(1_611);
+    expect(b.pension).toBe(1_998);
+    expect(b.total).toBe(6_523);
   });
 });
 
@@ -115,7 +120,7 @@ describe("calcMaxDailyCustomers", () => {
 describe("필수 케이스: 기본 5행 + 월세 4만 + 직원 1명 32,000 + 기타 1만 + 抽成 35% + 수수료 2% + 디자이너 1·席位 3·10h", () => {
   const mix = calcServiceMix(DEFAULT_SERVICES);
   const staff = calcStaffCost(1, 32_000);
-  const fixed = 40_000 + staff.total + 10_000; // 88,445
+  const fixed = 40_000 + staff.total + 10_000; // 88,523 (v26: 고용주 부담 6,445→6,523)
   const variableRatio = mix.materialRate + 0.35 + 0.02; // 0.56
   const bep = calcBep(fixed, variableRatio);
   const dailyNeed = calcDailyCustomers(bep, mix.avgTicket, 26);
@@ -125,8 +130,8 @@ describe("필수 케이스: 기본 5행 + 월세 4만 + 직원 1명 32,000 + 기
     expect(variableRatio).toBeCloseTo(394 / 1_480 + 0.37, 10); // ≈ 0.6362
   });
 
-  it("BEP = 88,445 ÷ (1 − 0.6362) ≈ 243,125", () => {
-    expect(Math.round(bep)).toBe(243_125);
+  it("BEP = 88,523 ÷ (1 − 0.6362) ≈ 243,340", () => {
+    expect(Math.round(bep)).toBe(243_340);
   });
 
   it("일 필요 객수 6.3명 (客單價 1,480 × 26일)", () => {
@@ -168,13 +173,14 @@ describe("C-2.3 필수 케이스: 월세 4만·押金 2개월·頂讓 30만·裝
     expect(initial.total - initial.deposit).toBe(998_000); // 소멸성
   });
 
-  it("카드② 월 고정비 96,445 — 인건비 실부담 38,445 (명목 32,000 + 고용주 6,445)", () => {
-    expect(staff.total).toBe(38_445);
-    expect(fixed).toBe(96_445);
+  // v26: 勞退 급距 조회로 고용주 부담이 6,445 → 6,523 이 되면서 78 씩 올라갔다.
+  it("카드② 월 고정비 96,523 — 인건비 실부담 38,523 (명목 32,000 + 고용주 6,523)", () => {
+    expect(staff.total).toBe(38_523);
+    expect(fixed).toBe(96_523);
   });
 
-  it("카드③ 권장 준비 자금 = 1,078,000 + 96,445 × 6 = 1,656,670", () => {
-    expect(calcPreparationFund(initial.total, fixed, 6)).toBe(1_656_670);
+  it("카드③ 권장 준비 자금 = 1,078,000 + 96,523 × 6 = 1,657,138", () => {
+    expect(calcPreparationFund(initial.total, fixed, 6)).toBe(1_657_138);
   });
 
   it("운전자금 0개월이면 준비 자금 = 초기 투자 총액", () => {
@@ -273,12 +279,12 @@ describe("영업일수 입력 클램프", () => {
 
 // ─── v25: 고용주 부담 — 제도별 분급표 + 官方 분담금액표 ──────────────────────
 describe("calcEmployerBurden 경계값 (v25)", () => {
-  it("기존 케이스 회귀 불변 — 월급 32,000", () => {
+  it("월급 32,000 — 세 항목 모두 급距 기준 (v26 勞退 교체 반영)", () => {
     const b = calcEmployerBurden(32_000);
     expect(b.labor).toBe(2_914);   // 33,300 급距, 官方 분담금액표
     expect(b.health).toBe(1_611);  // 33,300 × 5.17% × 60% × 1.56
-    expect(b.pension).toBe(1_920);
-    expect(b.total).toBe(6_445);
+    expect(b.pension).toBe(1_998); // 33,300 급距 × 6% (실급여 32,000 아님)
+    expect(b.total).toBe(6_523);
   });
 
   it("45,800 이하는 勞保·健保 표가 같아 결과가 갈리지 않는다", () => {
@@ -326,5 +332,49 @@ describe("calcEmployerBurden 경계값 (v25)", () => {
     const staff = calcStaffCost(3, 60_000);
     expect(staff.perEmployee).toBe(60_000 + one.total);
     expect(staff.total).toBe((60_000 + one.total) * 3);
+  });
+});
+
+// ─── v26: 勞退 고용주 제교 — 月提繳分級表 급距 조회 ──────────────────────────
+// 실급여를 그대로 6% 곱하던 것을 급距 조회로 바꿨다. 급距 위에 정확히 놓인 급여만
+// 종전과 결과가 같고, 그 사이 값은 전부 올라간다.
+describe("calcEmployerBurden 勞退 급距 (v26)", () => {
+  it("급여 계산기와 같은 표를 쓴다 — 산식 이중화 없음", () => {
+    for (const salary of [28_000, 32_000, 45_000, 60_000, 99_999, 200_000]) {
+      expect(calcEmployerBurden(salary).pension).toBe(
+        Math.round(matchPensionBracket(salary) * 0.06)
+      );
+    }
+  });
+
+  it("급距 정중앙 32,000 → 33,300 급距 × 6% = 1,998", () => {
+    expect(matchPensionBracket(32_000)).toBe(33_300);
+    expect(calcEmployerBurden(32_000).pension).toBe(1_998);
+  });
+
+  it("급距 경계 — 상한값과 그 +1", () => {
+    // 33,300 은 급距 그 자체 → 실급여와 급距가 같아 종전 산식과 결과가 우연히 일치
+    expect(calcEmployerBurden(33_300).pension).toBe(Math.round(33_300 * 0.06)); // 1,998
+    // 33,301 은 다음 급距(34,800)로 올라간다
+    expect(matchPensionBracket(33_301)).toBe(34_800);
+    expect(calcEmployerBurden(33_301).pension).toBe(Math.round(34_800 * 0.06)); // 2,088
+  });
+
+  it("급距 위에 정확히 놓인 급여만 종전 산식과 같다", () => {
+    const oldWay = (s: number) => Math.round(Math.min(s, 150_000) * 0.06);
+    expect(calcEmployerBurden(33_300).pension).toBe(oldWay(33_300)); // 급距값 → 동일
+    expect(calcEmployerBurden(32_000).pension).not.toBe(oldWay(32_000)); // 사이값 → 다름
+    expect(calcEmployerBurden(45_000).pension).not.toBe(oldWay(45_000));
+  });
+
+  it("150,000 초과는 최고 급距 150,000 에서 멈춘다", () => {
+    const cap = Math.round(150_000 * 0.06); // 9,000
+    expect(calcEmployerBurden(150_000).pension).toBe(cap);
+    expect(calcEmployerBurden(300_000).pension).toBe(cap);
+    expect(calcEmployerBurden(9_999_999).pension).toBe(cap);
+  });
+
+  it("최저 급距 아래도 표 제1급(1,500)으로 떨어진다", () => {
+    expect(calcEmployerBurden(1_000).pension).toBe(Math.round(1_500 * 0.06)); // 90
   });
 });

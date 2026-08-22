@@ -22,7 +22,7 @@ const DEFAULT_SERVICES: ServiceRow[] = [
 
 describe("經營損益模擬器 검증 앵커 (매출 가중 확인)", () => {
   const mix = calcServiceMix(DEFAULT_SERVICES);
-  const fixed = 40_000 + calcStaffCost(1, 32_000).total + 10_000; // 88,445
+  const fixed = 40_000 + calcStaffCost(1, 32_000).total + 10_000; // 88,523 (v26: 勞退 급距 조회)
   const variableRatio = mix.materialRate + 0.35 + 0.02;
   const bep = calcBep(fixed, variableRatio);
   const dailyNeed = calcDailyCustomers(bep, mix.avgTicket, 26);
@@ -37,8 +37,9 @@ describe("經營損益模擬器 검증 앵커 (매출 가중 확인)", () => {
     expect(Math.round(variableRatio * 1000) / 10).toBe(63.6);
   });
 
-  it("BEP ≈ NT$ 243,125 (지시서 추정 242,981은 재료율 26.6% 반올림값 — 정확 계산 기준)", () => {
-    expect(Math.round(bep)).toBe(243_125);
+  // v26: 고용주 勞退가 급距 조회로 바뀌어 월 고정비가 88,445 → 88,523 이 되면서 BEP 도 올라갔다.
+  it("BEP ≈ NT$ 243,340 (지시서 추정 242,981은 재료율 26.6% 반올림값 — 정확 계산 기준)", () => {
+    expect(Math.round(bep)).toBe(243_340);
   });
 
   it("일 필요 객수 ≈ 6.3 / 캐파 6.6명/일", () => {
@@ -77,7 +78,7 @@ describe("bizSimImport", () => {
       monthlyRent: 40_000, staffCount: 1, staffSalary: 32_000,
       utilities: 8_000, marketing: 5_000, otherFixed: 5_000,
     });
-    expect(mapOpeningCostToMonthlyFixed(raw)).toBe(96_445); // 40,000+38,445+18,000
+    expect(mapOpeningCostToMonthlyFixed(raw)).toBe(96_523); // 40,000+38,523+18,000 (v26 勞退 급距)
     expect(mapOpeningCostToMonthlyFixed(null)).toBeNull();
   });
 });

@@ -142,7 +142,9 @@ export const toolStrings = {
   ocStaffBurdenTitle: { zh: "每人雇主負擔（自動加算）", ko: "1인당 고용주 부담 (자동 가산)" },
   ocBurdenLabor: { zh: "勞保雇主分（70%）", ko: "노보 고용주분 (70%)" },
   ocBurdenHealth: { zh: "健保雇主分（60% × 平均眷屬係數 1.56）", ko: "건보 고용주분 (60% × 평균 피부양 계수 1.56)" },
-  ocBurdenPension: { zh: "勞退提繳（6%）", ko: "노퇴 적립 (6%)" },
+  // 6% 가 곱해지는 대상은 화면 위의 月薪 이 아니라 月提繳分級表의 급距다.
+  // 라벨에 그 기준을 밝히지 않으면 사용자가 月薪×6% 로 검산했을 때 값이 안 맞는다.
+  ocBurdenPension: { zh: "勞退提繳（月提繳工資 6%）", ko: "노퇴 적립 (제교급여의 6%)" },
   ocStaffTotalCost: { zh: "實際人事總負擔", ko: "실제 인건비 총부담" },
   ocUtilities: { zh: "水電・通訊（NT$）", ko: "수도광열·통신 (NT$)" },
   ocMarketing: { zh: "行銷費用（NT$）", ko: "마케팅 (NT$)" },

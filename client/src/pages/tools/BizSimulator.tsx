@@ -16,6 +16,7 @@ import {
   calcProductContribution,
   calcScenarios,
   calcServiceMix,
+  calcStaffCost,
   normalizeShares,
   type ServiceRow,
 } from "@/lib/openingCostCalc";
@@ -55,9 +56,15 @@ const DEFAULT_SERVICES: ServiceRow[] = [
   { name: "其他", price: 800, materialPct: 10, sharePct: 5, minutes: 40 },
 ];
 
+// 開店成本試算器의 기본 시나리오(월세 40,000 + 직원 1명 32,000 + 水電 8,000
+// + 마케팅 5,000 + 기타 5,000)에서 나오는 월 고정비를 시드로 쓴다.
+// **리터럴로 박지 않는다** — 요율·급距가 바뀌면 조용히 낡는다.
+// 실제로 96,445 로 박혀 있다가 v26(勞退 급距 조회 전환)에서 96,523 이 되며 어긋났다.
+const DEFAULT_MONTHLY_FIXED = 40_000 + calcStaffCost(1, 32_000).total + 8_000 + 5_000 + 5_000;
+
 const DEFAULTS: SavedInputs = {
   services: DEFAULT_SERVICES,
-  monthlyFixed: 96_445,
+  monthlyFixed: DEFAULT_MONTHLY_FIXED,
   commissionPct: 35,
   cardFeePct: 2,
   workDays: 26,

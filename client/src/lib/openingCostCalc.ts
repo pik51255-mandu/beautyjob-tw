@@ -4,10 +4,14 @@ import {
   HEALTH_INSURANCE_EMPLOYER_SHARE,
   HEALTH_INSURANCE_RATE,
   LABOR_INSURANCE_MAX,
-  PENSION_EMPLOYER_MAX_BASE,
   PENSION_EMPLOYER_RATE,
 } from "./rates2026";
-import { laborEmployerPremium, matchHealthBracket, matchInsuredBracket } from "./salaryCalc";
+import {
+  laborEmployerPremium,
+  matchHealthBracket,
+  matchInsuredBracket,
+  matchPensionBracket,
+} from "./salaryCalc";
 
 // ─── 월급제 직원 1인당 고용주 부담 ────────────────────────────────────────────
 export type EmployerBurden = {
@@ -33,11 +37,10 @@ export function calcEmployerBurden(monthlySalary: number): EmployerBurden {
       HEALTH_INSURANCE_AVG_DEPENDENTS_FACTOR
   );
 
-  // 勞退 제교는 실급여 기준 (상한 150,000).
-  // ⚠️ 官方은 月提繳分級表의 급距로 잡는다(32,000 → 33,300). 여기는 아직 실급여
-  //    그대로라 급距에 못 미치는 만큼 과소 계산된다. 신규 발견분이라 v25 에서는
-  //    보고만 하고 고치지 않았다 — content-factory/legal_citations.md 참조.
-  const pension = Math.round(Math.min(monthlySalary, PENSION_EMPLOYER_MAX_BASE) * PENSION_EMPLOYER_RATE);
+  // 勞退 제교는 月提繳分級表의 급距로 잡는다 — 실급여 그대로가 아니다.
+  // 32,000 이면 제교공자는 33,300 이고, 6% 는 1,998 이다(1,920 아님).
+  // 급여 계산기의 自提와 같은 표를 쓴다(insuranceTables2026 勞退 62급) — 산식 이중화 금지.
+  const pension = Math.round(matchPensionBracket(monthlySalary) * PENSION_EMPLOYER_RATE);
   return { labor, health, pension, total: labor + health + pension };
 }
 
