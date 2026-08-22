@@ -124,22 +124,39 @@ describe("ItemList", () => {
   });
 });
 
-describe("IndexNow — 준비만, 발사 금지", () => {
-  it("기본 비활성이다", () => {
-    expect(INDEXNOW_ENABLED).toBe(false);
+describe("IndexNow — 2026-08-22 활성화(v19 4번)", () => {
+  it("활성 상태다 — 도메인 연결 + noindex 해제 후 켰다", () => {
+    expect(INDEXNOW_ENABLED).toBe(true);
   });
 
-  // M11: 플래그를 켜는 순간 이 테스트가 실제로 IndexNow 로 POST 하는 사고를 막는다.
-  // fetch 를 반드시 스텁하고, 호출 0회임을 함께 단언한다.
-  it("비활성일 때 네트워크 호출 없이 즉시 반환한다", async () => {
+  // M11: 테스트가 실제로 IndexNow 로 POST 하는 사고를 막는다.
+  // 플래그가 켜진 뒤에도 fetch 는 반드시 스텁한다 (v19 4번에서 활성화됨).
+  it("URL 이 비면 네트워크 호출 없이 즉시 반환한다", async () => {
     const spy = vi.spyOn(globalThis, "fetch").mockRejectedValue(
       new Error("테스트에서 실제 네트워크 호출이 발생했다")
     );
     try {
-      const r = await pingIndexNow(ORIGIN, ["https://example.tw/a"]);
+      const r = await pingIndexNow(ORIGIN, []);
       expect(spy).not.toHaveBeenCalled();
       expect(r.sent).toBe(false);
-      if (!r.sent) expect(r.reason).toContain("INDEXNOW_ENABLED=false");
+      if (!r.sent) expect(r.reason).toContain("URL 없음");
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("활성 상태에서는 keyLocation 과 host 를 담아 POST 한다", async () => {
+    const spy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(null, { status: 200 })
+    );
+    try {
+      const r = await pingIndexNow(ORIGIN, ["https://example.tw/a"]);
+      expect(spy).toHaveBeenCalledOnce();
+      const body = JSON.parse(String(spy.mock.calls[0][1]?.body));
+      expect(body.host).toBe(new URL(ORIGIN).host);
+      expect(body.keyLocation).toBe(`${ORIGIN}/${INDEXNOW_KEY}.txt`);
+      expect(body.urlList).toEqual(["https://example.tw/a"]);
+      expect(r.sent).toBe(true);
     } finally {
       spy.mockRestore();
     }

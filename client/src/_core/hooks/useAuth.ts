@@ -45,10 +45,9 @@ export function useAuth(options?: UseAuthOptions) {
   }, [logoutMutation, utils]);
 
   const state = useMemo(() => {
-    localStorage.setItem(
-      "manus-runtime-user-info",
-      JSON.stringify(meQuery.data)
-    );
+    // (v19 3c) localStorage["manus-runtime-user-info"] 기록 제거.
+    // vite-plugin-manus-runtime(=유일한 소비자)이 사라진 뒤로 아무도 읽지 않는 죽은 기록이었고,
+    // 로그인 사용자 정보를 매 상태 변화마다 localStorage 에 남기고 있었다.
     return {
       user: meQuery.data ?? null,
       loading: meQuery.isLoading || logoutMutation.isPending,

@@ -110,12 +110,12 @@ temp/
 .webdev/
 
 # Manus version file (auto-generated, not part of source)
-client/public/__manus__/version.json
 .project-config.json
 
 # Python bytecode (content-factory 파서 스크립트)
 __pycache__/
 *.pyc
 
-# Manus 디버그 로컬 로그 (v15 0-7)
+# 개발용 디버그 수집기 로그 (v15 0-7 / v19 3c 로 경로 개명)
 .manus-logs/
+.devtools-logs/

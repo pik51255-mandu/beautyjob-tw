@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEVELOPERS, SELECTABLE_PERCENTS, calcMix, diagnoseLift, isUndertoneRisky, needsNaturalBase,
   percentToVol, railForPercent, resolvePercent, safetyRails, undertoneAt,
+  legalNoteForPercent,
 } from "./colorMixCalc";
 
 describe("雙氧乳 %↔vol 대응 (02 바이블 1-3)", () => {
@@ -267,5 +268,35 @@ describe("v12 지정 테스트 케이스 3종", () => {
     expect(v).toEqual({ kind: "ok", lift: 1, percent: 6 });
     const rails = safetyRails(v, "50+", "自然", 6);
     expect(rails.map((r) => r.id)).toEqual(["grey"]);
+  });
+});
+
+describe("法規 사실과 시술 권고의 분리 (v19 2번)", () => {
+  it("12% 를 고르면 法規 사실이 따로 나온다", () => {
+    const note = legalNoteForPercent(12);
+    expect(note).toContain("現行法規上限");
+    expect(note).toContain("40 volumes");
+    expect(note).toContain("編號167");
+  });
+
+  it("法規 사실은 적용 범위를 반드시 밝힌다 — 범위 없는 단정 금지", () => {
+    expect(legalNoteForPercent(12)).toContain("染髮、燙髮產品");
+    expect(legalNoteForPercent(12)).toContain("含釋出之H2O2");
+  });
+
+  it("法規 사실 안에 시술 권고를 섞지 않는다", () => {
+    const note = legalNoteForPercent(12)!;
+    expect(note).not.toContain("頭皮");
+    expect(note).not.toContain("距離");
+  });
+
+  it("시술 권고 안에 法規 표현을 섞지 않는다", () => {
+    const rail = railForPercent(12)!;
+    expect(rail.textZh).not.toContain("法規");
+    expect(rail.textZh).toContain("頭皮");
+  });
+
+  it("12% 미만에서는 法規 사실이 나오지 않는다", () => {
+    for (const p of [3, 6, 9]) expect(legalNoteForPercent(p)).toBeNull();
   });
 });

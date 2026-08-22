@@ -177,7 +177,7 @@ export function itemListLd(
   };
 }
 
-// ─── IndexNow (준비만 — 발사 금지) ───────────────────────────────────────────
+// ─── IndexNow (2026-08-22 활성화) ───────────────────────────────────────────
 
 /**
  * IndexNow 키. 사양상 공개적으로 서빙해야 하는 값이라 비밀이 아니다
@@ -186,10 +186,12 @@ export function itemListLd(
 export const INDEXNOW_KEY = "9f2c4b7e8a1d40f3b6c5e2d7a8f14b03";
 
 /**
- * 활성화 스위치. 도메인 연결 전까지 false 를 유지한다 —
- * noindex 상태에서 핑을 보내면 색인 요청과 색인 차단이 모순된다.
+ * 활성화 스위치. 2026-08-22 도메인 연결 + noindex 해제 완료로 **켰다**(v19 4번).
+ * 켜기 전 조건 두 가지가 모두 충족됐다 —
+ *  ① 페이지가 index,follow 다 (noindex 상태에서 핑을 보내면 색인 요청과 차단이 모순된다)
+ *  ② 키 검증 파일이 공개 서빙된다 (`/{INDEXNOW_KEY}.txt` → 200, salonPages.ts:622)
  */
-export const INDEXNOW_ENABLED = false;
+export const INDEXNOW_ENABLED = true;
 
 export type IndexNowResult =
   | { sent: false; reason: string }

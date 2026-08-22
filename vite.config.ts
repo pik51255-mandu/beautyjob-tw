@@ -6,12 +6,12 @@ import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 
 // =============================================================================
-// Manus Debug Collector - Vite Plugin
+// Dev Debug Collector - Vite Plugin (개발 전용)
 // Writes browser logs directly to files, trimmed when exceeding size limit
 // =============================================================================
 
 const PROJECT_ROOT = import.meta.dirname;
-const LOG_DIR = path.join(PROJECT_ROOT, ".manus-logs");
+const LOG_DIR = path.join(PROJECT_ROOT, ".devtools-logs");
 const MAX_LOG_SIZE_BYTES = 1 * 1024 * 1024; // 1MB per log file
 const TRIM_TARGET_BYTES = Math.floor(MAX_LOG_SIZE_BYTES * 0.6); // Trim to 60% to avoid constant re-trimming
 
@@ -69,13 +69,15 @@ function writeToLogFile(source: LogSource, entries: unknown[]) {
 
 /**
  * Vite plugin to collect browser debug logs
- * - POST /__manus__/logs: Browser sends logs, written directly to files
+ * - GET  /__devtools__/debug-collector.js: 디스크(tools/devtools/)에서 직접 서빙 —
+ *   client/public/ 에 두면 프로덕션 번들에 그대로 실려 나간다(v19 3c).
+ * - POST /__devtools__/logs: Browser sends logs, written directly to files
  * - Files: browserConsole.log, networkRequests.log, sessionReplay.log
  * - Auto-trimmed when exceeding 1MB (keeps newest entries)
  */
-function vitePluginManusDebugCollector(): Plugin {
+function vitePluginDevDebugCollector(): Plugin {
   return {
-    name: "manus-debug-collector",
+    name: "dev-debug-collector",
 
     transformIndexHtml(html) {
       if (process.env.NODE_ENV === "production") {
@@ -87,7 +89,7 @@ function vitePluginManusDebugCollector(): Plugin {
           {
             tag: "script",
             attrs: {
-              src: "/__manus__/debug-collector.js",
+              src: "/__devtools__/debug-collector.js",
               defer: true,
             },
             injectTo: "head",
@@ -97,8 +99,20 @@ function vitePluginManusDebugCollector(): Plugin {
     },
 
     configureServer(server: ViteDevServer) {
-      // POST /__manus__/logs: Browser sends logs (written directly to files)
-      server.middlewares.use("/__manus__/logs", (req, res, next) => {
+      // GET /__devtools__/debug-collector.js — public/ 밖 디스크에서 서빙한다.
+      server.middlewares.use("/__devtools__/debug-collector.js", (_req, res) => {
+        const file = path.join(PROJECT_ROOT, "tools", "devtools", "debug-collector.js");
+        if (!fs.existsSync(file)) {
+          res.writeHead(404);
+          res.end("// dev debug collector not found");
+          return;
+        }
+        res.writeHead(200, { "Content-Type": "text/javascript; charset=utf-8" });
+        res.end(fs.readFileSync(file, "utf-8"));
+      });
+
+      // POST /__devtools__/logs: Browser sends logs (written directly to files)
+      server.middlewares.use("/__devtools__/logs", (req, res, next) => {
         if (req.method !== "POST") {
           return next();
         }
@@ -151,7 +165,7 @@ function vitePluginManusDebugCollector(): Plugin {
 
 // vitePluginManusRuntime 제거 (2026-08-20 정찰 확정): Manus 비주얼 에디터 전용 브릿지로
 // 독립 배포에선 전 기능 도먼트. index.html 에 366KB 인라인 + 무인증 postMessage 채널만 남기므로 적출.
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusDebugCollector()];
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginDevDebugCollector()];
 
 export default defineConfig({
   plugins,

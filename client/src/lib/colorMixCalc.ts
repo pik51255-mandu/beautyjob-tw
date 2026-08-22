@@ -172,9 +172,11 @@ export function safetyRails(
 /**
  * 실제로 쓸 雙氧乳 濃度(%).
  *
- * 12% 는 선택지에서 빼지 않는다. 다만 고르면 두피 이격 경고(railForPercent)가 붙는다.
- * 12% 가 대만 법정 상한인지는 **미확인** — content-factory/legal_citations.md 참조.
- * 확인 전까지 어떤 문구에서도 "법정 상한"이라고 쓰지 않는다.
+ * 12% 는 선택지에서 빼지 않는다. 고르면 두 가지가 함께 붙는다 —
+ * 法規 사실(legalNoteForPercent)과 시술 권고(railForPercent). **둘을 한 문장에 합치지 않는다.**
+ * 법규는 "이 이상은 팔 수 없다"는 사실이고, 두피 이격은 "이 濃度면 이렇게 발라라"는 권고다.
+ * 근거: 〈化粧品成分使用限制表〉編號167 (食藥署 開放資料, 衛授食字第1131602014號).
+ *       content-factory/legal_citations.md 「현행」 등재.
  *
  * override 가 null 이면 진단 권장값을 쓴다. 漂髮 판정에는 권장값이 없으므로 null 이 될 수 있다.
  */
@@ -183,8 +185,19 @@ export function resolvePercent(verdict: LiftVerdict, override: number | null): n
   return verdict.kind === "ok" ? verdict.percent : null;
 }
 
-/** 최고 濃度를 직접 선택했을 때의 레일. 판정은 percent 로만 한다. */
+/** 최고 濃度를 직접 선택했을 때의 레일 — **시술 권고**. 판정은 percent 로만 한다. */
 export function railForPercent(percent: number): Rail | null {
   if (percent >= 12) return { id: "pct12", textZh: "使用 12% 時，請與頭皮保持距離塗抹。" };
+  return null;
+}
+
+/**
+ * 최고 濃度를 골랐을 때 함께 보여줄 **法規 사실**. 사실 서술만 하고 권고를 섞지 않는다.
+ * 시술 권고는 railForPercent() 가 따로 담당한다.
+ */
+export function legalNoteForPercent(percent: number): string | null {
+  if (percent >= 12) {
+    return "12%（40 volumes）＝現行法規上限（染髮、燙髮產品，含釋出之H2O2，〈化粧品成分使用限制表〉編號167）。";
+  }
   return null;
 }

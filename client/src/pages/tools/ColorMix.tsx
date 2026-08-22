@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { detectToolLang, makeT } from "@/lib/toolStrings";
 import {
   DEVELOPERS, GREY_OPTIONS, SELECTABLE_PERCENTS, TONE_FAMILIES,
-  calcMix, diagnoseLift, percentToVol, railForPercent, resolvePercent, safetyRails, undertoneAt,
+  calcMix, diagnoseLift, legalNoteForPercent, percentToVol, railForPercent, resolvePercent, safetyRails, undertoneAt,
   type GreyRatio, type HairLength, type HairVolume, type ToneFamily,
 } from "@/lib/colorMixCalc";
 
@@ -121,6 +121,8 @@ export default function ColorMix() {
   );
   const pctRail = usedPercent != null ? railForPercent(usedPercent) : null;
   const allRails = pctRail ? [...rails, pctRail] : rails;
+  // 法規 사실은 안전 레일(시술 권고)과 섞지 않고 濃度 선택지 바로 아래에 따로 놓는다.
+  const legalNote = usedPercent != null ? legalNoteForPercent(usedPercent) : null;
 
   const greyLabels = Object.fromEntries(GREY_OPTIONS.map((g) => [g.value, g.labelZh]));
 
@@ -260,6 +262,9 @@ export default function ColorMix() {
               </button>
             ))}
           </div>
+          {legalNote && (
+            <p className="mt-3 text-xs text-muted-foreground leading-relaxed">{legalNote}</p>
+          )}
         </div>
       </section>
 
