@@ -79,6 +79,7 @@ while i < len(lines):
     para = " ".join(buf)
     cls = ""
     if para.startswith("**직역**"): cls = ' class="lit"'
+    elif para.startswith("**보기**"): cls = ' class="opt"'
     elif para.startswith("**정답"): cls = ' class="ans"'
     elif para.startswith("→ 관련 이론"): cls = ' class="rel"'
     out.append(f"<p{cls}>{inline(para)}</p>")
@@ -110,6 +111,9 @@ blockquote.quote-q { margin: 0 0 13px; padding: 14px 16px; background: #fbfaf5;
 blockquote.quote-vs { margin: 12px 0 13px; padding: 13px 15px; background: #fff7ed;
     border-left: 5px solid #d97706; border-radius: 0 8px 8px 0; font-size: 13.5pt; line-height: 1.8; }
 p.lit { color: #4a515f; font-size: 13.5pt; margin: 0 0 8px; }
+p.opt { color: #2f3542; font-size: 13pt; line-height: 1.9; margin: 0 0 10px;
+        padding: 10px 12px; background: #f7f8fa; border-radius: 7px;
+        border: 1px solid #e6e9ee; page-break-inside: avoid; }
 p.ans { font-size: 16pt; font-weight: 700; color: #b0122f; margin: 0 0 10px; }
 p.rel { font-size: 12.5pt; color: #5b6270; margin-top: 10px; }
 p.rel a { color: #5b6270; }
@@ -128,10 +132,10 @@ body_html = chr(10).join(out).replace("<p>題目來源：", '<p class="src">題�
 
 doc = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <title>{html.escape(title)}</title><style>{CSS}</style></head><body>
-<div class="cover"><div class="badge">검수판 · 내부용</div>
+<div class="cover"><div class="badge">검수판 v2.2 · 내부용</div>
 <h1>{html.escape(title)}</h1>
 <div class="meta">題庫 {html.escape(fm.get('exam_bank',''))}　·　slug <code>{html.escape(fm.get('slug',''))}</code><br>
-문항 30 · 한국어 마스터 (번체 번역 전)　·　2026-08-22</div></div>
+문항 30 · 한국어 마스터 (번체 번역 전) · 용어 병기 + 판정 반영　·　2026-08-22</div></div>
 {body_html}
 </body></html>"""
 open(dst, "w", encoding="utf-8").write(doc)
