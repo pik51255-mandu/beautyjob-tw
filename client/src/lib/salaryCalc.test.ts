@@ -4,8 +4,17 @@ import {
   calcDeductions,
   calcDesignerGross,
   calcNet,
+  matchHealthBracket,
   matchInsuredBracket,
+  matchPensionBracket,
 } from "./salaryCalc";
+import {
+  HEALTH_INSURANCE_TABLE,
+  LABOR_INSURANCE_TABLE,
+  PENSION_TABLE,
+  RATE_ROC_YEAR,
+  RATE_YEAR,
+} from "./insuranceTables2026";
 import {
   HEALTH_INSURANCE_MAX,
   INSURED_SALARY_BRACKETS,
@@ -156,5 +165,188 @@ describe("助理 월급 45,000 (실기기 제보 케이스)", () => {
       const used = calcDeductions({ insuredBracket: displayed, dependents: 0, pensionSelfRate: 0 });
       expect(used.laborInsurance).toBe(Math.round(Math.min(displayed, 45_800) * 0.125 * 0.2));
     }
+  });
+});
+
+// ─── v24 A+B+C — 제도별 분급표 분리 ──────────────────────────────────────────
+// 勞保·健保·勞退가 각자 다른 표를 쓴다. 예전에는 勞保 표 하나로 셋을 계산해서
+// 45,800 초과 구간(設計師)에서 健保·勞退가 과소 계산됐다.
+describe("분급표 분리 (v24)", () => {
+  it("세 표는 서로 다르다 — 급수와 상한", () => {
+    expect(INSURED_SALARY_BRACKETS).toHaveLength(11);
+    expect(HEALTH_INSURANCE_TABLE.amounts).toHaveLength(58);
+    expect(PENSION_TABLE.amounts).toHaveLength(62);
+    expect(INSURED_SALARY_BRACKETS.at(-1)).toBe(45_800);
+    expect(HEALTH_INSURANCE_TABLE.amounts.at(-1)).toBe(313_000);
+    expect(PENSION_TABLE.amounts.at(-1)).toBe(150_000);
+  });
+
+  it("메타는 연도·시행일·출처를 갖는다 (UI 연도 라벨의 유일한 출처)", () => {
+    for (const t of [LABOR_INSURANCE_TABLE, HEALTH_INSURANCE_TABLE, PENSION_TABLE]) {
+      expect(t.year).toBe(2026);
+      expect(t.rocYear).toBe(115);
+      expect(t.effectiveFrom).toBe("2026-01-01");
+      expect(t.sourceUrl).toMatch(/^https:\/\//);
+    }
+    expect(RATE_YEAR).toBe(2026);
+    expect(RATE_ROC_YEAR).toBe(115);
+  });
+
+  it("세 표 모두 오름차순이고 중복이 없다", () => {
+    for (const amounts of [
+      INSURED_SALARY_BRACKETS,
+      HEALTH_INSURANCE_TABLE.amounts,
+      PENSION_TABLE.amounts,
+    ]) {
+      for (let i = 1; i < amounts.length; i++) expect(amounts[i]).toBeGreaterThan(amounts[i - 1]);
+    }
+  });
+
+  it("45,800 이하에서는 勞保·健保 표가 같다 (助理 구간 결과 불변의 근거)", () => {
+    const health = HEALTH_INSURANCE_TABLE.amounts.filter((a) => a <= 45_800);
+    expect(health).toEqual([...INSURED_SALARY_BRACKETS]);
+  });
+});
+
+describe("경계값 — 급距 매칭", () => {
+  it("45,800 직전·정확·초과", () => {
+    expect(matchInsuredBracket(43_901)).toBe(45_800);
+    expect(matchInsuredBracket(45_800)).toBe(45_800);
+    expect(matchInsuredBracket(45_801)).toBe(45_800); // 勞保는 여기서 멈춘다
+    expect(matchHealthBracket(45_800)).toBe(45_800);
+    expect(matchHealthBracket(45_801)).toBe(48_200);  // 健保는 계속 올라간다
+    expect(matchPensionBracket(45_801)).toBe(48_200);
+  });
+
+  it("健保 상한 등급 313,000", () => {
+    expect(matchHealthBracket(312_999)).toBe(313_000);
+    expect(matchHealthBracket(313_000)).toBe(313_000);
+    expect(matchHealthBracket(9_999_999)).toBe(313_000);
+  });
+
+  it("勞退 캡 150,000", () => {
+    expect(matchPensionBracket(147_901)).toBe(150_000);
+    expect(matchPensionBracket(150_000)).toBe(150_000);
+    expect(matchPensionBracket(9_999_999)).toBe(150_000);
+  });
+
+  it("최저 급距 아래는 제1급", () => {
+    expect(matchInsuredBracket(0)).toBe(29_500);
+    expect(matchHealthBracket(1)).toBe(29_500);
+    expect(matchPensionBracket(1)).toBe(1_500);
+  });
+});
+
+describe("경계값 — 健保 眷屬 3口 캡 (健保法 第18條第2項)", () => {
+  const at = (dependents: number) =>
+    calcDeductions({ insuredBracket: 45_800, grossSalary: 45_000, dependents, pensionSelfRate: 0 });
+
+  it("0口 = 본인만 710", () => {
+    expect(at(0).healthInsurance).toBe(710);
+  });
+
+  it("3口 = 본인+3 = 710 × 4 = 2,840 (官方 「本人+3眷口」 열과 일치)", () => {
+    expect(at(3).healthInsurance).toBe(2_840);
+  });
+
+  it("4口 이상은 3口로 잡힌다 — 더 늘지 않는다", () => {
+    expect(at(4).healthInsurance).toBe(at(3).healthInsurance);
+    expect(at(10).healthInsurance).toBe(at(3).healthInsurance);
+    expect(at(999).healthInsurance).toBe(at(3).healthInsurance);
+  });
+
+  it("음수·소수는 0口로 떨어진다", () => {
+    expect(at(-5).healthInsurance).toBe(710);
+    expect(at(0.9).healthInsurance).toBe(710);
+  });
+});
+
+describe("助理 45,000 회귀 — 표 분리 뒤에도 값이 그대로다", () => {
+  it("勞保 1,145 / 健保 710 / 실수령 43,145", () => {
+    const gross = calcAssistantGross({ salary: 45_000, allowance: 0 });
+    const d = calcDeductions({
+      insuredBracket: matchInsuredBracket(gross),
+      grossSalary: gross,
+      dependents: 0,
+      pensionSelfRate: 0,
+    });
+    expect(d.laborInsurance).toBe(1_145);
+    expect(d.healthInsurance).toBe(710);
+    expect(d.total).toBe(1_855);
+    expect(calcNet(gross, d)).toBe(43_145);
+  });
+
+  it("助理 급여대 전 구간에서 표 분리 전후 결과가 같다", () => {
+    for (let salary = 29_000; salary <= 45_800; salary += 100) {
+      const bracket = matchInsuredBracket(salary);
+      const now = calcDeductions({ insuredBracket: bracket, grossSalary: salary, dependents: 0, pensionSelfRate: 0.06 });
+      const before = calcDeductions({ insuredBracket: bracket, dependents: 0, pensionSelfRate: 0.06 });
+      expect(now).toEqual(before);
+    }
+  });
+});
+
+describe("設計師 고소득 — 분리 효과 (v22 §2 불일치 B·C 해소)", () => {
+  it("총급여 60,000: 健保가 45,800 이 아니라 60,800 기준", () => {
+    const d = calcDeductions({
+      insuredBracket: matchInsuredBracket(60_000), // 45,800 (勞保는 캡)
+      grossSalary: 60_000,
+      dependents: 0,
+      pensionSelfRate: 0,
+    });
+    expect(d.laborInsurance).toBe(1_145);          // 勞保는 그대로 캡
+    expect(d.healthInsurance).toBe(943);           // 60,800 × 5.17% × 30%
+    expect(matchHealthBracket(60_000)).toBe(60_800);
+  });
+
+  it("총급여 100,000·自提 6%: 勞退가 45,800 이 아니라 101,100 기준", () => {
+    const d = calcDeductions({
+      insuredBracket: matchInsuredBracket(100_000),
+      grossSalary: 100_000,
+      dependents: 0,
+      pensionSelfRate: 0.06,
+    });
+    expect(matchPensionBracket(100_000)).toBe(101_100);
+    expect(d.pensionSelf).toBe(Math.round(101_100 * 0.06)); // 6,066
+  });
+});
+
+// 官方 「勞工保險普通事故保險費及就業保險保險費合計之被保險人與投保單位分擔金額表
+// (自115年1月1日起適用)」 30일(만근) 열 — https://www.bli.gov.tw/Files/25697 (ODS 원문 셀값)
+describe("官方 분담금액표 대조 — 勞保 11급 전량", () => {
+  /** [투보급距, 官方 본인부담액] */
+  const OFFICIAL: [number, number][] = [
+    [29_500, 738], [30_300, 758], [31_800, 795], [33_300, 833],
+    [34_800, 870], [36_300, 908], [38_200, 955], [40_100, 1_002],
+    [42_000, 1_050], [43_900, 1_098], [45_800, 1_145],
+  ];
+
+  /**
+   * 40,100 한 급距만 官方값이 계산식과 1원 다르다.
+   * 40,100 × 12.5% × 20% = 1,002.5 이고, 나머지 .5 급距(29,500·30,300·33,300·36,300·
+   * 43,900)는 전부 올림인데 이것만 내림돼 있다. ODS 의 office:value 속성에서 직접 읽은
+   * 값이라 파싱 오류가 아니다. 官方 표의 특이값으로 보고 로직은 손대지 않았다 —
+   * 판정 대기(content-factory/legal_citations.md 참조).
+   */
+  const KNOWN_OFFICIAL_DIVERGENCE = new Map<number, number>([[40_100, 1_002]]);
+
+  it("10개 급距는 官方 표와 원 단위까지 같다", () => {
+    for (const [bracket, expected] of OFFICIAL) {
+      if (KNOWN_OFFICIAL_DIVERGENCE.has(bracket)) continue;
+      const d = calcDeductions({ insuredBracket: bracket, grossSalary: bracket, dependents: 0, pensionSelfRate: 0 });
+      expect(d.laborInsurance).toBe(expected);
+    }
+  });
+
+  it("40,100 급距는 官方 1,002 vs 계산 1,003 — 알려진 1원 차이", () => {
+    const d = calcDeductions({ insuredBracket: 40_100, grossSalary: 40_100, dependents: 0, pensionSelfRate: 0 });
+    expect(d.laborInsurance).toBe(1_003);                       // 현재 로직
+    expect(KNOWN_OFFICIAL_DIVERGENCE.get(40_100)).toBe(1_002);  // 官方 표
+    // 차이가 1원을 넘어가면 알아채야 한다.
+    expect(Math.abs(d.laborInsurance - 1_002)).toBe(1);
+  });
+
+  it("대조 대상이 표 전량이다 (급距를 빠뜨리지 않았다)", () => {
+    expect(OFFICIAL.map(([b]) => b)).toEqual([...INSURED_SALARY_BRACKETS]);
   });
 });

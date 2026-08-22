@@ -16,11 +16,13 @@ import {
 import { toast } from "sonner";
 import { detectToolLang, makeT } from "@/lib/toolStrings";
 import { INSURED_SALARY_BRACKETS } from "@/lib/rates2026";
+import { RATE_YEAR } from "@/lib/insuranceTables2026";
 import {
   calcAssistantGross,
   calcDeductions,
   calcDesignerGross,
   calcNet,
+  HEALTH_DEPENDENT_CAP,
   matchInsuredBracket,
   type PerformanceTier,
 } from "@/lib/salaryCalc";
@@ -160,10 +162,12 @@ export default function SalaryCalculator() {
     () =>
       calcDeductions({
         insuredBracket,
+        // 健保·勞退는 勞保 급距가 아니라 실급여에서 각자의 분급표로 잡는다.
+        grossSalary: gross,
         dependents: state.dependents,
         pensionSelfRate: state.pensionPct / 100,
       }),
-    [insuredBracket, state.dependents, state.pensionPct]
+    [insuredBracket, gross, state.dependents, state.pensionPct]
   );
   const net = calcNet(gross, deductions);
 
@@ -380,7 +384,9 @@ export default function SalaryCalculator() {
 
         <div className="grid grid-cols-2 gap-4">
           <Field label={t("dependents")}>
-            <Input inputMode="numeric" value={state.dependents || ""} placeholder="0" onChange={(e) => set("dependents", Math.min(10, numOr0(e.target.value)))} />
+            {/* 健保法 第18條第2項 — 眷屬은 3口까지만 계산된다. 4명 이상 넣어도 3口로 잡히므로
+                입력 자체를 3 에서 끊는다(넣을 수 있는데 결과가 안 바뀌면 버그로 읽힌다). */}
+            <Input inputMode="numeric" value={state.dependents || ""} placeholder="0" onChange={(e) => set("dependents", Math.min(HEALTH_DEPENDENT_CAP, numOr0(e.target.value)))} />
           </Field>
           <Field label={t("pensionSelfRate")}>
             <Input inputMode="numeric" value={state.pensionPct || ""} placeholder="0" onChange={(e) => set("pensionPct", Math.min(6, numOr0(e.target.value)))} />
@@ -392,7 +398,7 @@ export default function SalaryCalculator() {
       <div className="bg-white rounded-xl border border-border overflow-hidden mb-6">
         <div className="px-6 py-4 border-b border-border flex items-center justify-between">
           <h2 className="font-semibold">{t("resultTitle")}</h2>
-          <Badge variant="secondary" className="text-xs">2026</Badge>
+          <Badge variant="secondary" className="text-xs">{RATE_YEAR}</Badge>
         </div>
         <div className="p-6 space-y-3 text-sm">
           <Row label={t("grossLabel")} value={fmt(gross)} strong />
