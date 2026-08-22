@@ -185,15 +185,9 @@ export default defineConfig({
   },
   server: {
     host: true,
-    allowedHosts: [
-      ".manuspre.computer",
-      ".manus.computer",
-      ".manus-asia.computer",
-      ".manuscomputer.ai",
-      ".manusvm.computer",
-      "localhost",
-      "127.0.0.1",
-    ],
+    // Manus VM 호스트 5종 제거(v24) — Manus 비주얼 에디터를 쓰지 않게 되면서
+    // 이 dev 서버를 외부 VM 도메인으로 열어둘 이유가 사라졌다. 로컬만 허용한다.
+    allowedHosts: ["localhost", "127.0.0.1"],
     fs: {
       strict: true,
       deny: ["**/.*"],
