@@ -6,7 +6,12 @@ export const MIN_WAGE_MONTHLY = 29_500; // 月薪
 export const MIN_WAGE_HOURLY = 196;     // 時薪
 
 // 勞保 (就業保險 1% 포함)
-export const LABOR_INSURANCE_RATE = 0.125;      // 12.5%
+// ⚠️ 官方은 이 12.5% 를 한 번에 곱하지 않는다. 普通事故 11.5% 와 就保 1% 를 각각
+// 반올림해서 더한다 — 분담액은 LABOR_PREMIUM_TABLE(표 조회)이 정본이다.
+// 이 상수는 요율 표기·근사 계산용으로만 남긴다.
+export const LABOR_ORDINARY_RATE = 0.115;       // 普通事故 11.5% (自114.1.1)
+export const EMPLOYMENT_INSURANCE_RATE = 0.01;  // 就業保險 1% (自92.1.1)
+export const LABOR_INSURANCE_RATE = 0.125;      // 12.5% = 위 둘의 합
 export const LABOR_INSURANCE_EMPLOYEE_SHARE = 0.2; // 본인부담 20%
 export const LABOR_INSURANCE_MAX = 45_800;      // 투보급距 상한
 

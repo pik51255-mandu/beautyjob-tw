@@ -4,6 +4,9 @@ import {
   calcDeductions,
   calcDesignerGross,
   calcNet,
+  laborEmployeePremium,
+  laborEmployerPremium,
+  splitLaborPremium,
   matchHealthBracket,
   matchInsuredBracket,
   matchPensionBracket,
@@ -11,6 +14,7 @@ import {
 import {
   HEALTH_INSURANCE_TABLE,
   LABOR_INSURANCE_TABLE,
+  LABOR_PREMIUM_TABLE,
   PENSION_TABLE,
   RATE_ROC_YEAR,
   RATE_YEAR,
@@ -321,29 +325,38 @@ describe("官方 분담금액표 대조 — 勞保 11급 전량", () => {
     [42_000, 1_050], [43_900, 1_098], [45_800, 1_145],
   ];
 
-  /**
-   * 40,100 한 급距만 官方값이 계산식과 1원 다르다.
-   * 40,100 × 12.5% × 20% = 1,002.5 이고, 나머지 .5 급距(29,500·30,300·33,300·36,300·
-   * 43,900)는 전부 올림인데 이것만 내림돼 있다. ODS 의 office:value 속성에서 직접 읽은
-   * 값이라 파싱 오류가 아니다. 官方 표의 특이값으로 보고 로직은 손대지 않았다 —
-   * 판정 대기(content-factory/legal_citations.md 참조).
-   */
-  const KNOWN_OFFICIAL_DIVERGENCE = new Map<number, number>([[40_100, 1_002]]);
-
-  it("10개 급距는 官方 표와 원 단위까지 같다", () => {
+  it("11급 전부 官方 표와 원 단위까지 같다", () => {
     for (const [bracket, expected] of OFFICIAL) {
-      if (KNOWN_OFFICIAL_DIVERGENCE.has(bracket)) continue;
       const d = calcDeductions({ insuredBracket: bracket, grossSalary: bracket, dependents: 0, pensionSelfRate: 0 });
       expect(d.laborInsurance).toBe(expected);
     }
   });
 
-  it("40,100 급距는 官方 1,002 vs 계산 1,003 — 알려진 1원 차이", () => {
-    const d = calcDeductions({ insuredBracket: 40_100, grossSalary: 40_100, dependents: 0, pensionSelfRate: 0 });
-    expect(d.laborInsurance).toBe(1_003);                       // 현재 로직
-    expect(KNOWN_OFFICIAL_DIVERGENCE.get(40_100)).toBe(1_002);  // 官方 표
-    // 차이가 1원을 넘어가면 알아채야 한다.
-    expect(Math.abs(d.laborInsurance - 1_002)).toBe(1);
+  /**
+   * v25 정정: 40,100 은 官方 표의 특이값이 아니었다.
+   * 官方은 12.5% 를 한 번에 곱하지 않고 勞保 11.5% 와 就保 1% 를 각각 반올림해 더한다.
+   * 그 산식이면 본인·단위 22개 값이 전부 맞는다. 단일 12.5% 는 본인 1건·단위 3건이 어긋난다.
+   */
+  it("官方 산식(분리합산)이 본인·단위 22개 값을 전부 재현한다", () => {
+    for (const [bracket, expectedEmployee] of OFFICIAL) {
+      expect(splitLaborPremium(bracket, 0.2)).toBe(expectedEmployee);
+      expect(splitLaborPremium(bracket, 0.7)).toBe(LABOR_PREMIUM_TABLE.byBracket[bracket].employer);
+    }
+  });
+
+  it("단일 12.5% 산식은 4곳에서 어긋난다 — 그래서 표가 정본이다", () => {
+    const mismatches: number[] = [];
+    for (const [bracket, expectedEmployee] of OFFICIAL) {
+      const employer = LABOR_PREMIUM_TABLE.byBracket[bracket].employer;
+      if (Math.round(bracket * 0.125 * 0.2) !== expectedEmployee) mismatches.push(bracket);
+      if (Math.round(bracket * 0.125 * 0.7) !== employer) mismatches.push(bracket);
+    }
+    expect(mismatches.sort((a, b) => a - b)).toEqual([29_500, 38_200, 40_100, 45_800]);
+  });
+
+  it("표에 없는 급距는 官方 산식으로 떨어진다 (UI 밖 호출 방어)", () => {
+    expect(laborEmployeePremium(37_000)).toBe(splitLaborPremium(37_000, 0.2));
+    expect(laborEmployerPremium(37_000)).toBe(splitLaborPremium(37_000, 0.7));
   });
 
   it("대조 대상이 표 전량이다 (급距를 빠뜨리지 않았다)", () => {

@@ -4,10 +4,16 @@ import {
   HEALTH_INSURANCE_RATE,
   INSURED_SALARY_BRACKETS,
   LABOR_INSURANCE_EMPLOYEE_SHARE,
+  LABOR_INSURANCE_EMPLOYER_SHARE,
   LABOR_INSURANCE_MAX,
-  LABOR_INSURANCE_RATE,
+  LABOR_ORDINARY_RATE,
+  EMPLOYMENT_INSURANCE_RATE,
 } from "./rates2026";
-import { HEALTH_INSURANCE_TABLE, PENSION_TABLE } from "./insuranceTables2026";
+import {
+  HEALTH_INSURANCE_TABLE,
+  LABOR_PREMIUM_TABLE,
+  PENSION_TABLE,
+} from "./insuranceTables2026";
 
 /** 健保法 第18條第2項 「前項眷屬之保險費，由被保險人繳納；超過三口者，以三口計」 */
 export const HEALTH_DEPENDENT_CAP = 3;
@@ -35,6 +41,28 @@ export function matchHealthBracket(grossSalary: number): number {
 /** 勞退 월제교공자 — 또 다른 표(62급, 상한 150,000)를 쓴다. */
 export function matchPensionBracket(grossSalary: number): number {
   return matchBracket(PENSION_TABLE.amounts, grossSalary);
+}
+
+// ─── 勞保 분담액 ──────────────────────────────────────────────────────────────
+/**
+ * 官方 분담금액표에 금액이 있으면 **표가 정본**이다. 산식으로 다시 계산하지 않는다.
+ * 표에 없는 급距(UI 밖에서 임의 값이 들어온 경우)만 官方과 같은 방식으로 계산한다 —
+ * 12.5% 를 한 번에 곱하는 게 아니라 勞保 11.5% 와 就保 1% 를 각각 반올림해 더한다.
+ */
+export function laborEmployeePremium(bracket: number): number {
+  return LABOR_PREMIUM_TABLE.byBracket[bracket]?.employee ?? splitLaborPremium(bracket, LABOR_INSURANCE_EMPLOYEE_SHARE);
+}
+
+export function laborEmployerPremium(bracket: number): number {
+  return LABOR_PREMIUM_TABLE.byBracket[bracket]?.employer ?? splitLaborPremium(bracket, LABOR_INSURANCE_EMPLOYER_SHARE);
+}
+
+/** 官方 산식 — 두 보험료를 각각 반올림한 뒤 합산한다. 11급 × 본인·단위 22/22 일치. */
+export function splitLaborPremium(bracket: number, share: number): number {
+  return (
+    Math.round(bracket * LABOR_ORDINARY_RATE * share) +
+    Math.round(bracket * EMPLOYMENT_INSURANCE_RATE * share)
+  );
 }
 
 // ─── 총급여 계산 ──────────────────────────────────────────────────────────────
@@ -95,7 +123,7 @@ export function calcDeductions(input: DeductionInput): DeductionResult {
   // 勞保는 사용자가 고른 급距 그대로 쓴다 (수동 저보고를 화면에 그대로 보여주려고).
   // 다만 표의 상한(45,800)은 넘을 수 없다 — UI 밖에서 호출될 때의 방어선.
   const laborBase = Math.min(input.insuredBracket, LABOR_INSURANCE_MAX);
-  const laborInsurance = Math.round(laborBase * LABOR_INSURANCE_RATE * LABOR_INSURANCE_EMPLOYEE_SHARE);
+  const laborInsurance = laborEmployeePremium(laborBase);
 
   // 健保·勞退는 각자의 분급표로 실급여에서 다시 잡는다. 세 표가 갈리는 것은
   // 45,800 초과 구간부터라, 助理 급여대에서는 예전과 결과가 같다.

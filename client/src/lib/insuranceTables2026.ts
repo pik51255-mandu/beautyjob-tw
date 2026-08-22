@@ -84,6 +84,55 @@ export const PENSION_TABLE: BracketTable = {
   ],
 };
 
+/**
+ * 勞保(普通事故 11.5%) + 就保(1%) **분담금액표** — 30일 만근 기준, 官方 원문 금액.
+ *
+ * ⚠️ 이 금액을 산식으로 다시 계산하지 말 것. **표 조회가 정본이고 산식은 교차검증용이다.**
+ *
+ * 왜 산식이 정본이 아닌가: 官方은 12.5% 를 한 번에 곱하지 않는다.
+ * **勞保 11.5% 와 就保 1% 를 각각 계산해 각각 반올림한 뒤 더한다.**
+ *   40,100 본인 = round(40,100×11.5%×20%) + round(40,100×1%×20%)
+ *               = round(922.3) + round(80.2) = 922 + 80 = 1,002
+ *   단일 12.5% 로는 round(1,002.5) = 1,003 이 나와 1원 어긋난다.
+ * 같은 이유로 단위(고용주)분은 29,500·38,200·45,800 세 급距에서 어긋난다.
+ * 분리합산 산식은 11급 × 본인·단위 = 22/22 전부 일치한다.
+ *
+ * 차년도 표 갱신 시 이 금액을 통째로 갈아끼우고, 분리합산 산식으로 다시 대조한다.
+ *
+ * 출처: 「勞工保險普通事故保險費及就業保險保險費合計之被保險人與投保單位分擔金額表
+ *       (自115年1月1日起適用)」 https://www.bli.gov.tw/Files/25697 (ODS 원문 셀값)
+ */
+export type LaborPremium = { employee: number; employer: number };
+
+export const LABOR_PREMIUM_TABLE: {
+  name: string;
+  year: number;
+  rocYear: number;
+  effectiveFrom: string;
+  sourceUrl: string;
+  /** 투보급距 → 30일 만근 분담액 */
+  byBracket: Record<number, LaborPremium>;
+} = {
+  name: "勞工保險普通事故保險費及就業保險保險費合計之被保險人與投保單位分擔金額表",
+  year: 2026,
+  rocYear: 115,
+  effectiveFrom: "2026-01-01",
+  sourceUrl: "https://www.bli.gov.tw/Files/25697",
+  byBracket: {
+  29500: { employee: 738, employer: 2_582 },
+  30300: { employee: 758, employer: 2_651 },
+  31800: { employee: 795, employer: 2_783 },
+  33300: { employee: 833, employer: 2_914 },
+  34800: { employee: 870, employer: 3_045 },
+  36300: { employee: 908, employer: 3_176 },
+  38200: { employee: 955, employer: 3_342 },
+  40100: { employee: 1_002, employer: 3_509 },
+  42000: { employee: 1_050, employer: 3_675 },
+  43900: { employee: 1_098, employer: 3_841 },
+  45800: { employee: 1_145, employer: 4_008 },
+  },
+};
+
 /** 화면에 찍는 연도 라벨은 전부 여기서 나온다 — 연도 하드코딩 금지 */
 export const RATE_YEAR = LABOR_INSURANCE_TABLE.year;
 export const RATE_ROC_YEAR = LABOR_INSURANCE_TABLE.rocYear;
